@@ -21,11 +21,23 @@ class DatabaseSeeder extends Seeder
 //             'email' => 'test@example.com',
 //         ]);
 
-        $admin = new User();
-        $admin->name = 'AdminUser';
-        $admin->email = 'admin@admin.com';
-        $admin->password = Hash::make('password');
-        $admin->save();
-        $admin->addRole('teacher');
+        // $admin = new User();
+        // $admin->name = 'AdminUser';
+        // $admin->email = 'admin@admin.com';
+        // $admin->password = Hash::make('password');
+        // $admin->save();
+        // $admin->addRole('teacher');
+
+        // Panggil seeder untuk mysql_topics terlebih dahulu
+        $this->call(MySqlTopicDetailSeeder::class);
+
+        // Panggil seeder untuk mysql_task setelahnya
+        $this->call(MySqlTopicSeeder::class);
+
+        // Panggil seeder untuk mysql_queries
+        $this->call(MySqlQueriesSeeder::class);
+
+        // Panggil seeder untuk mysql_student_submissions
+        $this->call(MySqlStudentSubmissionsSeeder::class);
     }
 }
