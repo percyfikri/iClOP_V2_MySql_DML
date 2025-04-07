@@ -9,7 +9,7 @@ class MySqlTopicDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'mysql_topic_detail'; //Name of the table in the database
+    protected $table = 'mysql_topic_details'; //Name of the table in the database
 
     public function topics()
     {

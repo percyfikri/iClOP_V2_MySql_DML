@@ -34,7 +34,7 @@ class MySqlTopicDetailSeeder extends Seeder
 
         // Loop melalui setiap data dan gunakan updateOrInsert
         foreach ($topics as $topic) {
-            DB::table('mysql_topic_detail')->updateOrInsert(
+            DB::table('mysql_topic_details')->updateOrInsert(
                 ['title' => $topic['title']], // Kondisi: Cari berdasarkan kolom 'title'
                 [
                     'description' => $topic['description'],

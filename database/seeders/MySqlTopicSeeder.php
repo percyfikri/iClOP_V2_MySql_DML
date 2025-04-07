@@ -14,7 +14,7 @@ class MySqlTopicSeeder extends Seeder
     public function run(): void
     {
         // Get the ID of the first topic (e.g., "INSERT")
-        $firstTopicId = DB::table('mysql_topic_detail')->orderBy('id', 'asc')->first()->id;
+        $firstTopicId = DB::table('mysql_topic_details')->orderBy('id', 'asc')->first()->id;
 
         // Daftar data yang akan disimpan
         $tasks = [
