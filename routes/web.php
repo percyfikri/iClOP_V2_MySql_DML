@@ -79,6 +79,7 @@ require __DIR__ . '/android23_routes.php';
 require __DIR__ . '/php_routes.php';
 require __DIR__ . '/phpunit_routes.php';
 require __DIR__ . '/react_routes.php';
+require __DIR__ . '/mysql_routes.php';
 require __DIR__ . '/flutter_routes.php';
 require __DIR__ . '/python_routes.php';
 // });

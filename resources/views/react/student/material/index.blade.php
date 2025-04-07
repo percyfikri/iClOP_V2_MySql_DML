@@ -238,7 +238,7 @@
                                     WEBAPPS</p>
                             </div>
                             <div class="col">
-                                <img src="{{asset("./images/react/react.png")}}" alt="learning-logo"
+                                <img src="{{asset("./images//mysql/mysql-logo.png")}}" alt="learning-logo"
                                      style="height: 45px;">
                             </div>
                         </div>
