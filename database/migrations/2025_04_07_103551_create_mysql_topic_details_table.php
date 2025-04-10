@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mysql_topic_details', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('topic_id')->constrained('mysql_topics')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('folder_path')->nullable();

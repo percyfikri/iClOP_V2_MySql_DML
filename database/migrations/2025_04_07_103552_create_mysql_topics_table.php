@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('mysql_topics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('topic_id')->constrained('mysql_topics')->onDelete('cascade');
             $table->string('title');
             $table->timestamps();
         });

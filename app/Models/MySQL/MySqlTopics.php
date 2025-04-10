@@ -5,14 +5,14 @@ namespace App\Models\MySQL;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MySqlTopic extends Model
+class MySqlTopics extends Model
 {
     use HasFactory;
     
     protected $table = 'mysql_topics'; //Name of the table in the database
 
-    public function topicDetail()
+    public function topicDetails()
     {
-        return $this->belongsTo(MySqlTopicDetail::class, 'topic_id');
+        return $this->hasMany(MySqlTopicDetails::class, 'topic_id');
     }
 }

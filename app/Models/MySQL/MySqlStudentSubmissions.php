@@ -17,9 +17,9 @@ class MySqlStudentSubmissions extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function task()
+    public function topicsDetails()
     {
-        return $this->belongsTo(MySqlTopic::class, 'task_id');
+        return $this->hasMany(MySqlTopicDetails::class, 'topic_detail_id');
     }
 
     public function queries()

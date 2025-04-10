@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('mysql_student_submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('task_id')->constrained('mysql_task')->onDelete('cascade');
-            $table->foreignId('query_id')->constrained('mysql_query')->onDelete('cascade');
+            $table->foreignId('topic_detail_id')->constrained('mysql_topic_details')->onDelete('cascade');
+            $table->foreignId('query_id')->constrained('mysql_queries')->onDelete('cascade');
             $table->timestamps();
         });
     }

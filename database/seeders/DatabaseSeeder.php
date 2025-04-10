@@ -28,16 +28,16 @@ class DatabaseSeeder extends Seeder
         // $admin->save();
         // $admin->addRole('teacher');
 
-        // Panggil seeder untuk mysql_topics terlebih dahulu
-        $this->call(MySqlTopicDetailSeeder::class);
+         // Panggil seeder untuk mysql_topics terlebih dahulu
+         $this->call(MySqlTopicsSeeder::class);
 
-        // Panggil seeder untuk mysql_task setelahnya
-        $this->call(MySqlTopicSeeder::class);
-
-        // Panggil seeder untuk mysql_queries
-        $this->call(MySqlQueriesSeeder::class);
-
-        // Panggil seeder untuk mysql_student_submissions
-        $this->call(MySqlStudentSubmissionsSeeder::class);
+         // Panggil seeder untuk mysql_topic_details
+         $this->call(MySqlTopicDetailsSeeder::class);
+ 
+         // Panggil seeder untuk mysql_queries
+         $this->call(MySqlQueriesSeeder::class);
+ 
+         // Panggil seeder untuk mysql_student_submissions
+         $this->call(MySqlStudentSubmissionsSeeder::class);
     }
 }

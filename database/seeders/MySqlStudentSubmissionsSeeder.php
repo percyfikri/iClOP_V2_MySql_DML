@@ -13,6 +13,8 @@ class MySqlStudentSubmissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        $user_id = 1631; // ID pengguna yang ada di tabel users
+
         // Ambil ID dari query pertama
         $firstQueryId = DB::table('mysql_queries')->orderBy('id', 'asc')->first()->id;
 
@@ -22,13 +24,13 @@ class MySqlStudentSubmissionsSeeder extends Seeder
         // Daftar data yang akan disimpan
         $submissions = [
             [
-                'user_id' => 1631, // Pastikan user_id sesuai dengan ID pengguna yang ada di tabel users
-                'task_id' => $firstTaskId,
+                'user_id' => $user_id,
+                'topic_detail_id' => $firstTaskId,
                 'query_id' => $firstQueryId,
             ],
             [
-                'user_id' => 1631,
-                'task_id' => $firstTaskId,
+                'user_id' => $user_id,
+                'topic_detail_id' => $firstTaskId,
                 'query_id' => $firstQueryId + 1, // Query kedua
             ],
         ];
@@ -38,7 +40,7 @@ class MySqlStudentSubmissionsSeeder extends Seeder
             DB::table('mysql_student_submissions')->updateOrInsert(
                 [
                     'user_id' => $submission['user_id'],
-                    'task_id' => $submission['task_id'],
+                    'topic_detail_id' => $submission['topic_detail_id'],
                     'query_id' => $submission['query_id'],
                 ], // Kondisi unik: kombinasi user_id, task_id, dan query_id
                 [

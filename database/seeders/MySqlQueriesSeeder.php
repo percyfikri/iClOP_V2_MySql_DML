@@ -13,18 +13,20 @@ class MySqlQueriesSeeder extends Seeder
      */
     public function run(): void
     {
+        $user_id = 1631; // ID pengguna yang ada di tabel users
+
         // Daftar data yang akan disimpan
         $queries = [
             [
-                'user_id' => 1631, // Pastikan user_id sesuai dengan ID pengguna yang ada di tabel users
+                'user_id' => $user_id,
                 'query' => 'SELECT * FROM mysql_topic_detail;',
             ],
             [
-                'user_id' => 1631,
+                'user_id' => $user_id,
                 'query' => 'INSERT INTO mysql_topics (topic_id, title) VALUES (1, "DML Example");',
             ],
             [
-                'user_id' => 1631,
+                'user_id' => $user_id,
                 'query' => 'UPDATE mysql_topics SET title = "Updated DML" WHERE id = 1;',
             ],
         ];
