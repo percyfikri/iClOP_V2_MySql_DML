@@ -39,7 +39,7 @@ class AuthController extends Controller
 
         } else {
 
-            echo "okee err";
+            echo "error login";
         }
     }
 
