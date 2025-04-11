@@ -304,7 +304,6 @@
                                     @php
                                         $limit_id = $topic->id;
                                         $row = DB::table('mysql_topics')->where('id', $limit_id)->first();
-                                        // $row = DB::table('mysql_topic_details')->where('topic_id', $limit_id)->first();
                                         $rowArray = (array) $row;
                                         if ($row) {
                                             $rows = $row->id;
@@ -320,7 +319,7 @@
                                             <div class="custom-button-detail">
                                               
                                                 <a class="button-text" data-toggle="modal" data-target="#exampleModal"
-                                                   onclick="materialModal('{{ $topic->id }}','{{ $topic->description }}','{{ $topic->id_topics }}')">
+                                                   onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $topic->topic_id }}')">
                                                     <i class="fas fa-key" style="margin-right: 5px;"></i>
                                                     <!-- Ikon kunci -->
                                                     Material Details
@@ -533,7 +532,7 @@
                             <img src={{asset("./images/online_virtual_machine.png")}} alt="logo" width="400"
                                  height="300">
                         </div>
-                        <h5>Materi React</h5>
+                        <h5>Materi MySQL</h5>
                         
                         <input type="hidden" id="id"/>
                         <input type="hidden" id="title"/>
@@ -544,11 +543,10 @@
                     <div class="col-md-7">
                         <b>Prerequisite knowledge : </b>
                         <div class="text-sm" style="margin-bottom: 20px">
-                            <p style="margin-bottom: 5px !important">Sebelum memulai pembelajaran PHP, Anda harus
-                                memiliki pengetahuan dasar tentang <b>HTML, CSS, dan JavaScript</b>.</p>
-                            1. HTML digunakan untuk mendesain halaman web statis.<br>
-                            2. CSS membantu membuat konten halaman web lebih efektif dan menarik.<br/>
-                            3. JavaScript digunakan untuk mendesain website yang interaktif..
+                            <p style="margin-bottom: 5px !important">Sebelum memulai pembelajaran MySQL DML, Anda harus memiliki pengetahuan dasar tentang <b>Database Management Systems (DBMS)</b> dan <b>SQL</b>.</p>
+                            1. SQL digunakan untuk mengelola dan mengakses data dalam database.<br>
+                            2. DBMS membantu menyimpan, mengatur, dan mengambil data secara efisien.<br/>
+                            3. Pemahaman dasar tentang konsep relasi dalam database.
                         </div>
 
                         <b>Requirement : </b>
@@ -562,12 +560,12 @@
                         <b>Tools : </b><br>
                         <div class="row">
                             <div class="col-md-6 text-center text-sm">
-                                <a href="https://code.visualstudio.com/" target="_blank">
-                                    <img style="width: 90px; height: 80px;" src="{{asset("./images/php/vscode.png")}}"
+                                <a href="https://www.mysql.com/" target="_blank">
+                                    <img style="width: 150px; height: 80px;" src="{{asset("./images/mysql/mysql-logo.png")}}"
                                          alt="">
                                 </a>
                                 <br>
-                                VISUAL STUDIO CODE
+                                MySQL
                             </div>
                             <div class="col-md-6 text-center text-sm">
                                 <a href="https://www.apachefriends.org/" target="_blank">
