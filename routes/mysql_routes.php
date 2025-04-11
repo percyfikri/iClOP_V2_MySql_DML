@@ -5,7 +5,8 @@ use App\Http\Controllers\React\Student\ReactLogicalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\MySQL\MysqlController;
+use App\Http\Controllers\MySQL\TopicDetailController;
 use App\Http\Controllers\PHP\PHPController;
 use App\Http\Controllers\PHP\PHPDosenController;
 use App\Http\Controllers\PHP\Student\DashboardUnitControllers;
@@ -19,7 +20,12 @@ use Illuminate\Support\Facades\Storage;
 
 Route::group(['middleware' => ['auth']], function() {
     Route::prefix('mysql')->group(function () {
-        Route::get('/start', [ReactController::class, 'index'])->name('react_welcome');
+        //-----------------CHANGED-----------------
+        Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
+        Route::get('/topic-details', [TopicDetailController::class, 'index'])->name('topic_details.index');
+        //-----------------CHANGED-----------------
+        
+        // Route::get('/start', [ReactController::class, 'index'])->name('react_welcome');
         Route::get('/detail-topics', [ReactController::class, 'php_material_detail'])->name('react_material_detail');
         Route::get('/php-admin', [ReactController::class, 'php_admin'])->name('php_admin');
         Route::post('/uploadimage', [ReactController::class, 'upload'])->name('uploadimage');
@@ -42,5 +48,8 @@ Route::group(['middleware' => ['auth', 'teacher']], function() {
         Route::post('/teacher/topics/simpan', [ReactDosenController::class, 'simpan'])->name('react_teacer_simpan');
     });
 
+// Route untuk halaman web
+Route::get('/topic-details', [TopicDetailController::class, 'index'])->name('topic_details.index');
+// Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
 });
 

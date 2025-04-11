@@ -287,7 +287,7 @@
                         </div>
                     </div>
                     <div style="margin-top: auto;">
-                        <a href="{{ route('react_welcome') }}" class="btn btn-primary">Start Learning</a>
+                        <a href="{{ route('mysql_welcome') }}" class="btn btn-primary">Start Learning</a>
                     </div>
                 </div>
             </div>
