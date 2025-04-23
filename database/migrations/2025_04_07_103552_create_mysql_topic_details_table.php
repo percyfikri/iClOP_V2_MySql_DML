@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('folder_path')->nullable();
+            $table->string('file_name', 100)->nullable();
+            $table->string('flag', 1)->nullable();
             $table->timestamps();
         });
     }

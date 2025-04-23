@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
          $this->call(MySqlTopicDetailsSeeder::class);
  
          // Panggil seeder untuk mysql_queries
-         $this->call(MySqlQueriesSeeder::class);
+         $this->call(MySqlFeedbackSeeder::class);
  
          // Panggil seeder untuk mysql_student_submissions
          $this->call(MySqlStudentSubmissionsSeeder::class);

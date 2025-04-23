@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mysql_queries', function (Blueprint $table) {
+        Schema::create('mysql_student_submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->text('query');
+            $table->foreignId('topic_detail_id')->constrained('mysql_topic_details')->onDelete('cascade');
+            $table->foreignId('feedback_id')->constrained('mysql_feedback')->onDelete('cascade');
+            $table->string('query')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mysql_queries');
+        Schema::dropIfExists('mysql_student_submissions');
     }
 };
