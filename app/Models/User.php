@@ -54,4 +54,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserEnroll::class);
     }
+
+    // Relasi One-to-Many dengan mysql_student_submissions
+    public function submissions()
+    {
+        return $this->hasMany(StudentSubmission::class, 'user_id');
+    }
 }

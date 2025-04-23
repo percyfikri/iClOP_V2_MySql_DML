@@ -10,20 +10,27 @@ class MySqlStudentSubmissions extends Model
 {
     use HasFactory;
 
-    protected $table = 'mysql_student_submissions'; //Name of the table in the database
+    protected $table = 'mysql_student_submissions';
 
+    protected $fillable = [
+        'user_id', 'topic_detail_id', 'feedback_id', 'query',
+    ];
+
+    // Relasi BelongsTo dengan User
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function topicsDetails()
+    // Relasi BelongsTo dengan TopicDetail
+    public function topicDetail()
     {
-        return $this->hasMany(MySqlTopicDetails::class, 'topic_detail_id');
+        return $this->belongsTo(MySqlTopicDetails::class, 'topic_detail_id');
     }
 
-    public function queries()
+    // Relasi BelongsTo dengan Feedback
+    public function feedback()
     {
-        return $this->belongsTo(MySqlQuery::class, 'query_id');
+        return $this->belongsTo(MySqlFeedbacks::class, 'feedback_id');
     }
 }
