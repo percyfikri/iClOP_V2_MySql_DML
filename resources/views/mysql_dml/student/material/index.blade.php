@@ -317,11 +317,8 @@
                                         </div>
                                         <div class="col" style="text-align: right;">
                                             <div class="custom-button-detail">
-                                              
-                                                <a class="button-text" data-toggle="modal" data-target="#exampleModal"
-                                                   onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $topic->topic_id }}')">
-                                                    <i class="fas fa-key" style="margin-right: 5px;"></i>
-                                                    <!-- Ikon kunci -->
+                                                <a class="button-text" data-toggle="modal" data-target="#exampleModal" onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')">
+                                                    <i class="fas fa-key" style="margin-right: 5px;"></i> <!-- Ikon kunci -->
                                                     Material Details
                                                 </a>
                                             </div>
@@ -381,7 +378,7 @@
                                 @endif
 
                             </div>
-                            {{-- <div class="tab-pane fade" id="progress">
+                            <div class="tab-pane fade" id="progress">
                                 <h3>Progress Topic Finished</h3>
                                 <p>This is the content for the Topic Finished.</p>
                                  <div class="table-responsive mb-5">
@@ -394,7 +391,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach($progress as $userId => $userProgress)
+                                    {{-- @foreach($progress as $userId => $userProgress)
                                         <tr>
                                             <td>{{ $userProgress['name'] }}</td>
                                             <td>{{ $userProgress['percent'] }}%</td>
@@ -409,11 +406,11 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @endforeach --}}
                                     </tbody>
                                 </table>
                                 </div>
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -507,8 +504,6 @@
                 </div>
             </div>
         </main>
-
-
     </div>
 </div>
 <!-- The Modal -->
@@ -605,7 +600,7 @@
         let id = $("#id").val();
         let title = $("#title").val();
         let controller = $("#controller").val();
-        window.location.href = "{{ route('react_material_detail') }}?phpid=" + id + "&start=" + controller;
+        window.location.href = "{{ route('mysql_material_detail') }}?mysqlid=" + id + "&start=" + controller;
 
         /*$.ajax({
             type: "POST",

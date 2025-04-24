@@ -19,14 +19,15 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
 Route::group(['middleware' => ['auth']], function() {
-    Route::prefix('mysql')->group(function () {
+    Route::prefix('mysql-dml')->group(function () {
         //-----------------CHANGED-----------------
         Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
-        Route::get('/topic-details', [TopicDetailController::class, 'index'])->name('topic_details.index');
+        Route::get('/detail-topics', [MysqlController::class, 'mysql_material_detail'])->name('mysql_material_detail');
+        
         //-----------------CHANGED-----------------
         
         // Route::get('/start', [ReactController::class, 'index'])->name('react_welcome');
-        Route::get('/detail-topics', [ReactController::class, 'php_material_detail'])->name('react_material_detail');
+        // Route::get('/detail-topics', [ReactController::class, 'php_material_detail'])->name('react_material_detail');
         Route::get('/php-admin', [ReactController::class, 'php_admin'])->name('php_admin');
         Route::post('/uploadimage', [ReactController::class, 'upload'])->name('uploadimage');
         Route::get('/send-task', [ReactController::class, 'send_task'])->name('send_task');

@@ -67,7 +67,7 @@ Route::get('/material-detail', function () {
 })->name('material_detail');
 
 // Route Node JS
-require __DIR__ . '/nodejs_routes.php';
+// require __DIR__ . '/nodejs_routes.php';
 
 // Route Aplas
 
@@ -81,5 +81,5 @@ require __DIR__ . '/phpunit_routes.php';
 require __DIR__ . '/react_routes.php';
 require __DIR__ . '/mysql_routes.php';
 require __DIR__ . '/flutter_routes.php';
-require __DIR__ . '/python_routes.php';
+// require __DIR__ . '/python_routes.php';
 // });
