@@ -300,16 +300,17 @@
                         <div class="tab-content mt-3">
                             <div class="tab-pane fade show active" id="learning">
                                 @foreach($topics as $topic)
-                                {{-- @foreach($topicDetails as $topic) --}}
                                     @php
-                                        $limit_id = $topic->id;
-                                        $row = DB::table('mysql_topics')->where('id', $limit_id)->first();
-                                        $rowArray = (array) $row;
-                                        if ($row) {
-                                            $rows = $row->id;
-                                        }
-                                        
-                                    @endphp
+                                    $limit_id = $topic->id;
+                                    // Ambil ID pertama dari mysql_topic_details berdasarkan topic_id
+                                    $row = DB::table('mysql_topic_details')
+                                        ->where('topic_id', $limit_id)
+                                        ->orderBy('id', 'asc')
+                                        ->first();
+                            
+                                    // Jika ada data di mysql_topic_details, ambil ID-nya, jika tidak, set null
+                                    $rows = $row ? $row->id : null;
+                                @endphp
                          
                                     <div class="row">
                                         <div class="col">
@@ -330,7 +331,7 @@
                                 <h3>Topic Finished</h3>
                                 <p>Topic Finished as user : @php echo Auth::user()->name; @endphp</p>
                                 @if($role == "student")
-                                       <div class="table-responsive mb-5">
+                                    <div class="table-responsive mb-5">
                                     <table id="progressTable" class="table table-striped ">
                                         <thead>
                                         <tr>
