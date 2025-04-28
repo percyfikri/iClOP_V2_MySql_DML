@@ -195,13 +195,6 @@
         <ul class="list">
             @foreach($topics as $topic)
             @php
-                /*$results = DB::select("select * from php_topics where id = ?", [$topic->id]);
-                if (!empty($results)) {
-                    $result = $results[0]; 
-                    $result->id; 
-                } else {
-                    echo "No results found.";
-                }*/
                 if($topic->id == $_GET['mysqlid'] ){
                     $display = "display:block !important";
                     $transform = "transform: rotate(180deg); !important";
@@ -210,17 +203,16 @@
                     $transform = "";
                 }
             @endphp
+            {{-- List title topic  --}}
             <li class="list-item" onclick="toggleItem(this)">
                 <img class="list-item-icon" src="{{ asset('images/down-arrow.png') }}" style="height: 24px; @php echo $transform; @endphp">
                 <span class="list-item-title">{{ $topic->title }}   </span>
             </li>
-            
+
+            {{-- List title topic detail --}}
             <div class="expandable-content" style="@php echo $display; @endphp">
-            
                 <div style="display: flex; flex-direction: column; align-items: left;">
                     @php
-                
-                        
                         $row = DB::table('mysql_topics')
                         ->leftJoin('mysql_topic_details', 'mysql_topics.id', '=', 'mysql_topic_details.topic_id')
                         ->select('*')
@@ -241,6 +233,7 @@
                         }
                     @endphp 
                     <div class="row">
+                        {{-- icon radio label --}}
                         <div class="col-sm-1">
                             <label class="radio-label">
                                 <svg width="16" height="16" class="" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -248,16 +241,17 @@
                                 </svg>
                             </label>
                         </div>
+                        {{-- Title topic detail --}}
                         <div class="col" style="padding-bottom: 1rem;">
                             <a class="text" style="{{ $active }};" href="{{ route('mysql_material_detail') }}?mysqlid={{$topic->id}}&start={{$r->id}}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">{{ $r->title }} </a> 
                         </div>
                     </div>
                     @endforeach
+
+
                     @php
                     $top = $topic->id;
                     $task = DB::table('php_task')->where('id_topics', $top)->first(); // Menggunakan first() untuk mengambil satu baris pertama
-                    
-                
                     @endphp
                     
                     @if($task)
@@ -308,7 +302,7 @@
                 else:
             @endphp
             
-            <iframe src="{{ asset('php/document/A1_BASIC_PHP/'. $html_start ) }}" style="width: 100%; height: 510px"></iframe></iframe>
+            <iframe src="{{ asset('mysql/DML/'. $html_start ) }}" style="width: 100%; height: 510px"></iframe></iframe>
             @php
                 endif;
             @endphp

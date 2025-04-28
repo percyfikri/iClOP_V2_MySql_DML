@@ -22,7 +22,6 @@ class MysqlController extends Controller
         $role    = DB::select("select role from users where id = $idUser");
 
         if ($role[0]->role == "student") {
-            // return redirect('mysql/start');
             return view('mysql_dml.student.material.index', 
             compact(
                 'topics', 
@@ -41,7 +40,7 @@ class MysqlController extends Controller
 
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
         $html_start = '';
-        $pdf_reader = '';
+        $pdf_reader = 0;
 
         foreach ($results as $r) {
             if ($mysqlid == $r->topic_id) {
