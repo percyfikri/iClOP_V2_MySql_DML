@@ -64,6 +64,7 @@ class MysqlController extends Controller
         $roleTeacher = DB::select("select role from users where id = $idUser");
 
         $topics = MySqlTopics::all();
+        $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
         $detail = MySqlTopicDetails::findOrFail($mysqlid);
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
@@ -71,6 +72,7 @@ class MysqlController extends Controller
         return view('mysql_dml.student.material.topic_detail', [
             'row' => $detail,
             'topics' => $topics,
+            'topicsNavbar' => $topicsNavbar,
             'mysqlid' => $mysqlid,
             'html_start' => $html_start,
             'pdf_reader' => $pdf_reader,

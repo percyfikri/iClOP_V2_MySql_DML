@@ -176,120 +176,52 @@
     <nav class="navbar navbar-light bg-light" style="padding: 15px 20px; border-bottom: 1px solid #E4E4E7; font-family: 'Poppins', sans-serif;">
         <a class="navbar-brand" href="{{ route('mysql_welcome') }}">
             <img src="{{ asset('images/left-arrow.png') }}" style="height: 24px; margin-right: 10px;">
-            {{ $row->title; }}
+            {{ $topicsNavbar->title; }}
         </a>
     </nav>
 
-     <!-- Sidebar -->
-   
-    
-
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar" style="border-left: 1px solid #E4E4E7; padding: 20px; width: 100%; max-width: 400px;">
-        <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px"><img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List</p>
-        <div class="progress-container">
-            <div id="progressbar"></div>
-            
-        </div>
-        <div id="progress">0%</div>
-        <ul class="list">
-            @foreach($topics as $topic)
-            @php
-                if($topic->id == $_GET['mysqlid'] ){
-                    $display = "display:block !important";
-                    $transform = "transform: rotate(180deg); !important";
-                }else{
-                    $display = "";
-                    $transform = "";
-                }
-            @endphp
-            {{-- List title topic  --}}
-            <li class="list-item" onclick="toggleItem(this)">
-                <img class="list-item-icon" src="{{ asset('images/down-arrow.png') }}" style="height: 24px; @php echo $transform; @endphp">
-                <span class="list-item-title">{{ $topic->title }}   </span>
-            </li>
-
-            {{-- List title topic detail --}}
-            <div class="expandable-content" style="@php echo $display; @endphp">
-                <div style="display: flex; flex-direction: column; align-items: left;">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar" style="border-left: 1px solid #E4E4E7; padding: 20px; width: 100%; max-width: 400px;">
+            <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px">
+                <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
+            </p>
+            <div class="progress-container">
+                <div id="progressbar"></div>
+            </div>
+            <div id="progress">0%</div>
+            <ul class="list pt-3">
+                
                     @php
-                        $row = DB::table('mysql_topics')
-                        ->leftJoin('mysql_topic_details', 'mysql_topics.id', '=', 'mysql_topic_details.topic_id')
-                        ->select('*')
-                        ->where('mysql_topic_details.topic_id', '=',   $topic->id ) 
+                    // Ambil mysqlid dari query string
+                    $mysqlid = request()->get('mysqlid');
+
+                    // Ambil data mysql_topic_details berdasarkan mysqlid
+                    $rows = DB::table('mysql_topic_details')
+                        ->where('topic_id', $mysqlid)
                         ->get();
                         $no = 1;
                     @endphp
-                    @foreach($row as $r)
-                    @php
-                    $no++;
-                    $count_ = ($no/$detailCount)*10;
-                        $mysqldid = isset($_GET['start']) ? $_GET['start'] : '';
-                        if($r->id == $mysqldid and $r->topic_id == $_GET['mysqlid']){
-                            $active = 'color:#000; font-weight:bold; text-decoration: underline;';
-
-                        }else{
-                            $active = '';
-                        }
-                    @endphp 
-                    <div class="row">
-                        {{-- icon radio label --}}
-                        <div class="col-sm-1">
-                            <label class="radio-label">
-                                <svg width="16" height="16" class="" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.9993 2.6665C8.63555 2.6665 2.66602 8.63604 2.66602 15.9998C2.66602 23.3636 8.63555 29.3332 15.9993 29.3332C23.3631 29.3332 29.3327 23.3636 29.3327 15.9998C29.3327 8.63604 23.3631 2.6665 15.9993 2.6665ZM5.33268 15.9998C5.33268 10.1088 10.1083 5.33317 15.9993 5.33317C21.8904 5.33317 26.666 10.1088 26.666 15.9998C26.666 21.8909 21.8904 26.6665 15.9993 26.6665C10.1083 26.6665 5.33268 21.8909 5.33268 15.9998Z" fill="#71717A"></path>
-                                </svg>
-                            </label>
-                        </div>
+                    @foreach($rows as $row)
+                        @php
+                            $no++;
+                            $count_ = ($no / $detailCount) * 10;
+                            $mysqldid = isset($_GET['start']) ? $_GET['start'] : '';
+                            $active = ($row->id == $mysqldid) ? 'color:#000; font-weight:bold; text-decoration: underline;' : '';
+                        @endphp
                         {{-- Title topic detail --}}
-                        <div class="col" style="padding-bottom: 1rem;">
-                            <a class="text" style="{{ $active }};" href="{{ route('mysql_material_detail') }}?mysqlid={{$topic->id}}&start={{$r->id}}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">{{ $r->title }} </a> 
+                        <div class="row px-4 py-2">
+                            <div class="col" style="padding-bottom: 1rem;">
+                                <img src="{{ asset('images/book.png') }}" style="height: 24px; margin-right: 10px;">
+                                <a class="text" style="{{ $active }};" href="{{ route('mysql_material_detail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">
+                                    {{ $row->title }}
+                                </a>
+                            </div>
                         </div>
-                    </div>
                     @endforeach
+                
+            </ul>
+        </div>
 
-
-                    @php
-                    $top = $topic->id;
-                    $task = DB::table('php_task')->where('id_topics', $top)->first(); // Menggunakan first() untuk mengambil satu baris pertama
-                    @endphp
-                    
-                    @if($task)
-                    @php
-                    $tsk = $task->id;
-                    $task_get = isset($_GET['task']) ? $_GET['task'] : '';
-                    if($tsk == $task_get){
-                        $active_task = 'color:#000; font-weight:bold; text-decoration: underline;';
-
-                    }else{
-                        $active_task = '';
-                    }
-                    
-                    @endphp
-                    <div class="row">
-                        <div class="col-sm-1">
-                            <label class="radio-label">
-                                <svg width="16" height="16" class="" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.9993 2.6665C8.63555 2.6665 2.66602 8.63604 2.66602 15.9998C2.66602 23.3636 8.63555 29.3332 15.9993 29.3332C23.3631 29.3332 29.3327 23.3636 29.3327 15.9998C29.3327 8.63604 23.3631 2.6665 15.9993 2.6665ZM5.33268 15.9998C5.33268 10.1088 10.1083 5.33317 15.9993 5.33317C21.8904 5.33317 26.666 10.1088 26.666 15.9998C26.666 21.8909 21.8904 26.6665 15.9993 26.6665C10.1083 26.6665 5.33268 21.8909 5.33268 15.9998Z" fill="#71717A"></path>
-                                </svg>
-                            </label>
-                        </div>
-                        <div class="col" style="padding-bottom: 1rem;">
-                            
-                            <a class="text" onclick="updateProgress(@php echo $count_ @endphp)" style="{{ $active_task }}" href="{{ route('send_task') }}?phpid={{$topic->id}}&task={{$task->id}}" id="requirement" >{{ $task->task_name }} </a>
-                        </div>
-                    </div>        
-                    @endif
-                </div>
-
-            </div>
-            @endforeach
-        </ul>
-    </div>
-    <div class="form-group row">
-
-        
-    </div>
     <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
         <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:40px">
             @php
