@@ -28,6 +28,12 @@ class MySqlStudentSubmissions extends Model
         return $this->belongsTo(MySqlTopicDetails::class, 'topic_detail_id');
     }
 
+    // Relasi hasMany dengan MysqlQueries
+    public function mysqlQueries()
+    {
+        return $this->hasMany(MySqlQueries::class, 'submission_id');
+    }
+
     // Relasi BelongsTo dengan Feedback
     public function feedback()
     {
