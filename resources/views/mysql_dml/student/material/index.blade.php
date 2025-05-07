@@ -142,7 +142,8 @@
 
     </style>
 
-    <title>Tab Example</title>
+    <title>Database Management System with MySQL</title>
+    <link rel="icon" href={{asset("./images/logo.png")}} type="image/png">
 
    <!-- CSS Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -182,7 +183,7 @@
           "Roboto-BoldItalic.ttf": robotoBoldItalicBase64
         };
     </script>
-    <link rel="icon" href="./images/logo.png" type="image/png">
+
 </head>
 
 <body>
@@ -237,7 +238,7 @@
                                 <p style="font-weight: 600; font-size: 14px; color: #34364A; margin-left: 15px;">STUDENT
                                     WEBAPPS</p>
                             </div>
-                            <div class="col">
+                            <div class="col d-flex justify-content-center">
                                 <img src="{{asset("./images/mysql/mysql-logo.png")}}" alt="learning-logo"
                                      style="height: 45px;">
                             </div>
