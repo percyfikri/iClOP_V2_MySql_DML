@@ -15,9 +15,9 @@ class MySqlFeedbacks extends Model
         'feedback',
     ];
 
-    // Relasi BelongsTo dengan StudentSubmission
-    public function submission()
+    // Relasi: Setiap feedback memiliki banyak student submissions
+    public function studentSubmissions()
     {
-        return $this->hasOne(MySqlStudentSubmissions::class, 'feedback_id');
+        return $this->hasMany(MySqlStudentSubmissions::class, 'feedback_id');
     }
 }

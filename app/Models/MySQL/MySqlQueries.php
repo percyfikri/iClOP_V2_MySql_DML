@@ -12,7 +12,7 @@ class MySqlQueries extends Model
     protected $table = 'mysql_queries';
 
     protected $fillable = [
-        'submission_id', 'question_number', 'query',
+        'query',
     ];
 
     // Relasi: Setiap query milik satu submission

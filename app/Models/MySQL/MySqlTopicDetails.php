@@ -12,19 +12,25 @@ class MySqlTopicDetails extends Model
     protected $table = 'mysql_topic_details'; //Name of the table in the database
 
     protected $fillable = [
-        'title', 'description', 'folder_path', 'topic_id',
+        'title',
+        'description',
+        'folder_path',
+        'topic_id',
+        'file_name',
+        'flag',
+        'created_by',
     ];
 
-    // Relasi BelongsTo dengan Topic
+    // Relasi: Setiap topic detail milik satu topic
     public function topic()
     {
         return $this->belongsTo(MySqlTopics::class, 'topic_id');
     }
 
-    // Relasi HasOne dengan StudentSubmission
-    public function submission()
+    // Relasi: Setiap topic detail memiliki banyak questions
+    public function questions()
     {
-        return $this->hasOne(MySqlStudentSubmissions::class, 'topic_detail_id');
+        return $this->hasMany(MySqlQuestions::class, 'topic_detail_id');
     }
 }
 
