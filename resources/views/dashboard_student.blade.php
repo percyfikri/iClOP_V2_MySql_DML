@@ -30,7 +30,11 @@
                 <div class="mx-auto">
                     <ul class="navbar-nav mb-2 mb-lg-0 justify-content-center">
                         <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/dashboard-student">Dashboard Student</a>
+                        @if($role == 'teacher')
+                            <a class="nav-link active" aria-current="page" href="/dashboard-teacher">Dashboard Teacher</a>
+                        @else
+                            <a class="nav-link active" aria-current="page" href="/dashboard-teacher">Dashboard Student</a>
+                        @endif
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="#">Tutorials</a>
@@ -77,7 +81,11 @@
                         </div>
                     </div>
                     <div style="margin-top: auto;">
-                        <a href="{{ route('welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @if($role == 'teacher')
+                            <a href="{{ route('welcome') }}" class="btn btn-primary">View Details</a>
+                        @else
+                            <a href="{{ route('welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -94,7 +102,11 @@
                         </div>
                     </div>
                     <div style="margin-top: auto;">
-                        <a href="{{ route('react_welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @if($role == 'teacher')
+                            <a href="{{ route('react_welcome') }}" class="btn btn-primary">View Details</a>
+                        @else
+                            <a href="{{ route('react_welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -111,7 +123,11 @@
                         </div>
                     </div>
                     <div style="margin-top: auto;">
-                        <a href="{{ route('mysql_welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @if($role == 'teacher')
+                            <a href="{{ route('mysql_teacher') }}" class="btn btn-primary">View Details</a>
+                        @else
+                            <a href="{{ route('mysql_welcome') }}" class="btn btn-primary">Start Learning</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -428,3 +444,4 @@
 </style>
 
 </html>
+

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MySQL\MysqlController;
+use App\Http\Controllers\MySQL\MysqlTeacherController;
 use App\Http\Controllers\MySQL\TopicDetailController;
 use App\Http\Controllers\PHP\PHPController;
 use App\Http\Controllers\PHP\PHPDosenController;
@@ -19,11 +20,11 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
 Route::group(['middleware' => ['auth']], function() {
-    Route::prefix('mysql-dml')->group(function () {
+    Route::prefix('mysql')->group(function () {
         //-----------------CHANGED-----------------
         Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
         Route::get('/detail-topics', [MysqlController::class, 'mysql_material_detail'])->name('mysql_material_detail');
-        
+        Route::post('/submit_user_input', [MysqlController::class, 'submit_user_input'])->name('mysql_submit_user_input');
         //-----------------CHANGED-----------------
         
         // Route::get('/start', [ReactController::class, 'index'])->name('react_welcome');
@@ -42,15 +43,14 @@ Route::group(['middleware' => ['auth']], function() {
 });
 
 Route::group(['middleware' => ['auth', 'teacher']], function() {
-    Route::prefix('react')->group(function () {
+    Route::prefix('mysql')->group(function () {
+        //-----------------CHANGED-----------------
+        Route::get('/teacher/materials',[MysqlTeacherController::class, 'index'])->name('mysql_teacher');
+        //-----------------CHANGED-----------------
 
-        Route::get('/teacher/topics',[ReactDosenController::class, 'topics'])->name('react_teacer_topics');
+        // Route::get('/teacher/topics',[ReactDosenController::class, 'topics'])->name('react_teacer_topics');
         Route::get('/teacher/topics/add/{id}', [ReactDosenController::class, 'add_topics'])->name('react_teacer_topics');
         Route::post('/teacher/topics/simpan', [ReactDosenController::class, 'simpan'])->name('react_teacer_simpan');
     });
-
-// Route untuk halaman web
-Route::get('/topic-details', [TopicDetailController::class, 'index'])->name('topic_details.index');
-// Route::get('/topics', [TopicController::class, 'index'])->name('topics.index');
 });
 

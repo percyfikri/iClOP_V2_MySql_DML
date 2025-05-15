@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardView;
 use App\Http\Controllers\DataController;
 
 use Laravel\Socialite\Facades\Socialite;
@@ -50,13 +51,13 @@ Route::get('/logout', [AuthController::class, 'logoutt'])
 // Route::group(["prefix" => 'test', 'middleware' => ['login'],  'as' => 'test.'], function(){
 
 
-Route::get('/dashboard-student', function () {
-    return view('dashboard_student');
-})->name('dashboard-student')->middleware('auth');
+Route::get('/dashboard-student', [DashboardView::class, 'index'])
+    ->name('dashboard-student')
+    ->middleware('auth');
 
-Route::get('/dashboard_teacher', function () {
-    return view('dashboard_student');
-})->name('dashboard-teacher')->middleware('auth');
+Route::get('/dashboard_teacher', [DashboardView::class, 'index'])
+    ->name('dashboard-teacher')
+    ->middleware('auth');
 
 Route::get('/learning-student', function () {
     return view('learning_student');
