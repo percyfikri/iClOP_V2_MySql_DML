@@ -5,6 +5,7 @@ namespace App\Http\Controllers\MySQL;
 use App\Http\Controllers\Controller;
 use App\Models\MySQL\MySqlTopicDetails;
 use App\Models\MySQL\MySqlTopics;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -22,13 +23,15 @@ class MysqlController extends Controller
         $role    = DB::select("select role from users where id = $idUser");
 
         if ($role[0]->role == "student") {
-            return view('mysql_dml.student.material.index', 
-            compact(
-                'topics', 
-                'role', 
-                'topicsCount', 
-                'topicDetails', 
-            ));
+            return view(
+                'mysql_dml.student.material.index',
+                compact(
+                    'topics',
+                    'role',
+                    'topicsCount',
+                    'topicDetails',
+                )
+            );
         }
     }
 
@@ -38,27 +41,21 @@ class MysqlController extends Controller
         $start = (int)$_GET['start'] ?? '';
         $output = $_GET['output'] ?? '';
 
+        // Ambil topic detail
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
+
+        // Ambil question terkait topic detail
+        $question = DB::table('mysql_questions')
+            ->where('topic_detail_id', $start)
+            ->first();
+
         $html_start = '';
         $pdf_reader = 0;
 
-        foreach ($results as $r) {
-            if ($mysqlid == $r->topic_id) {
-                $html_start = empty($r->file_name) ? $r->description : $r->file_name;
-                $pdf_reader = !empty($r->file_name) ? 1 : 0;
-                break;
-            }
+        if ($question) {
+            $html_start = empty($question->file_name) ? $question->question : $question->file_name;
+            $pdf_reader = !empty($question->file_name) ? 1 : 0;
         }
-// {{-- CHANGE 1 --}}
-        $listTask = DB::select(
-            "select aa.*, us.name from php_user_submits aa 
-            join users us on aa.userid = us.id 
-            where php_id = $mysqlid and php_id_topic = $start ");
-
-            // =========Rencana Query=========
-            // select from mysql_student_submissions
-            // where user_id and topic_detail_id
-            // where user_id = Auth::user()->id
 
         $idUser = Auth::user()->id;
         $roleTeacher = DB::select("select role from users where id = $idUser");
@@ -79,9 +76,41 @@ class MysqlController extends Controller
             'topicsCount' => $topicsCount,
             'detailCount' => $detailCount,
             'output' => $output,
-            'flag' => isset($results[0]) ? $results[0]->flag : 0,
-            // 'listTask' => $listTask,
             'role' => isset($roleTeacher[0]) ? $roleTeacher[0]->role : '',
+            'question' => $question, // kirim question ke view jika perlu
         ]);
+    }
+
+    function submit_user_input(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'userInput' => 'required|string|max:255',
+        ]);
+
+        // Ambil data dari request
+        $userInput = $request->input('userInput');
+        $userId = Auth::user()->id; // Ambil ID pengguna yang sedang login
+        $topicDetailId = $request->input('topic_detail_id'); // Pastikan Anda mengirimkan topic_detail_id dari form
+
+        // Simpan ke tabel mysql_student_submissions terlebih dahulu
+        $submissionId = DB::table('mysql_student_submissions')->insertGetId([
+            'user_id' => $userId,
+            'topic_detail_id' => $topicDetailId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Simpan query ke tabel mysql_queries
+        DB::table('mysql_queries')->insert([
+            'submission_id' => $submissionId,
+            'question_number' => 1, // Anda bisa mengganti ini sesuai kebutuhan
+            'query' => $userInput,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Redirect dengan pesan sukses
+        return redirect()->back()->with('success', 'Your query has been submitted successfully.');
     }
 }

@@ -14,7 +14,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <title>iCLOP</title>
-    <link rel="icon" href="./images/logo.png" type="image/png">
+    <link rel="icon" href={{asset("./images/logo.png")}} type="image/png">
     <style>
         .text {
             font-family: 'Poppins', sans-serif;
@@ -241,88 +241,27 @@
 
         </div>
     </div>
-
-    @if($role == 'teacher')
-    <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
-        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:40px">
-        <!-- <a href="{{ asset('/storage/private/febri syawaldi/febri syawaldi_db_conn.php') }}" download>Download File</a>
-        <a href="{{public_path('storage/private/febri syawaldi/febri syawaldi_db_conn.php')}}" download>Click me</a> -->
-
-
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Download File</th>
-                        <!-- Add more table headers as needed -->
-                    </tr>
-                </thead>
-                <tbody>
-{{-- CHANGE 1 --}}
-                    {{-- @foreach ($listTask as $item)
-                        <tr>
-                            <td>{{ $item->name }}</td>
-                            <td>{{ $item->flag }}</td>
-                            <td><a href="{{ asset( $item->path ) }}" download="" class="btn btn-primary">Download File</a></td>
-                            <!-- Add more table cells as needed -->
-                        </tr>
-                    @endforeach --}}
-                </tbody>
-            </table>
-
-        </div>
-    </div>
-    @else
-        
-    @endif
     
-    @if($flag == 1)
-
-    <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
-        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:40px">
-            <div style="padding-top: 15px; padding-bottom: 15px">
-                <p class='text-list' style='font-size: 24px; font-weight: 600;width: 400px !important;'> Upload File Practicum </p>
-                <div class="texts" style=" position: relative;">   
-                    <style>    
-                        text:hover{
-                            text-decoration: none !important;
-                        }
-                    </style>    
-                    <form action="{{ Route("task_submission") }}" method="POST" enctype="multipart/form-data">
-                        {{ csrf_field() }}
-                        <input type="hidden" name="phpid" id="phpid" value="{{ $_GET['phpid'] }}">
-                        <input type="hidden" name="start" id="start" value="{{ $_GET['start'] }}">
-                        <div class="form-group" >
-                            <label for="">Evidence</label>
-                            <input type="file" name="file" class="form-control">
-                            <small>Enter the work results <code>.php | .html </code></small>
-                        </div>
-                        <br />
-                        <div class="form-group">
-                            <label for="">Comment</label>
-                            <textarea class="form-control" name="comment" placeholder="..."></textarea>
-                        </div>
-                        <br />
-                        <div class="form-group">
-                            <input type="submit" value="Upload" class="btn btn-primary">
-                        </div>
-                        
-                        @if($output)
-                            <p>{!! $output !!}</p>
-                        @else
-                            <p>{!! $output !!}</p>
-                        @endif
-                    </form>
-                </div>
+    {{-- Submit Query from user input --}}
+    <div style="padding-top: 20px; padding-bottom: 2rem; max-width: 65%; margin-left:25px; margin-bottom: 5rem;">
+        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
+            <div style="padding-top: 15px; padding-bottom: 15px;">
+                <p class="text-list" style="font-size: 24px; font-weight: 600; width: 400px !important;">Submit Your Query</p>
+                <form action="{{ route('mysql_submit_user_input') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="topic_detail_id" value="{{ $row->id }}"> <!-- Tambahkan ini -->
+                    <div class="form-group">
+                        <label class="mb-2" for="userInput">Your Answer</label>
+                        <input type="text" name="userInput" id="userInput" class="form-control" placeholder="Enter your input here" required>
+                    </div>
+                    <br />
+                    <div class="form-group">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    @else
-        
-    @endif
-
-    
 
 
     <!-- Footer -->
@@ -337,7 +276,7 @@
                 ckfinder: {
                     
                     uploadUrl: '{{route('uploadimage').'?_token='.csrf_token()}}',
-                   
+                
                 }
             });
     </script>

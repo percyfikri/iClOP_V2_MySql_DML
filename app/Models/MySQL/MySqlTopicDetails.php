@@ -12,12 +12,8 @@ class MySqlTopicDetails extends Model
     protected $table = 'mysql_topic_details'; //Name of the table in the database
 
     protected $fillable = [
-        'title',
-        'description',
-        'folder_path',
         'topic_id',
-        'file_name',
-        'flag',
+        'title',
         'created_by',
     ];
 

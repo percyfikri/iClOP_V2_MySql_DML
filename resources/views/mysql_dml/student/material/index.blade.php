@@ -202,8 +202,11 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/dashboard-student">Dashboard Student</a>
                     </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <span>/</span>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Learning</a>
+                        <a class="nav-link active" aria-current="page" href="/mysql/start">Learning</a>
                     </li>
                 </ul>
             </div>
@@ -211,13 +214,12 @@
                 <p style="margin-top: 10px; margin-right: 10px;">{{auth()->user()->name}}
                     <img src="{{ asset('./images/Group.png') }}" alt="Group" style="height: 50px; margin-right: 10px;">
                     <i class="fas fa-chevron-down" style="color: #0079FF;"></i>
-                <div class="dropdown-content" id="dropdownContent">
-                    <form id="logout-form" action="{{ route('logoutt') }}" method="POST">
-                        @csrf
-                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                    </form>
-
-                </div>
+                    <div class="dropdown-content" id="dropdownContent">
+                        <form id="logout-form" action="{{ route('logoutt') }}" method="POST">
+                            @csrf
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                        </form>
+                    </div>
                 </p>
             </div>
             <!-- <button class="btn btn-primary custom-button-sign-up" onclick="window.location.href='register.html'">Sign Up</button> -->
@@ -240,7 +242,7 @@
                             </div>
                             <div class="col d-flex justify-content-center">
                                 <img src="{{asset("./images/mysql/mysql-logo.png")}}" alt="learning-logo"
-                                     style="height: 45px;">
+                                    style="height: 45px;">
                             </div>
                         </div>
                     </li>
@@ -248,11 +250,11 @@
                         <div class="row align-items-start">
                             <div class="col-2">
                                 <i class="fas fa-book" style="margin-top: 12px; margin-left: 15px; color: #676767;"
-                                   id="learningIcon"></i>
+                                id="learningIcon"></i>
                             </div>
                             <div class="col">
                                 <a class="nav-link active" href="#" onclick="showContent('start-learning')"
-                                   style="color: #34364A;" id="learningLink">Start Learning</a>
+                                style="color: #34364A;" id="learningLink">Start Learning</a>
                             </div>
                         </div>
                     </li>
@@ -261,15 +263,15 @@
                         <div class="row align-items-start">
                             <div class="col-2">
                                 <i class="fas fa-check-circle"
-                                   style="margin-top: 12px; margin-left: 15px; color: #676767;" id="validationIcon"></i>
+                                style="margin-top: 12px; margin-left: 15px; color: #676767;" id="validationIcon"></i>
                             </div>
                             <div class="col">
                                 <a class="nav-link" href="#" onclick="showContent('validation')" style="color: #34364A;"
-                                   id="validationLink">Student Submission</a>
+                                id="validationLink">Student Submission</a>
                             </div>
                         </div>
                     </li>
-                  
+                    
 
                 </ul>
             </div>
@@ -312,7 +314,7 @@
                                     // Jika ada data di mysql_topic_details, ambil ID-nya, jika tidak, set null
                                     $rows = $row ? $row->id : null;
                                 @endphp
-                         
+
                                     <div class="row">
                                         <div class="col">
                                             <div class="p-3">{{ $topic->title }}</div>
@@ -355,7 +357,7 @@
                                     </div>
                                 @endif
                                 @if($role == "teacher")
-                                 <div class="table-responsive mb-5">
+                                <div class="table-responsive mb-5">
                                     
                                     <table id="progressTable" class="table table-striped">
                                         <thead>
@@ -383,7 +385,7 @@
                             <div class="tab-pane fade" id="progress">
                                 <h3>Progress Topic Finished</h3>
                                 <p>This is the content for the Topic Finished.</p>
-                                 <div class="table-responsive mb-5">
+                                <div class="table-responsive mb-5">
                                 <table class="table" id="finnishedProgressTable">
                                     <thead>
                                     <tr>
@@ -400,10 +402,10 @@
                                             <td>
                                                 <div class="progress">
                                                     <div class="progress-bar" role="progressbar"
-                                                         style="width: {{ $userProgress['percent'] }}%;"
-                                                         aria-valuenow="{{ $userProgress['percent'] }}"
-                                                         aria-valuemin="0"
-                                                         aria-valuemax="100">{{ $userProgress['percent'] }}%
+                                                            style="width: {{ $userProgress['percent'] }}%;"
+                                                            aria-valuenow="{{ $userProgress['percent'] }}"
+                                                            aria-valuemin="0"
+                                                            aria-valuemax="100">{{ $userProgress['percent'] }}%
                                                     </div>
                                                 </div>
                                             </td>
@@ -420,7 +422,7 @@
 
             <div id="validation" class="content" style="display: none;">
                 <h1>Student Submission</h1>
-                 <div class="table-responsive mb-5">
+                <div class="table-responsive mb-5">
                 <table class="table" id="studentSubmissionTable">
                     <thead>
                     <tr>
@@ -435,10 +437,10 @@
                         @php
 
                             $studentSubmissions = DB::table('react_user_submits')
-                                           ->join('users', 'users.id', '=', 'react_user_submits.user_id')
-                                           ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
-                                           ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
-                                           ->get();
+                                        ->join('users', 'users.id', '=', 'react_user_submits.user_id')
+                                        ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
+                                        ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
+                                        ->get();
                         @endphp
                         @foreach($studentSubmissions as $submission)
                             <tr>
@@ -453,11 +455,11 @@
                         @php
 
                             $studentSubmissions = DB::table('react_user_submits')
-                                           ->join('users', 'users.id', '=', 'react_user_submits.user_id')
-                                           ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
-                                           ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
-                                           ->where('users.id', Auth::user()->id)
-                                           ->get();
+                                        ->join('users', 'users.id', '=', 'react_user_submits.user_id')
+                                        ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
+                                        ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
+                                        ->where('users.id', Auth::user()->id)
+                                        ->get();
                         @endphp
                         @foreach($studentSubmissions as $submission)
                             <tr>

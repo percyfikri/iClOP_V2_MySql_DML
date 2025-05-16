@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\React\ReactController;
 use App\Http\Controllers\React\ReactDosenController;
 use App\Http\Controllers\React\Student\ReactLogicalController;
@@ -19,14 +20,14 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth']], function () {
     Route::prefix('mysql')->group(function () {
         //-----------------CHANGED-----------------
         Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
         Route::get('/detail-topics', [MysqlController::class, 'mysql_material_detail'])->name('mysql_material_detail');
         Route::post('/submit_user_input', [MysqlController::class, 'submit_user_input'])->name('mysql_submit_user_input');
         //-----------------CHANGED-----------------
-        
+
         // Route::get('/start', [ReactController::class, 'index'])->name('react_welcome');
         // Route::get('/detail-topics', [ReactController::class, 'php_material_detail'])->name('react_material_detail');
         Route::get('/php-admin', [ReactController::class, 'php_admin'])->name('php_admin');
@@ -42,15 +43,13 @@ Route::group(['middleware' => ['auth']], function() {
     });
 });
 
-Route::group(['middleware' => ['auth', 'teacher']], function() {
+Route::group(['middleware' => ['auth', 'teacher']], function () {
     Route::prefix('mysql')->group(function () {
         //-----------------CHANGED-----------------
-        Route::get('/teacher/materials',[MysqlTeacherController::class, 'index'])->name('mysql_teacher');
+        Route::get('/teacher/materials', [MysqlTeacherController::class, 'index'])->name('mysql_teacher');
+        Route::get('/teacher/topics-table', [MysqlTeacherController::class, 'topicsTable'])->name('teacher.topics.table');
+        Route::post('/teacher/topics/add-topic-subtopic', [MysqlTeacherController::class, 'addTopicSubtopic'])->name('teacher.topics.addTopicSubtopic');
+        Route::delete('/teacher/topics/{id}/delete', [MysqlTeacherController::class, 'deleteTopic'])->name('teacher.topics.delete');
         //-----------------CHANGED-----------------
-
-        // Route::get('/teacher/topics',[ReactDosenController::class, 'topics'])->name('react_teacer_topics');
-        Route::get('/teacher/topics/add/{id}', [ReactDosenController::class, 'add_topics'])->name('react_teacer_topics');
-        Route::post('/teacher/topics/simpan', [ReactDosenController::class, 'simpan'])->name('react_teacer_simpan');
     });
 });
-

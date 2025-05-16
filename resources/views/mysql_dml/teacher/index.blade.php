@@ -8,14 +8,17 @@
     <style>
         /* Additional styles */
         .content {
-        margin-left: 14rem; /* Sesuaikan dengan lebar sidebar */
-        padding: 20px;
+            margin-left: 0; /* Akan diatur otomatis oleh JS */
+            padding: 20px;
         }
 
         .sidebar {
-            width: 100%; /* Sidebar akan menyesuaikan kolom */
-            background-color: #ffffff; /* Warna latar belakang sidebar */
-            padding: 20px;
+            min-width: 0;
+            width: max-content;
+            max-width: 100vw;
+            background-color: #fff;
+            padding: 20px 24px 20px 24px;
+            z-index: 100;
         }
 
         .sidebar-right-shadow {
@@ -28,12 +31,18 @@
             align-items: center;
         }
 
-        .nav-link:hover {
-            color: blue !important;
-        }
-
         .nav-link .icon {
             margin-right: 5px;
+        }
+
+        .sidebar .nav-link.active-sidebar {
+            background-color: #0077ff !important;
+            color: #fff !important;
+            transition: background-color 0.3s;
+        }
+        .sidebar .nav-link.active-sidebar i {
+            color: #fff !important;
+            transition: color 0.3s;
         }
 
         .custom-button {
@@ -220,29 +229,28 @@
     <title>Database Management System with MySQL</title>
     <link rel="icon" href={{asset("./images/logo.png")}} type="image/png">
 
-   <!-- CSS Bootstrap -->
-    {{-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> --}}
+    <!-- CSS Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link href="style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+    rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
+    
     <!-- JavaScript Bootstrap -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Place these in the <head> section -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <!-- Place these in the <head> section -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+        <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 
-    <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script>
+        <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+        <script>
         
         // Define the font files in base64
         var robotoRegularBase64 = 'BASE64_STRING_OF_ROBOTO_REGULAR';
@@ -258,13 +266,74 @@
           "Roboto-BoldItalic.ttf": robotoBoldItalicBase64
         };
     </script>
+    <script>
+        // Script ini akan mengatur margin kiri (.content) secara otomatis
+        // sesuai lebar sidebar, sehingga tabel tidak tertumpuk sidebar.
+        function adjustContentMargin() {
+            var sidebar = document.querySelector('.sidebar');
+            var content = document.querySelector('.content');
+            if (sidebar && content) {
+                content.style.marginLeft = sidebar.offsetWidth + 'px';
+            }
+        }
+        window.addEventListener('DOMContentLoaded', adjustContentMargin);
+        window.addEventListener('resize', adjustContentMargin);
+    </script>
+    <script>
+        // Ketika menu Topics diklik, load table topik via AJAX tanpa reload halaman
+        $(document).on('click', '#show-topics-table', function(e) {
+            e.preventDefault();
+            $.get("{{ route('teacher.topics.table') }}", function(data) {
+                $('#main-table-content').html(data);
+            });
+        });
+    </script>
+    <script>
+        // Ketika menu sidebar diklik, beri highlight hanya pada menu yang aktif
+        $(document).on('click', '.sidebar .nav-link', function() {
+            $('.sidebar .nav-link').removeClass('active-sidebar');
+            $(this).addClass('active-sidebar');
+        });
 
+        // AJAX untuk Topics (tetap seperti sebelumnya)
+        $(document).on('click', '#show-topics-table', function(e) {
+            e.preventDefault();
+            $.get("{{ route('teacher.topics.table') }}", function(data) {
+                $('#main-table-content').html(data);
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            // Saat halaman pertama kali dibuka, langsung load tabel topics
+            $.get("{{ route('teacher.topics.table') }}", function(data) {
+                $('#main-table-content').html(data);
+            });
+        });
+    </script>
+    
+    {{-- Script untuk menambahkan sub-topik pada modal --}}
+    <script>
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'add-subtopic-btn') {
+                const container = document.getElementById('subtopics-container');
+                if (container) {
+                    const newGroup = document.createElement('div');
+                    newGroup.className = 'mb-3 subtopic-group';
+                    newGroup.innerHTML = `
+                        <label class="form-label">Sub-Topic</label>
+                        <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                    `;
+                    container.appendChild(newGroup);
+                }
+            }
+        });
+    </script>
 </head>
 <body>
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg" style="background-color: #FEFEFE;">
         <div class="container-fluid">
-            <!-- <a class="navbar-brand" href="#">Navbar</a> -->
             <img src={{asset("./images/logo.png")}} alt="logo" width="104" height="65">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -280,7 +349,7 @@
                             <span>/</span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/mysql-dml/teacher/topics">Database Management System with MySQL</a>
+                            <a class="nav-link active" aria-current="page" href="/mysql/teacher/materials">Database Management System with MySQL</a>
                         </li>
                     </ul>
                 </div>
@@ -296,7 +365,6 @@
                     </div>
                     </p>
                 </div>
-                <!-- <button class="btn btn-primary custom-button-sign-up" onclick="window.location.href='register.html'">Sign Up</button> -->
             </div>
         </div>
     </nav>
@@ -305,7 +373,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- SIDEBAR -->
-            <div class="col-md-2 sidebar sidebar-right-shadow" style="height: 100vh; position: fixed; overflow-y: auto;">
+            <div class="col-auto sidebar sidebar-right-shadow" style="height: 100vh; position: fixed; overflow-y: auto; padding: 20px 0px;">
                 <div class="sidebar-sticky" style="margin-top: 20px;">
                     <ul class="nav flex-column">
                         <li class="nav-item" style="margin-bottom: 40px;">
@@ -319,21 +387,29 @@
                             </div>
                         </li>
                         <li class="nav-item">
-                            <div class="row align-items-start">
-                                <div class="col-1">
-                                    <i class="fas fa-folder-open" style="margin-top: 12px; margin-left: 10px; color: #676767;" id="topicIcon"></i>
-                                </div>
-                                <div class="col pl-3">
-                                    <a class="nav-link" href="/teacher/materials" onclick="showContent('material')" style="color: #34364A;" id="materialLink">Materials Management</a>
-                                </div>
-                            </div>
+                            <a class="nav-link d-flex align-items-center active-sidebar"
+                               href="#"
+                               id="show-topics-table"
+                               style="color: #34364A; white-space: nowrap; font-size: 16px;">
+                                <i class="fas fa-book" style="margin-right: 12px;"></i>
+                                Topics Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center"
+                               href="/mysql/teacher/questions"
+                               onclick="showContent('questions')"
+                               style="color: #34364A; white-space: nowrap; font-size: 16px;">
+                                <i class="fas fa-book" style="margin-right: 12px;"></i>
+                                Questions Management
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
 
             <!-- CONTENT -->
-            <div class="col-md-10 offset-md-2 content">
+            {{-- <div class="col content" style="margin-left: 240px;">
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr class="text-center">
@@ -375,11 +451,14 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div> --}}
+            <div class="col content px-4" id="main-table-content">
+                {{-- Tabel topik akan dimuat di sini via AJAX --}}
             </div>
         </div>
     </div>
     {{-- FOOTER --}}
-    <footer class="footer"style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 10px 0; position: fixed; bottom: 0;  width: 100%; ">
-        © 2023 Your Website. All rights reserved.
+    <footer class="footer"style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 5px 0; position: fixed; bottom: 0;  width: 100%; ">
+        © 2025 Your Website. All rights reserved.
     </footer>   
 </body>

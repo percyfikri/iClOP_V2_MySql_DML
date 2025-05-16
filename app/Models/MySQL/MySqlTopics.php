@@ -13,6 +13,7 @@ class MySqlTopics extends Model
 
     protected $fillable = [
         'title',
+        'created_by',
     ];
 
     // Relasi HasMany dengan TopicDetail
