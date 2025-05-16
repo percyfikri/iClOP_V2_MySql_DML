@@ -64,8 +64,12 @@ class MysqlTeacherController extends Controller
             ]);
         }
         // dd($request->all());
-
-            return redirect()->route('mysql_teacher')->with('success', 'Topic & Sub-Topic saved!');
+       
+        // Jika request AJAX, return JSON
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('mysql_teacher')->with('success', 'Topic & Sub-Topic saved!');
     }
 
     public function editTopicAjax($id)
@@ -125,6 +129,10 @@ class MysqlTeacherController extends Controller
         // Hapus topic
         $topic->delete();
 
+        // Jika request AJAX, return JSON
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
         return redirect()->route('mysql_teacher')->with('success', 'Topic dan seluruh sub-topic berhasil dihapus.');
     }
 }

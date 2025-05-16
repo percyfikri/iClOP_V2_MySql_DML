@@ -38,13 +38,9 @@
                         <button class="btn btn-sm btn-warning" title="Edit" onclick="editTopic({{ $data->id }})">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <form action="{{ route('teacher.topics.delete', $data->id) }}" method="POST" style="display:inline; margin-left: 5px" onsubmit="return confirm('Delete this topic beserta seluruh sub-topik?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <button class="btn btn-sm btn-danger ms-1 delete-topic-btn" data-id="{{ $data->id }}" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
             @endforeach

@@ -312,6 +312,7 @@
         });
     </script>
 
+    {{-- TOPICS MANAGEMENT --}}
     {{-- Script untuk menambahkan sub-topik pada modal --}}
     <script>
         document.addEventListener('click', function(e) {
@@ -398,6 +399,63 @@
             });
         });
     </script>
+
+    {{-- Add topics tanpa reload page --}}
+    <script>
+        $(document).on('submit', 'form[action="{{ route('teacher.topics.addTopicSubtopic') }}"]', function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            $.ajax({
+                url: $form.attr('action'),
+                method: 'POST',
+                data: $form.serialize(),
+                success: function(res) {
+                    $('#addTopicModal').modal('hide');
+                    // Reload tabel topics
+                    $.get("{{ route('teacher.topics.table') }}", function(data) {
+                        $('#main-table-content').html(data);
+                    });
+                    // Reset form dan subtopics
+                    $form[0].reset();
+                    $('#subtopics-container').html(`
+                        <div class="mb-3 subtopic-group d-flex align-items-center">
+                            <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Sub-Topic">
+                        </div>
+                    `);
+                },
+                error: function(xhr) {
+                    alert('Gagal menambah topic. Pastikan semua field terisi dengan benar.');
+                }
+            });
+        });
+    </script>
+
+    {{-- delete topik dan subtopik tanpa reload page --}}
+    <script>
+        $(document).on('click', '.delete-topic-btn', function() {
+            var id = $(this).data('id');
+            if (confirm('Delete this topic beserta seluruh sub-topik?')) {
+                $.ajax({
+                    url: '/mysql/teacher/topics/' + id + '/delete',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        _method: 'DELETE'
+                    },
+                    success: function(res) {
+                        // Reload tabel topics
+                        $.get("{{ route('teacher.topics.table') }}", function(data) {
+                            $('#main-table-content').html(data);
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Gagal menghapus topic.');
+                    }
+                });
+            }
+        });
+    </script>
+    {{----------------------------------------------------------------------------------------------}}
 </head>
 <body>
     <!-- NAVBAR -->
