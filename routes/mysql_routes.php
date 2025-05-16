@@ -50,6 +50,10 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::get('/teacher/topics-table', [MysqlTeacherController::class, 'topicsTable'])->name('teacher.topics.table');
         Route::post('/teacher/topics/add-topic-subtopic', [MysqlTeacherController::class, 'addTopicSubtopic'])->name('teacher.topics.addTopicSubtopic');
         Route::delete('/teacher/topics/{id}/delete', [MysqlTeacherController::class, 'deleteTopic'])->name('teacher.topics.delete');
+        
+        // Route untuk ambil data topic & subtopic
+        Route::get('/teacher/topics/{id}/edit', [MysqlTeacherController::class, 'editTopicAjax']);
+        Route::put('/teacher/topics/{id}', [MysqlTeacherController::class, 'updateTopicAjax']);
         //-----------------CHANGED-----------------
     });
 });

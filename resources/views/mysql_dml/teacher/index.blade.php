@@ -311,7 +311,7 @@
             });
         });
     </script>
-    
+
     {{-- Script untuk menambahkan sub-topik pada modal --}}
     <script>
         document.addEventListener('click', function(e) {
@@ -327,6 +327,75 @@
                     container.appendChild(newGroup);
                 }
             }
+        });
+    </script>
+
+    {{-- Script untuk edit topik dan sub-topik pada modal --}}
+    <script>
+        function editTopic(topicId) {
+            // Ambil data topic & subtopic via AJAX
+            $.get('/mysql/teacher/topics/' + topicId + '/edit', function(data) {
+                $('#edit_topic_id').val(data.topic.id);
+                $('#edit_topic_title').val(data.topic.title);
+        
+                // Render subtopics
+                let subtopicsHtml = '';
+                data.subtopics.forEach(function(sub, idx) {
+                    subtopicsHtml += `
+                        <div class="mb-3 edit-subtopic-group">
+                            <label class="form-label">Sub-Topic</label>
+                            <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
+                            <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
+                            <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-top:5px;">Remove</button>
+                        </div>
+                    `;
+                });
+                $('#edit-subtopics-container').html(subtopicsHtml);
+        
+                // Tampilkan modal
+                var editModal = new bootstrap.Modal(document.getElementById('editTopicModal'));
+                editModal.show();
+            });
+        }
+        
+        // Tambah subtopic baru di modal edit
+        $(document).on('click', '#add-edit-subtopic-btn', function() {
+            $('#edit-subtopics-container').append(`
+                <div class="mb-3 edit-subtopic-group">
+                    <label class="form-label">Sub-Topic</label>
+                    <input type="hidden" name="sub_topic_ids[]" value="">
+                    <input type="text" class="form-control" name="sub_topic_titles[]" required>
+                    <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-top:5px;">Remove</button>
+                </div>
+            `);
+        });
+        
+        // Hapus subtopic di modal edit
+        $(document).on('click', '.remove-edit-subtopic-btn', function() {
+            $(this).closest('.edit-subtopic-group').remove();
+        });
+        
+        // Submit edit topic
+        $(document).on('submit', '#edit-topic-form', function(e) {
+            e.preventDefault();
+            var topicId = $('#edit_topic_id').val();
+            var formData = $(this).serialize();
+        
+            $.ajax({
+                url: '/mysql/teacher/topics/' + topicId,
+                method: 'POST',
+                data: formData + '&_method=PUT',
+                success: function(res) {
+                    $('#editTopicModal').modal('hide');
+                    // Reload tabel topics
+                    $.get("{{ route('teacher.topics.table') }}", function(data) {
+                        $('#main-table-content').html(data);
+                    });
+                },
+                error: function(xhr) {
+                    alert('Update failed!');
+                }
+            });
         });
     </script>
 </head>

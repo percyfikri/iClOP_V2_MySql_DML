@@ -68,6 +68,53 @@ class MysqlTeacherController extends Controller
             return redirect()->route('mysql_teacher')->with('success', 'Topic & Sub-Topic saved!');
     }
 
+    public function editTopicAjax($id)
+    {
+        $topic = MySqlTopics::findOrFail($id);
+        $subtopics = MySqlTopicDetails::where('topic_id', $id)->get();
+        return response()->json([
+            'topic' => $topic,
+            'subtopics' => $subtopics
+        ]);
+    }
+
+    public function updateTopicAjax(Request $request, $id)
+    {
+        $topic = MySqlTopics::findOrFail($id);
+        $topic->title = $request->topic_title;
+        $topic->save();
+
+        // Update subtopics
+        $ids = $request->sub_topic_ids ?? [];
+        $titles = $request->sub_topic_titles ?? [];
+
+        // Hapus subtopic yang dihapus user
+        MySqlTopicDetails::where('topic_id', $id)
+            ->whereNotIn('id', array_filter($ids))
+            ->delete();
+
+        // Update atau tambah subtopic
+        foreach ($titles as $i => $title) {
+            if (!empty($ids[$i])) {
+                // Update existing
+                $sub = MySqlTopicDetails::find($ids[$i]);
+                if ($sub) {
+                    $sub->title = $title;
+                    $sub->save();
+                }
+            } else {
+                // Tambah baru
+                MySqlTopicDetails::create([
+                    'topic_id' => $id,
+                    'title' => $title,
+                    'created_by' => auth()->id(),
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function deleteTopic($id)
     {
         $topic = MySqlTopics::findOrFail($id);
