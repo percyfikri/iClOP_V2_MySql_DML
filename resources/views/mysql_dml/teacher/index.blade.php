@@ -595,6 +595,9 @@
         <div class="row">
             <!-- SIDEBAR -->
             <div class="col-auto sidebar sidebar-right-shadow" style="padding: 20px 0px;">
+                <div class="d-flex justify-content-center mb-5" style="cursor: pointer;" onclick="window.location.href='/dashboard_teacher'">
+                    <img src={{asset("./images/logo.png")}} alt="logo" width="104" height="65">
+                </div>
                 <div class="sidebar-sticky" style="margin-top: 20px;">
                     <ul class="nav flex-column">
                         <li class="nav-item" style="margin-bottom: 40px;">
