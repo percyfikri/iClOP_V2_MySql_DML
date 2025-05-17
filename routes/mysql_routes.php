@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MySQL\MysqlController;
-use App\Http\Controllers\MySQL\MysqlQuestionController;
+use App\Http\Controllers\MySQL\MysqlTeacherQuestionController;
 use App\Http\Controllers\MySQL\MysqlTeacherTopicsController;
 use App\Http\Controllers\MySQL\TopicDetailController;
 use App\Http\Controllers\PHP\PHPController;
@@ -54,11 +54,12 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         // Route untuk ambil data topic & subtopic
         Route::get('/teacher/topics/{id}/edit', [MysqlTeacherTopicsController::class, 'editTopicAjax']);
         Route::put('/teacher/topics/{id}', [MysqlTeacherTopicsController::class, 'updateTopicAjax']);
-        
-        // Route::get('/mysql/teacher/questions/table', [MysqlQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
-        // Route::get('/mysql/teacher/questions/{id}/edit', [MysqlQuestionController::class, 'editQuestionAjax']);
-        // Route::put('/mysql/teacher/questions/{id}', [MysqlQuestionController::class, 'updateQuestionAjax']);
-        // Route::post('/mysql/teacher/questions', [MysqlQuestionController::class, 'addQuestionAjax']);
+
+        Route::get('/mysql/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
+        Route::get('/mysql/teacher/questions/{id}/edit', [MysqlTeacherQuestionController::class, 'editQuestionAjax']);
+        Route::put('/mysql/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'updateQuestionAjax']);
+        Route::post('/mysql/teacher/questions', [MysqlTeacherQuestionController::class, 'addQuestionAjax']);
+        Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
         //-----------------CHANGED-----------------
     });
 });

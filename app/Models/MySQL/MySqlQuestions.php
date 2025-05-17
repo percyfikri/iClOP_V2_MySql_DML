@@ -2,6 +2,7 @@
 
 namespace App\Models\MySQL;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +25,11 @@ class MySqlQuestions extends Model
     public function topicDetail()
     {
         return $this->belongsTo(MySqlTopicDetails::class, 'topic_detail_id');
+    }
+
+    public function createdByUser()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     // Relasi: Setiap question memiliki banyak student submissions

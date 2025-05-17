@@ -474,6 +474,58 @@
         });
     </script>
     {{----------------------------------------------------------------------------------------------}}
+
+    {{-- QUESTIONS MANAGEMENT --}}
+    <script>
+        $(document).on('click', 'a[href="/mysql/teacher/questions"]', function(e) {
+            e.preventDefault();
+            $.get("{{ route('teacher.questions.table') }}", function(data) {
+                $('#main-table-content').html(data);
+            });
+        });
+        
+        // Show edit modal & fill data
+        window.editQuestion = function(id) {
+            $.get('/mysql/teacher/questions/' + id + '/edit', function(q) {
+                $('#edit_question_id').val(q.id);
+                $('#edit_question').val(q.question);
+                $('#edit_answer_key').val(q.answer_key);
+                $('#edit_topic_detail_id').val(q.topic_detail_id);
+                var modal = new bootstrap.Modal(document.getElementById('editQuestionModal'));
+                modal.show();
+            });
+        };
+        
+        // Submit edit
+        $(document).on('submit', '#edit-question-form', function(e) {
+            e.preventDefault();
+            var id = $('#edit_question_id').val();
+            $.ajax({
+                url: '/mysql/teacher/questions/' + id,
+                method: 'POST',
+                data: $(this).serialize() + '&_method=PUT',
+                success: function() {
+                    $('#editQuestionModal').modal('hide');
+                    $.get("{{ route('teacher.questions.table') }}", function(data) {
+                        $('#main-table-content').html(data);
+                    });
+                }
+            });
+        });
+        
+        // Submit add
+        $(document).on('submit', '#add-question-form', function(e) {
+            e.preventDefault();
+            $.post('/mysql/teacher/questions', $(this).serialize(), function() {
+                $('#addQuestionModal').modal('hide');
+                $.get("{{ route('teacher.questions.table') }}", function(data) {
+                    $('#main-table-content').html(data);
+                });
+            });
+        });
+    </script>
+    {{----------------------------------------------------------------------------------------------}}
+
 </head>
 <body>
     <!-- NAVBAR -->

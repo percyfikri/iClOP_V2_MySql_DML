@@ -13,7 +13,7 @@
         <table class="table table-bordered table-hover mb-5">
             <thead class="table-primary">
                 <tr class="text-center">
-                    <th>No</th>
+                    <th style="width: 45px;">No</th>
                     <th>Topic</th>
                     <th>Sub-Topics</th>
                     <th>Created By</th>
