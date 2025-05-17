@@ -19,10 +19,29 @@
             background-color: #fff;
             padding: 20px 24px 20px 24px;
             z-index: 100;
+            height: 100vh; /* Tambahkan ini agar sidebar penuh ke bawah */
+            position: fixed; /* Agar sidebar tetap di posisi kiri */
+            top: 0;
+            left: 0;
         }
 
         .sidebar-right-shadow {
             box-shadow: 1px 0px 8px rgba(0, 0, 0, 0.1); /* Bayangan di sisi kanan sidebar */
+        }
+
+        /* Tambahan untuk footer agar mulai dari setelah sidebar */
+        .footer {
+            background-color: #EAEAEA;
+            color: #636363;
+            text-align: center;
+            padding: 5px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            /* Lebar footer menyesuaikan sisa layar di kanan sidebar */
+            width: calc(100% - var(--sidebar-width, 240px));
+            margin-left: var(--sidebar-width, 240px);
+            z-index: 101;
         }
 
         /* NAV LINK */
@@ -267,13 +286,18 @@
         };
     </script>
     <script>
-        // Script ini akan mengatur margin kiri (.content) secara otomatis
-        // sesuai lebar sidebar, sehingga tabel tidak tertumpuk sidebar.
+        // Script ini akan mengatur margin kiri (.content) dan lebar footer secara otomatis
+        // sesuai lebar sidebar, sehingga tabel dan footer tidak tertumpuk sidebar.
         function adjustContentMargin() {
             var sidebar = document.querySelector('.sidebar');
             var content = document.querySelector('.content');
+            var footer = document.querySelector('.footer');
             if (sidebar && content) {
                 content.style.marginLeft = sidebar.offsetWidth + 'px';
+            }
+            if (sidebar && footer) {
+                // Set CSS variable untuk lebar sidebar
+                document.documentElement.style.setProperty('--sidebar-width', sidebar.offsetWidth + 'px');
             }
         }
         window.addEventListener('DOMContentLoaded', adjustContentMargin);
@@ -570,7 +594,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- SIDEBAR -->
-            <div class="col-auto sidebar sidebar-right-shadow" style="height: 100vh; position: fixed; overflow-y: auto; padding: 20px 0px;">
+            <div class="col-auto sidebar sidebar-right-shadow" style="padding: 20px 0px;">
                 <div class="sidebar-sticky" style="margin-top: 20px;">
                     <ul class="nav flex-column">
                         <li class="nav-item" style="margin-bottom: 40px;">
@@ -649,13 +673,13 @@
                     </tbody>
                 </table>
             </div> --}}
-            <div class="col content px-4" id="main-table-content">
+            <div class="col content px-4" id="main-table-content" style="margin-left: 240px;">
                 {{-- Tabel topik akan dimuat di sini via AJAX --}}
             </div>
         </div>
     </div>
     {{-- FOOTER --}}
-    <footer class="footer"style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 5px 0; position: fixed; bottom: 0;  width: 100%; ">
+    <footer class="footer">
         © 2025 Your Website. All rights reserved.
     </footer>   
 </body>
