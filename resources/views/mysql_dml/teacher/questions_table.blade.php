@@ -92,10 +92,10 @@
 <!-- Modal View Question Details -->
 <div class="modal fade" id="viewQuestionDetailsModal" tabindex="-1" aria-labelledby="viewQuestionDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="border-radius: 1rem;">
+            <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                 <h5 class="modal-title fw-bold" id="viewQuestionDetailsModalLabel">Question Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
@@ -120,7 +120,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
