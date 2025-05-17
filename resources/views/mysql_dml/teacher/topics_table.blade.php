@@ -1,7 +1,7 @@
 <div>
     {{-- Judul Topics List --}}
     <div class="mb-0 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 fw-bold">Topics Management</h5>
+        <h4 class="mb-3 fw-bold">Topics Management</h4>
     </div>
     {{-- Tombol Add Topic di bawah judul, tetap di kanan --}}
     <div class="mb-3 d-flex justify-content-end align-items-center">
@@ -60,12 +60,12 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="topicTitle" class="form-label">Topic</label>
+                        <label for="topicTitle" class="form-label fw-bold">Topic</label>
                         <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
                     </div>
                     <div id="subtopics-container">
                         <div class="mb-3 subtopic-group">
-                            <label class="form-label">Sub-Topic</label>
+                            <label class="form-label fw-bold">Sub-Topic</label>
                             <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="edit_topic_title" class="form-label">Topic</label>
+                        <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
                         <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
                     </div>
                     <div id="edit-subtopics-container"></div>

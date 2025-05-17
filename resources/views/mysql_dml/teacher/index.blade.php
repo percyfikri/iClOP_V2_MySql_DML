@@ -320,13 +320,23 @@
                 const container = document.getElementById('subtopics-container');
                 if (container) {
                     const newGroup = document.createElement('div');
-                    newGroup.className = 'mb-3 subtopic-group';
+                    newGroup.className = 'mb-3 subtopic-group d-flex align-items-center';
                     newGroup.innerHTML = `
-                        <label class="form-label">Sub-Topic</label>
-                        <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                        <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Other Sub-Topics">
+                        <button type="button" class="btn btn-danger btn-sm remove-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                            <span style="font-size:20px; font-weight:bold;">-</span>
+                        </button>
                     `;
                     container.appendChild(newGroup);
                 }
+            }
+        });
+
+        // Remove subtopic (add modal)
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.classList.contains('remove-subtopic-btn') || e.target.closest('.remove-subtopic-btn'))) {
+                const btn = e.target.closest('.remove-subtopic-btn');
+                btn.closest('.subtopic-group').remove();
             }
         });
     </script>
@@ -344,10 +354,14 @@
                 data.subtopics.forEach(function(sub, idx) {
                     subtopicsHtml += `
                         <div class="mb-3 edit-subtopic-group">
-                            <label class="form-label">Sub-Topic</label>
-                            <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
-                            <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
-                            <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-top:5px;">Remove</button>
+                            ${idx === 0 ? '<label class="form-label fw-bold">Sub-Topic</label>' : ''}
+                            <div class="mb-3 edit-subtopic-group d-flex align-items-center">
+                                <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
+                                <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
+                                <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                                    <span style="font-size:20px; font-weight:bold;">-</span>
+                                </button>
+                            </div>
                         </div>
                     `;
                 });
@@ -362,11 +376,12 @@
         // Tambah subtopic baru di modal edit
         $(document).on('click', '#add-edit-subtopic-btn', function() {
             $('#edit-subtopics-container').append(`
-                <div class="mb-3 edit-subtopic-group">
-                    <label class="form-label">Sub-Topic</label>
+                <div class="mb-3 edit-subtopic-group d-flex align-items-center">
                     <input type="hidden" name="sub_topic_ids[]" value="">
-                    <input type="text" class="form-control" name="sub_topic_titles[]" required>
-                    <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-top:5px;">Remove</button>
+                    <input type="text" class="form-control" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
+                    <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:20px; font-weight:bold;">-</span>
+                    </button>
                 </div>
             `);
         });
@@ -420,6 +435,9 @@
                     $('#subtopics-container').html(`
                         <div class="mb-3 subtopic-group d-flex align-items-center">
                             <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Sub-Topic">
+                            <button type="button" class="btn btn-danger btn-sm remove-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                                <span style="font-size:20px; font-weight:bold;">-</span>
+                            </button>
                         </div>
                     `);
                 },
