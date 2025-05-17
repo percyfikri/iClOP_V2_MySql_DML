@@ -9,43 +9,47 @@
             <i class="fas fa-plus"></i> Add Topic
         </button>
     </div>
-    <table class="table table-bordered table-hover mb-5">
-        <thead class="table-primary">
-            <tr class="text-center">
-                <th>No</th>
-                <th>Topic</th>
-                <th>Sub-Topics</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($data1 as $index => $data)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $data->title }}</td>
-                    <td>
-                        @if($data->topicDetails && count($data->topicDetails) > 0)
-                            <ul class="mb-0 pl-3" style="list-style-type: disc;">
-                                @foreach($data->topicDetails as $subtopic)
-                                    <li>{{ $subtopic->title }}</li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <span class="text-muted">-</span>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-warning" title="Edit" onclick="editTopic({{ $data->id }})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger ms-1 delete-topic-btn" data-id="{{ $data->id }}" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
+    <div class="card shadow-sm p-4 mb-4" style="border-radius: 18px;">
+        <table class="table table-bordered table-hover mb-5">
+            <thead class="table-primary">
+                <tr class="text-center">
+                    <th>No</th>
+                    <th>Topic</th>
+                    <th>Sub-Topics</th>
+                    <th>Created By</th>
+                    <th>Actions</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach ($data1 as $index => $data)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ $data->title }}</td>
+                        <td>
+                            @if($data->topicDetails && count($data->topicDetails) > 0)
+                                <ul class="mb-0 pl-3" style="list-style-type: disc;">
+                                    @foreach($data->topicDetails as $subtopic)
+                                        <li>{{ $subtopic->title }}</li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">{{ $data->createdBy->name ?? '-' }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning" title="Edit" onclick="editTopic({{ $data->id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger ms-1 delete-topic-btn" data-id="{{ $data->id }}" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal Add Topic & Sub-Topic -->
