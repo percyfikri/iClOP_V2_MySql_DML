@@ -57,8 +57,8 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
 
         Route::get('/mysql/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
         Route::get('/mysql/teacher/questions/{id}/edit', [MysqlTeacherQuestionController::class, 'editQuestionAjax']);
-        Route::put('/mysql/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'updateQuestionAjax']);
-        Route::post('/mysql/teacher/questions', [MysqlTeacherQuestionController::class, 'addQuestionAjax']);
+
+        Route::post('/teacher/questions', [MysqlTeacherQuestionController::class, 'storeQuestion']);
         Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
         //-----------------CHANGED-----------------
     });

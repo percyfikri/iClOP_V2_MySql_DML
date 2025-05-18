@@ -54,7 +54,7 @@
 <!-- Modal Add Question -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="add-question-form" class="needs-validation" novalidate>
+        <form id="add-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,6 +78,10 @@
                                 <option value="{{ $sub->id }}">{{ $sub->title }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Modul (PDF, optional)</label>
+                        <input type="file" class="form-control" name="modul" accept=".pdf">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -164,8 +168,8 @@
     </div>
 </div>
 
-{{-- Delete Question Script --}}
 <script>
+    // Delete question
     $(document).on('click', '.delete-question-btn', function() {
         var id = $(this).data('id');
         if (confirm('Delete this question?')) {
@@ -188,6 +192,7 @@
         }
     });
 
+    // View details
     function viewQuestionDetails(id) {
         $.get('/mysql/teacher/questions/' + id, function(data) {
             console.log(data); // Debug: lihat data yang diterima
@@ -202,4 +207,29 @@
             alert('Failed to fetch question details.');
         });
     }
+
+    // Submit add
+    $(document).on('submit', '#add-question-form', function(e) {
+        e.preventDefault();
+        var form = $(this)[0];
+        var formData = new FormData(form);
+
+        $.ajax({
+            url: '/mysql/teacher/questions',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function() {
+                $('#addQuestionModal').modal('hide');
+                $.get("{{ route('teacher.questions.table') }}", function(data) {
+                    $('#main-table-content').html(data);
+                });
+                form.reset();
+            },
+            error: function(xhr) {
+                alert('Failed to add question. Please check all fields.\n' + xhr.responseText);
+            }
+        });
+    });
 </script>

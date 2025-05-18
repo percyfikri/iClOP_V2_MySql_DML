@@ -22,27 +22,36 @@ class MysqlTeacherQuestionController extends Controller
         return response()->json($question);
     }
 
-    public function updateQuestionAjax(Request $request, $id)
+    public function storeQuestion(Request $request)
     {
         $request->validate([
             'question' => 'required|string',
             'answer_key' => 'required|string',
-            'topic_detail_id' => 'required|integer',
+            'topic_detail_id' => 'required|exists:mysql_topic_details,id',
+            // 'modul' => 'nullable|file|mimes:pdf|max:20480',
         ]);
-        $q = MySqlQuestions::findOrFail($id);
-        $q->update($request->only('question', 'answer_key', 'topic_detail_id'));
-        return response()->json(['success' => true]);
-    }
 
-    public function addQuestionAjax(Request $request)
-    {
-        $request->validate([
-            'question' => 'required|string',
-            'answer_key' => 'required|string',
-            'topic_detail_id' => 'required|integer',
+        $fileName = null;
+        $folderPath = null;
+        if ($request->hasFile('modul')) {
+            $file = $request->file('modul');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $folderPath = 'mysql/DML/';
+            $file->move(public_path($folderPath), $fileName);
+        }
+
+        $question = MySqlQuestions::create([
+            'question' => $request->question,
+            'answer_key' => $request->answer_key,
+            'topic_detail_id' => $request->topic_detail_id,
+            'file_name' => $fileName,
+            'folder_path' => $folderPath,
+            'created_by' => auth()->id(),
         ]);
-        MySqlQuestions::create($request->only('question', 'answer_key', 'topic_detail_id'));
-        return response()->json(['success' => true]);
+
+        // echo "<script>console.log(" . json_encode($question) . ");</script>"; // Debug jika perlu
+
+        return response()->json(['success' => true, 'question' => $question]);
     }
 
     public function show($id)

@@ -536,17 +536,6 @@
                 }
             });
         });
-        
-        // Submit add
-        $(document).on('submit', '#add-question-form', function(e) {
-            e.preventDefault();
-            $.post('/mysql/teacher/questions', $(this).serialize(), function() {
-                $('#addQuestionModal').modal('hide');
-                $.get("{{ route('teacher.questions.table') }}", function(data) {
-                    $('#main-table-content').html(data);
-                });
-            });
-        });
     </script>
     {{----------------------------------------------------------------------------------------------}}
 
