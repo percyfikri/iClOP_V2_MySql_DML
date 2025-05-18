@@ -5,7 +5,7 @@
     </div>
     {{-- Tombol Add Topic di bawah judul, tetap di kanan --}}
     <div class="mb-3 d-flex justify-content-end align-items-center">
-        <button class="btn btn-primary" id="add-topic-btn" data-bs-toggle="modal" data-bs-target="#addTopicModal">
+        <button class="btn btn-primary fw-bold" id="add-topic-btn" data-bs-toggle="modal" data-bs-target="#addTopicModal" style="border-radius: 0.5rem;">
             <i class="fas fa-plus"></i> Add Topic
         </button>
     </div>
@@ -57,10 +57,10 @@
     <div class="modal-dialog">
         <form method="POST" action="{{ route('teacher.topics.addTopicSubtopic') }}">
             @csrf
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content"style="border-radius: 1rem;">
+                <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title" id="addTopicModalLabel">Add Topic & Sub-Topic</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -74,7 +74,9 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-success btn-sm" id="add-subtopic-btn">
+                        <button type="button" class="btn btn-sm fw-bold btn-add-subtopic-hover"
+                            style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;"
+                            id="add-subtopic-btn">
                             <i class="fas fa-plus"></i> Add Sub-Topics
                         </button>
                     </div>
@@ -94,10 +96,10 @@
         <form id="edit-topic-form">
             @csrf
             <input type="hidden" id="edit_topic_id" name="topic_id">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content"style="border-radius: 1rem;">
+                <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title" id="editTopicModalLabel">Edit Topic & Sub-Topic</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -106,7 +108,9 @@
                     </div>
                     <div id="edit-subtopics-container"></div>
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-success btn-sm" id="add-edit-subtopic-btn">
+                        <button type="button" class="btn btn-sm fw-bold btn-add-subtopic-hover"
+                            style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;"
+                            id="add-edit-subtopic-btn">
                             <i class="fas fa-plus"></i> Add Sub-Topics
                         </button>
                     </div>

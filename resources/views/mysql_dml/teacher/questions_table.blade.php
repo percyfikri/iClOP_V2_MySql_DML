@@ -5,7 +5,7 @@
     </div>
     {{-- Tombol Add Topic di bawah judul, tetap di kanan --}}
     <div class="mb-3 d-flex justify-content-end align-items-center">
-        <button class="btn btn-primary" id="add-question-btn" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+        <button class="btn btn-primary fw-bold" id="add-question-btn" data-bs-toggle="modal" data-bs-target="#addQuestionModal" style="border-radius: 0.5rem;">
             <i class="fas fa-plus"></i> Add Question
         </button>
     </div>
@@ -56,10 +56,10 @@
     <div class="modal-dialog">
         <form id="add-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
             @csrf
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content" style="border-radius: 1rem;">
+                <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title fw-bold" id="addQuestionModalLabel">Add Question</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">

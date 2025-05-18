@@ -243,6 +243,49 @@
             background-color: #004a9c !important; /* Warna latar belakang lebih gelap saat aktif */
             border-color: #004080 !important; /* Warna border lebih gelap saat aktif */
         }
+
+        /* button minus subtopics */
+        .btn-minus-red {
+            background-color: #ffeaea !important;
+            border: 1.5px solid #ff3b3b !important;
+            border-radius: 8px !important;
+            color: #ff3b3b !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            transition: background 0.5s, color 0.5s;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 0;
+        }
+        .btn-minus-red:hover {
+            background-color: #ff3b3b !important;
+            color: #fff !important;
+            border-color: #ff3b3b !important;
+        }
+        .btn-minus-red .minus-sign {
+            color: #ff3b3b;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 auto;
+            line-height: 1;
+            transition: color 0.5s;
+        }
+        .btn-minus-red:hover .minus-sign {
+            color: #fff;
+        }
+
+        /* Button Add subtopics */
+        /* Efek hover untuk tombol Add Sub-Topics */
+        .btn-add-subtopic-hover:hover,
+        #add-edit-subtopic-btn:hover {
+            background-color: #258eff !important;
+            color: #fff !important;
+            border-color: #258eff !important;
+            transition: background 0.5s, color 0.5s;
+        }
     </style>
 
     <title>Database Management System with MySQL</title>
@@ -347,8 +390,8 @@
                     newGroup.className = 'mb-3 subtopic-group d-flex align-items-center';
                     newGroup.innerHTML = `
                         <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Other Sub-Topics">
-                        <button type="button" class="btn btn-danger btn-sm remove-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                            <span style="font-size:20px; font-weight:bold;">-</span>
+                        <button type="button" class="btn btn-minus-red remove-subtopic-btn">
+                            <span class="minus-sign">-</span>
                         </button>
                     `;
                     container.appendChild(newGroup);
@@ -381,9 +424,9 @@
                             ${idx === 0 ? '<label class="form-label fw-bold">Sub-Topic</label>' : ''}
                             <div class="mb-3 edit-subtopic-group d-flex align-items-center">
                                 <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
-                                <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
-                                <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                                    <span style="font-size:20px; font-weight:bold;">-</span>
+                                <input type="text" class="form-control me-2" name="sub_topic_titles[]" value="${sub.title}" required>
+                                <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn">
+                                    <span class="minus-sign">-</span>
                                 </button>
                             </div>
                         </div>
@@ -402,9 +445,9 @@
             $('#edit-subtopics-container').append(`
                 <div class="mb-3 edit-subtopic-group d-flex align-items-center">
                     <input type="hidden" name="sub_topic_ids[]" value="">
-                    <input type="text" class="form-control" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
-                    <button type="button" class="btn btn-danger btn-sm remove-edit-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                        <span style="font-size:20px; font-weight:bold;">-</span>
+                    <input type="text" class="form-control me-2" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
+                    <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn">
+                        <span class="minus-sign">-</span>
                     </button>
                 </div>
             `);
@@ -459,8 +502,8 @@
                     $('#subtopics-container').html(`
                         <div class="mb-3 subtopic-group d-flex align-items-center">
                             <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Sub-Topic">
-                            <button type="button" class="btn btn-danger btn-sm remove-subtopic-btn" style="margin-left:5px; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                                <span style="font-size:20px; font-weight:bold;">-</span>
+                            <button type="button" class="btn btn-minus-red remove-subtopic-btn">
+                                <span class="minus-sign">-</span>
                             </button>
                         </div>
                     `);
