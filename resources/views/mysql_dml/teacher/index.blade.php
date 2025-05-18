@@ -536,6 +536,67 @@
                 }
             });
         });
+
+        // Handler untuk delete question
+        $(document).on('click', '.delete-question-btn', function() {
+            var id = $(this).data('id');
+            if (confirm('Delete this question?')) {
+                $.ajax({
+                    url: '/mysql/teacher/questions/' + id,
+                    method: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function() {
+                        $.get("{{ route('teacher.questions.table') }}", function(data) {
+                            $('#main-table-content').html(data);
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Failed to delete question.\n' + xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // Handler untuk add question
+        $(document).on('submit', '#add-question-form', function(e) {
+            e.preventDefault();
+            var form = $(this)[0];
+            var formData = new FormData(form);
+
+            $.ajax({
+                url: '/mysql/teacher/questions',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function() {
+                    $('#addQuestionModal').modal('hide');
+                    $.get("{{ route('teacher.questions.table') }}", function(data) {
+                        $('#main-table-content').html(data);
+                    });
+                    form.reset();
+                },
+                error: function(xhr) {
+                    alert('Failed to add question. Please check all fields.\n' + xhr.responseText);
+                }
+            });
+        });
+
+        // Handler untuk view details
+        window.viewQuestionDetails = function(id) {
+            $.get('/mysql/teacher/questions/' + id, function(data) {
+                $('#detail_subtopic').val(data.topic_detail?.title ?? '-');
+                $('#detail_question').val(data.question ?? '-');
+                $('#detail_answer_key').val(data.answer_key ?? '-');
+                $('#detail_modul').val(data.file_name ?? '-');
+                $('#detail_created_by').val(data.created_by_user?.name ?? '-');
+                $('#viewQuestionDetailsModal').modal('show');
+            }).fail(function(xhr) {
+                alert('Failed to fetch question details.');
+            });
+        };
     </script>
     {{----------------------------------------------------------------------------------------------}}
 
