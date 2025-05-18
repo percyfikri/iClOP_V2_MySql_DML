@@ -81,7 +81,13 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Modul (PDF, optional)</label>
-                        <input type="file" class="form-control" name="modul" accept=".pdf">
+                        <div class="custom-file-group">
+                            <input type="text" class="form-control custom-file-label" id="modul-filename" placeholder="No file chosen" readonly>
+                            <label class="custom-file-btn mb-0">
+                                Choose File
+                                <input type="file" class="custom-file-input" name="modul" id="modul-input" accept=".pdf">
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

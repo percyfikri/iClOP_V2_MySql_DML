@@ -286,6 +286,46 @@
             border-color: #258eff !important;
             transition: background 0.5s, color 0.5s;
         }
+
+        /* Custom style for file input button */
+        .custom-file-group {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .custom-file-label {
+            flex: 1;
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            margin-right: -1px; /* hilangkan double border */
+        }
+        .custom-file-btn {
+            background: #eaf4ff;
+            color: #258eff;
+            border: 1.5px solid #258eff;
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            border-top-right-radius: 0.5rem !important;
+            border-bottom-right-radius: 0.5rem !important;
+            padding: 6px 18px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            outline: none;
+            white-space: nowrap;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .custom-file-btn:hover {
+            background: #258eff;
+            color: #fff;
+            border-color: #258eff;
+        }
+        .custom-file-input {
+            display: none;
+        }
     </style>
 
     <title>Database Management System with MySQL</title>
@@ -375,6 +415,16 @@
             // Saat halaman pertama kali dibuka, langsung load tabel topics
             $.get("{{ route('teacher.topics.table') }}", function(data) {
                 $('#main-table-content').html(data);
+            });
+        });
+    </script>
+
+    {{-- menampilkan nama file modul yang dipilih (Questions Management)--}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agar tetap berfungsi setelah AJAX reload, gunakan event delegation
+            $(document).on('change', '#modul-input', function() {
+                $('#modul-filename').val(this.files.length ? this.files[0].name : '');
             });
         });
     </script>
