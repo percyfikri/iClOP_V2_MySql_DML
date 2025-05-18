@@ -27,24 +27,26 @@ class MysqlTeacherQuestionController extends Controller
         ]);
 
         $fileName = null;
-        $folderPath = null;
+        $filePath = null;
         if ($request->hasFile('modul')) {
             $file = $request->file('modul');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $folderPath = 'mysql/DML/';
-            $file->move(public_path($folderPath), $fileName);
+            $filePath = 'mysql/DML/';
+            $file->move(public_path($filePath), $fileName);
+
+            // Simpan ke mysql_topic_details
+            $topicDetail = MySqlTopicDetails::find($request->topic_detail_id);
+            $topicDetail->file_name = $fileName;
+            $topicDetail->file_path = $filePath;
+            $topicDetail->save();
         }
 
         $question = MySqlQuestions::create([
             'question' => $request->question,
             'answer_key' => $request->answer_key,
             'topic_detail_id' => $request->topic_detail_id,
-            'file_name' => $fileName,
-            'folder_path' => $folderPath,
             'created_by' => auth()->id(),
         ]);
-
-        // echo "<script>console.log(" . json_encode($question) . ");</script>"; // Debug jika perlu
 
         return response()->json(['success' => true, 'question' => $question]);
     }
@@ -62,20 +64,27 @@ class MysqlTeacherQuestionController extends Controller
 
         // Handle file upload
         if ($request->hasFile('modul')) {
+            $topicDetail = MySqlTopicDetails::find($request->topic_detail_id);
+
             // Hapus file lama jika ada
-            if ($question->file_name && $question->folder_path) {
-                $oldFile = public_path($question->folder_path . $question->file_name);
+            if ($topicDetail && $topicDetail->file_name && $topicDetail->file_path) {
+                $oldFile = public_path($topicDetail->file_path . $topicDetail->file_name);
                 if (file_exists($oldFile)) {
                     @unlink($oldFile);
                 }
             }
+
             $file = $request->file('modul');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $folderPath = 'mysql/DML/';
-            $file->move(public_path($folderPath), $fileName);
+            $filePath = 'mysql/DML/';
+            $file->move(public_path($filePath), $fileName);
 
-            $question->file_name = $fileName;
-            $question->folder_path = $folderPath;
+            // Simpan ke mysql_topic_details
+            if ($topicDetail) {
+                $topicDetail->file_name = $fileName;
+                $topicDetail->file_path = $filePath;
+                $topicDetail->save();
+            }
         }
 
         $question->question = $request->question;
@@ -97,7 +106,8 @@ class MysqlTeacherQuestionController extends Controller
             'topic_detail' => $question->topicDetail ? [
                 'title' => $question->topicDetail->title
             ] : null,
-            'file_name' => $question->file_name ?? '-',
+            // Ambil file_name dari topicDetail
+            'file_name' => $question->topicDetail->file_name ?? '-',
             'created_by_user' => $question->createdByUser ? [
                 'name' => $question->createdByUser->name
             ] : null,

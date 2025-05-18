@@ -19,8 +19,8 @@ class MysqlTeacherTopicsController extends Controller
             ->select(
                 't.title as topic_title',
                 'td.title as sub_topic_title',
-                'q.file_name as module', // file_name diambil dari mysql_questions
-                'q.folder_path',         // jika ingin menampilkan folder_path juga
+                'td.file_name as module',      // ambil dari topic_details
+                'td.file_path',                // ambil dari topic_details
                 'q.question',
                 'q.answer_key'
             )
@@ -28,8 +28,6 @@ class MysqlTeacherTopicsController extends Controller
             ->orderBy('td.id', 'asc')
             ->orderBy('q.id', 'asc')
             ->get();
-
-        // echo "<script>console.log(" . json_encode($data) . ");</script>"; // Debug jika perlu
 
         return view('mysql_dml.teacher.index', compact('data'));
     }
@@ -65,7 +63,7 @@ class MysqlTeacherTopicsController extends Controller
             ]);
         }
         // dd($request->all());
-       
+
         // Jika request AJAX, return JSON
         if ($request->ajax()) {
             return response()->json(['success' => true]);
