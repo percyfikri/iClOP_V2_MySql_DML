@@ -70,4 +70,21 @@ class MysqlTeacherQuestionController extends Controller
             ] : null,
         ]);
     }
+
+    public function destroy($id)
+    {
+        $question = MySqlQuestions::findOrFail($id);
+
+        // Hapus file jika ada
+        if ($question->file_name && $question->folder_path) {
+            $filePath = public_path($question->folder_path . $question->file_name);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
+
+        $question->delete();
+
+        return response()->json(['success' => true]);
+    }
 }

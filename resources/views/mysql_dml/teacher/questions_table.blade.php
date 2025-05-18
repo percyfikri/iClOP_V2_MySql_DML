@@ -174,19 +174,18 @@
         var id = $(this).data('id');
         if (confirm('Delete this question?')) {
             $.ajax({
-                url: '/mysql/teacher/questions/' + id + '/delete',
-                method: 'POST',
+                url: '/mysql/teacher/questions/' + id,
+                method: 'DELETE',
                 data: {
-                    _token: '{{ csrf_token() }}',
-                    _method: 'DELETE'
+                    _token: '{{ csrf_token() }}'
                 },
                 success: function() {
                     $.get("{{ route('teacher.questions.table') }}", function(data) {
                         $('#main-table-content').html(data);
                     });
                 },
-                error: function() {
-                    alert('Failed to delete question.');
+                error: function(xhr) {
+                    alert('Failed to delete question.\n' + xhr.responseText);
                 }
             });
         }

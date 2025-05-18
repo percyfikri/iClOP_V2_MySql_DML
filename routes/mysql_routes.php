@@ -60,6 +60,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
 
         Route::post('/teacher/questions', [MysqlTeacherQuestionController::class, 'storeQuestion']);
         Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
+        Route::delete('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'destroy'])->name('teacher.questions.destroy');
         //-----------------CHANGED-----------------
     });
 });
