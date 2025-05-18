@@ -88,11 +88,61 @@
                                 <input type="file" class="custom-file-input" name="modul" id="modul-input" accept=".pdf">
                             </label>
                         </div>
+                        <small class="text-danger">*Please upload a file with .pdf extension.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-info">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Question -->
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="edit-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" id="edit_question_id" name="question_id">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editQuestionModalLabel">Edit Question</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Question</label>
+                        <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Answer Key</label>
+                        <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Sub-Topic</label>
+                        <select class="form-control" id="edit_topic_detail_id" name="topic_detail_id" required>
+                            @foreach($subtopics as $sub)
+                                <option value="{{ $sub->id }}">{{ $sub->title }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Modul (PDF, optional)</label>
+                        <div class="custom-file-group">
+                            <input type="text" class="form-control custom-file-label" id="edit-modul-filename" placeholder="No file chosen" readonly>
+                            <label class="custom-file-btn mb-0">
+                                Choose File
+                                <input type="file" class="custom-file-input" name="modul" id="edit-modul-input" accept=".pdf">
+                            </label>
+                        </div>
+                        <small class="text-danger">*Please upload a file with .pdf extension.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Save Changes</button>
                 </div>
             </div>
         </form>
@@ -133,43 +183,5 @@
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Modal Edit Question -->
-<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="edit-question-form" class="needs-validation" novalidate>
-            @csrf
-            <input type="hidden" id="edit_question_id" name="question_id">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="editQuestionModalLabel">Edit Question</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Question</label>
-                        <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Answer Key</label>
-                        <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Sub-Topic</label>
-                        <select class="form-control" id="edit_topic_detail_id" name="topic_detail_id" required>
-                            @foreach($subtopics as $sub)
-                                <option value="{{ $sub->id }}">{{ $sub->title }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-info">Save Changes</button>
-                </div>
-            </div>
-        </form>
     </div>
 </div>

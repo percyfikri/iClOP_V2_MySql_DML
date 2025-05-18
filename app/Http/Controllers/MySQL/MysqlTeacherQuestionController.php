@@ -17,12 +17,6 @@ class MysqlTeacherQuestionController extends Controller
         return view('mysql_dml.teacher.questions_table', compact('questions', 'subtopics'));
     }
 
-    public function editQuestionAjax($id)
-    {
-        $question = MySqlQuestions::findOrFail($id);
-        return response()->json($question);
-    }
-
     public function storeQuestion(Request $request)
     {
         $request->validate([
@@ -55,6 +49,43 @@ class MysqlTeacherQuestionController extends Controller
         return response()->json(['success' => true, 'question' => $question]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'question' => 'required|string',
+            'answer_key' => 'required|string',
+            'topic_detail_id' => 'required|exists:mysql_topic_details,id',
+            'modul' => 'nullable|file|mimes:pdf|max:20480',
+        ]);
+
+        $question = MySqlQuestions::findOrFail($id);
+
+        // Handle file upload
+        if ($request->hasFile('modul')) {
+            // Hapus file lama jika ada
+            if ($question->file_name && $question->folder_path) {
+                $oldFile = public_path($question->folder_path . $question->file_name);
+                if (file_exists($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+            $file = $request->file('modul');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $folderPath = 'mysql/DML/';
+            $file->move(public_path($folderPath), $fileName);
+
+            $question->file_name = $fileName;
+            $question->folder_path = $folderPath;
+        }
+
+        $question->question = $request->question;
+        $question->answer_key = $request->answer_key;
+        $question->topic_detail_id = $request->topic_detail_id;
+        $question->save();
+
+        return response()->json(['success' => true, 'question' => $question]);
+    }
+
     public function show($id)
     {
         $question = MySqlQuestions::with(['topicDetail', 'createdByUser'])->findOrFail($id);
@@ -62,6 +93,7 @@ class MysqlTeacherQuestionController extends Controller
         return response()->json([
             'question' => $question->question,
             'answer_key' => $question->answer_key,
+            'topic_detail_id' => $question->topic_detail_id,
             'topic_detail' => $question->topicDetail ? [
                 'title' => $question->topicDetail->title
             ] : null,
@@ -80,7 +112,7 @@ class MysqlTeacherQuestionController extends Controller
         if ($question->file_name && $question->folder_path) {
             $filePath = public_path($question->folder_path . $question->file_name);
             // Debug: cek path dan file_exists
-            Log::info('Try delete file: ' . $filePath . ' exists: ' . (file_exists($filePath) ? 'yes' : 'no'));    
+            Log::info('Try delete file: ' . $filePath . ' exists: ' . (file_exists($filePath) ? 'yes' : 'no'));
             if (file_exists($filePath)) {
                 @unlink($filePath);
             }
