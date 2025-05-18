@@ -44,17 +44,15 @@ class MysqlController extends Controller
         // Ambil topic detail
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
 
-        // Ambil question terkait topic detail
-        $question = DB::table('mysql_questions')
-            ->where('topic_detail_id', $start)
-            ->first();
-
         $html_start = '';
         $pdf_reader = 0;
 
-        if ($question) {
-            $html_start = empty($question->file_name) ? $question->question : $question->file_name;
-            $pdf_reader = !empty($question->file_name) ? 1 : 0;
+        foreach ($results as $r) {
+            if ($mysqlid == $r->topic_id) {
+                $html_start = empty($r->file_name) ? $r->description : $r->file_name;
+                $pdf_reader = !empty($r->file_name) ? 1 : 0;
+                break;
+            }
         }
 
         $idUser = Auth::user()->id;
@@ -77,7 +75,6 @@ class MysqlController extends Controller
             'detailCount' => $detailCount,
             'output' => $output,
             'role' => isset($roleTeacher[0]) ? $roleTeacher[0]->role : '',
-            'question' => $question, // kirim question ke view jika perlu
         ]);
     }
 
