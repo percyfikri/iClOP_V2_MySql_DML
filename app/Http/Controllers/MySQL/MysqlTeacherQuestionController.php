@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MySQL\MySqlQuestions;
 use App\Models\MySQL\MySqlTopicDetails;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MysqlTeacherQuestionController extends Controller
 {
@@ -78,6 +79,8 @@ class MysqlTeacherQuestionController extends Controller
         // Hapus file jika ada
         if ($question->file_name && $question->folder_path) {
             $filePath = public_path($question->folder_path . $question->file_name);
+            // Debug: cek path dan file_exists
+            Log::info('Try delete file: ' . $filePath . ' exists: ' . (file_exists($filePath) ? 'yes' : 'no'));    
             if (file_exists($filePath)) {
                 @unlink($filePath);
             }
