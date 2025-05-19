@@ -53,7 +53,7 @@
 
 <!-- Modal Add Question -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <form id="add-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
             @csrf
             <div class="modal-content" style="border-radius: 1rem;">
@@ -62,22 +62,44 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Sub-Topic</label>
-                        <select class="form-control" name="topic_detail_id" required>
-                            <option value="">-- Select Sub-Topic --</option>
-                            @foreach($subtopics as $sub)
-                                <option value="{{ $sub->id }}">{{ $sub->title }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Question</label>
-                        <input type="text" class="form-control" name="question" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Answer Key</label>
-                        <input type="text" class="form-control" name="answer_key" required autocomplete="off">
+                    <div class="row">
+                        <!-- Kolom kiri: Preview Modul -->
+                        <div class="col-md-7 d-flex align-items-stretch" id="add-modul-preview-container">
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <label class="form-label fw-semibold">Preview Modul</label>
+                                    <a id="add-open-pdf-btn" href="#" class="btn btn-sm btn-add-subtopic-hover disabled"
+                                       tabindex="-1" aria-disabled="true"
+                                       style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem; pointer-events: none;">
+                                        <i class="fas fa-file-pdf"></i> Open PDF
+                                    </a>
+                                </div>
+                                <div id="add-modul-preview-message" class="text-muted text-center">Please select a sub-topic to preview module.</div>
+                                <div id="add-modul-preview-file"></div>
+                            </div>
+                        </div>
+                        <!-- Kolom kanan: Form (pakai card) -->
+                        <div class="col-md-5">
+                            <div class="card p-3 shadow-sm" style="border-radius: 1rem;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Sub-Topic</label>
+                                    <select class="form-control" id="add_topic_detail_id" name="topic_detail_id" required>
+                                        <option value="" disabled selected>-- Select a Sub-Topic --</option>
+                                        @foreach($subtopics as $sub)
+                                            <option value="{{ $sub->id }}">{{ $sub->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Question</label>
+                                    <input type="text" class="form-control" id="add_question" name="question" required autocomplete="off">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Answer Key</label>
+                                    <input type="text" class="form-control" id="add_answer_key" name="answer_key" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -104,9 +126,18 @@
                 <div class="modal-body">
                     <div class="row">
                         <!-- Kolom kiri: Preview Modul -->
-                        <div class="col-md-7 d-flex align-items-stretch" id="edit-modul-preview-container" style="display:none;">
+                        <div class="col-md-7 d-flex align-items-stretch" id="edit-modul-preview-container">
                             <div class="w-100">
-                                <div id="edit-modul-preview"></div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <label class="form-label fw-semibold">Preview Modul</label>
+                                    <a id="edit-open-pdf-btn" href="#" class="btn btn-sm btn-add-subtopic-hover disabled"
+                                       tabindex="-1" aria-disabled="true"
+                                       style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem; pointer-events: none;">
+                                        <i class="fas fa-file-pdf"></i> Open PDF
+                                    </a>
+                                </div>
+                                <div id="edit-modul-preview-message" class="text-muted text-center">No module uploaded.</div>
+                                <div id="edit-modul-preview-file"></div>
                             </div>
                         </div>
                         <!-- Kolom kanan: Form (pakai card) -->

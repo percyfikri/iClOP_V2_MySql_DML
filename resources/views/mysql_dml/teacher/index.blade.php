@@ -730,6 +730,42 @@
             }
         });
     </script>
+
+    {{--  Update Preview Saat Subtopic Diganti pada Modal Add --}}
+    <script>
+        $(document).on('change', '#add_topic_detail_id', function() {
+            var subtopicId = $(this).val();
+            var $btn = $('#add-open-pdf-btn');
+            var $msg = $('#add-modul-preview-message');
+            var $file = $('#add-modul-preview-file');
+
+            if (!subtopicId) {
+                $btn.addClass('disabled').attr('href', '#').attr('tabindex', '-1').attr('aria-disabled', 'true').css('pointer-events', 'none');
+                $msg.html('Pilih subtopik untuk melihat modul.');
+                $file.html('');
+                return;
+            }
+            $.get('/mysql/teacher/subtopics/' + subtopicId + '/modul', function(res) {
+                if (res.file_name && res.file_path) {
+                    var fileUrl = '{{ asset('') }}' + res.file_path + res.file_name;
+                    $btn.removeClass('disabled').attr('href', fileUrl).attr('tabindex', '0').attr('aria-disabled', 'false').css('pointer-events', 'auto');
+                    $msg.html('');
+                    $file.html(`<iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`);
+                } else {
+                    $btn.addClass('disabled').attr('href', '#').attr('tabindex', '-1').attr('aria-disabled', 'true').css('pointer-events', 'none');
+                    $msg.html('No module uploaded yet. Please upload a PDF module to preview.');
+                    $file.html('');
+                }
+            });
+        });
+
+        // Saat modal dibuka, reset preview
+        $('#addQuestionModal').on('shown.bs.modal', function () {
+            $('#add-open-pdf-btn').addClass('disabled').attr('href', '#').attr('tabindex', '-1').attr('aria-disabled', 'true').css('pointer-events', 'none');
+            $('#add-modul-preview-message').html('Pilih subtopik untuk melihat modul.');
+            $('#add-modul-preview-file').html('');
+        });
+    </script>
     {{----------------------------------------------------------------------------------------------}}
 
     {{-- QUESTIONS MANAGEMENT --}}
@@ -752,19 +788,17 @@
                 // Preview modul PDF jika ada
                 if (q.file_name && q.file_name !== '-') {
                     var fileUrl = '{{ asset('') }}' + q.file_path + q.file_name;
-                    $('#edit-modul-preview').html(
-                        `<div class="d-flex justify-content-between mb-2">
-                            <label class="form-label fw-semibold">Preview Modul</label>
-                            <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-add-subtopic-hover" style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;">
-                                <i class="fas fa-file-pdf"></i> Open PDF
-                            </a>
-                        </div>
-                        <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
+                    $('#edit-open-pdf-btn').removeClass('disabled').attr('href', fileUrl).attr('tabindex', '0')
+                        .attr('aria-disabled', 'false').css('pointer-events', 'auto');
+                    $('#edit-modul-preview-message').html('');
+                    $('#edit-modul-preview-file').html(
+                        `<iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
                     );
-                    $('#edit-modul-preview-container').show();
                 } else {
-                    $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
-                    $('#edit-modul-preview-container').hide();
+                    $('#edit-open-pdf-btn').addClass('disabled').attr('href', '#').attr('tabindex', '-1')
+                        .attr('aria-disabled', 'true').css('pointer-events', 'none');
+                    $('#edit-modul-preview-message').html('No module uploaded yet. Please upload a PDF module to preview.');
+                    $('#edit-modul-preview-file').html('');
                 }
 
                 var modal = new bootstrap.Modal(document.getElementById('editQuestionModal'));
@@ -862,29 +896,36 @@
         // Update Preview Saat Subtopic Diganti pada Modal Edit
         $(document).on('change', '#edit_topic_detail_id', function() {
             var subtopicId = $(this).val();
+            var $btn = $('#edit-open-pdf-btn');
+            var $msg = $('#edit-modul-preview-message');
+            var $file = $('#edit-modul-preview-file');
+
             if (!subtopicId) {
-                $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
-                $('#edit-modul-preview-container').hide();
+                $btn.addClass('disabled').attr('href', '#').attr('tabindex', '-1').attr('aria-disabled', 'true').css('pointer-events', 'none');
+                $msg.html('No module uploaded yet. Please upload a PDF module to preview.');
+                $file.html('');
                 return;
             }
             $.get('/mysql/teacher/subtopics/' + subtopicId + '/modul', function(res) {
                 if (res.file_name && res.file_path) {
                     var fileUrl = '{{ asset('') }}' + res.file_path + res.file_name;
-                    $('#edit-modul-preview').html(
-                        `<div class="d-flex justify-content-between mb-2">
-                            <label class="form-label fw-semibold">Preview Modul</label>
-                            <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-add-subtopic-hover" style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;">
-                                <i class="fas fa-file-pdf"></i> Open PDF
-                            </a>
-                        </div>
-                        <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
-                    );
-                    $('#edit-modul-preview-container').show();
+                    $btn.removeClass('disabled').attr('href', fileUrl).attr('tabindex', '0').attr('aria-disabled', 'false').css('pointer-events', 'auto');
+                    $msg.html('');
+                    $file.html(`<iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`);
                 } else {
-                    $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
-                    $('#edit-modul-preview-container').hide();
+                    $btn.addClass('disabled').attr('href', '#').attr('tabindex', '-1').attr('aria-disabled', 'true').css('pointer-events', 'none');
+                    $msg.html('No module uploaded yet. Please upload a PDF module to preview.');
+                    $file.html('');
                 }
             });
+        });
+
+        // Saat modal edit dibuka, reset preview (atau isi sesuai data awal)
+        $('#editQuestionModal').on('shown.bs.modal', function () {
+            $('#edit-open-pdf-btn').addClass('disabled').attr('href', '#').attr('tabindex', '-1')
+                .attr('aria-disabled', 'true').css('pointer-events', 'none');
+            $('#edit-modul-preview-message').html('No module uploaded yet. Please upload a PDF module to preview.');
+            $('#edit-modul-preview-file').html('');
         });
     </script>
     {{----------------------------------------------------------------------------------------------}}
