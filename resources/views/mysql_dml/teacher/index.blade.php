@@ -853,6 +853,29 @@
                 alert('Failed to fetch question details.');
             });
         };
+
+        // Update Preview Saat Subtopic Diganti pada Modal Edit
+        $(document).on('change', '#edit_topic_detail_id', function() {
+            var subtopicId = $(this).val();
+            if (!subtopicId) {
+                $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
+                $('#edit-modul-preview-container').hide();
+                return;
+            }
+            $.get('/mysql/teacher/subtopics/' + subtopicId + '/modul', function(res) {
+                if (res.file_name && res.file_path) {
+                    var fileUrl = '{{ asset('') }}' + res.file_path + res.file_name;
+                    $('#edit-modul-preview').html(
+                        `<a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary mb-2">Open PDF</a>
+                        <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
+                    );
+                    $('#edit-modul-preview-container').show();
+                } else {
+                    $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
+                    $('#edit-modul-preview-container').hide();
+                }
+            });
+        });
     </script>
     {{----------------------------------------------------------------------------------------------}}
 

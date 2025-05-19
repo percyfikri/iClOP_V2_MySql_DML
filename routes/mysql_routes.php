@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         // Route untuk ambil data topic & subtopic
         Route::get('/teacher/topics/{id}/edit', [MysqlTeacherTopicsController::class, 'editTopicAjax']);
         Route::put('/teacher/topics/{id}', [MysqlTeacherTopicsController::class, 'updateTopicAjax']);
+        Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
 
         Route::get('/mysql/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
         Route::post('/teacher/questions', [MysqlTeacherQuestionController::class, 'storeQuestion']);
@@ -61,7 +62,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::post('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']); // Untuk AJAX _method=PUT
         Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
         Route::delete('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'destroy'])->name('teacher.questions.destroy');
-        Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
+        Route::get('/teacher/subtopics/{id}/modul', [MysqlTeacherQuestionController::class, 'getSubtopicModul']);
         //-----------------CHANGED-----------------
     });
 });

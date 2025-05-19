@@ -52,6 +52,18 @@ class MysqlTeacherQuestionController extends Controller
         return response()->json(['success' => true, 'question' => $question]);
     }
 
+    public function getSubtopicModul($id)
+    {
+        $subtopic = \App\Models\MySQL\MySqlTopicDetails::find($id);
+        if (!$subtopic) {
+            return response()->json(['file_name' => null, 'file_path' => null]);
+        }
+        return response()->json([
+            'file_name' => $subtopic->file_name,
+            'file_path' => $subtopic->file_path,
+        ]);
+    }
+
     public function show($id)
     {
         $question = MySqlQuestions::with(['topicDetail', 'createdByUser'])->findOrFail($id);
