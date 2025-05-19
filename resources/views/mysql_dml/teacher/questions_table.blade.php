@@ -14,9 +14,9 @@
             <thead class="table-primary">
                 <tr class="text-center align-middle">
                     <th style="width: 45px;">No</th>
+                    <th>Sub-Topic</th>
                     <th>Question</th>
                     <th>Answer Key</th>
-                    <th>Sub-Topic</th>
                     <th style="width: 120px;">Actions</th>
                 </tr>
             </thead>
@@ -24,9 +24,9 @@
                 @forelse ($questions as $index => $q)
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ $q->topicDetail->title ?? '-' }}</td>
                         <td>{{ $q->question }}</td>
                         <td>{{ $q->answer_key }}</td>
-                        <td>{{ $q->topicDetail->title ?? '-' }}</td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-1">
                                 <button class="btn btn-sm btn-info" title="View Details" onclick="viewQuestionDetails({{ $q->id }})">
@@ -63,14 +63,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Question</label>
-                        <input type="text" class="form-control" name="question" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Answer Key</label>
-                        <input type="text" class="form-control" name="answer_key" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label fw-semibold">Sub-Topic</label>
                         <select class="form-control" name="topic_detail_id" required>
                             <option value="">-- Select Sub-Topic --</option>
@@ -78,6 +70,14 @@
                                 <option value="{{ $sub->id }}">{{ $sub->title }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Question</label>
+                        <input type="text" class="form-control" name="question" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Answer Key</label>
+                        <input type="text" class="form-control" name="answer_key" required autocomplete="off">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Modul (PDF, optional)</label>
@@ -113,20 +113,20 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Question</label>
-                        <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Answer Key</label>
-                        <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label fw-semibold">Sub-Topic</label>
                         <select class="form-control" id="edit_topic_detail_id" name="topic_detail_id" required>
                             @foreach($subtopics as $sub)
                                 <option value="{{ $sub->id }}">{{ $sub->title }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Question</label>
+                        <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Answer Key</label>
+                        <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Modul (PDF, optional)</label>
