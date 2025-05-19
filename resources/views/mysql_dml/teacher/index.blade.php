@@ -419,16 +419,6 @@
         });
     </script>
 
-    {{-- menampilkan nama file modul yang dipilih (add Questions Management)--}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Agar tetap berfungsi setelah AJAX reload, gunakan event delegation
-            $(document).on('change', '#modul-input', function() {
-                $('#modul-filename').val(this.files.length ? this.files[0].name : '');
-            });
-        });
-    </script>
-
     {{-- Tampilkan nama file baru saat dipilih di Modal Edit --}}
     <script>
         $(document).on('change', '#edit-modul-input', function() {
@@ -759,15 +749,6 @@
                 $('#edit_answer_key').val(q.answer_key);
                 $('#edit_topic_detail_id').val(q.topic_detail_id);
 
-                // Tampilkan nama file modul lama di kolom
-                if (q.file_name && q.file_name !== '-') {
-                    $('#edit-modul-filename').val(q.file_name);
-                    $('#edit-modul-filename').attr('placeholder', q.file_name);
-                } else {
-                    $('#edit-modul-filename').val('');
-                    $('#edit-modul-filename').attr('placeholder', 'No file chosen');
-                }
-                $('#edit-modul-input').val('');
                 $('#current-modul-info').text(q.file_name && q.file_name !== '-' ? 'Current file: ' + q.file_name : 'No file uploaded');
 
                 var modal = new bootstrap.Modal(document.getElementById('editQuestionModal'));

@@ -79,17 +79,7 @@
                         <label class="form-label fw-semibold">Answer Key</label>
                         <input type="text" class="form-control" name="answer_key" required autocomplete="off">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Modul (PDF, optional)</label>
-                        <div class="custom-file-group">
-                            <input type="text" class="form-control custom-file-label" id="modul-filename" placeholder="No file chosen" readonly>
-                            <label class="custom-file-btn mb-0">
-                                Choose File
-                                <input type="file" class="custom-file-input" name="modul" id="modul-input" accept=".pdf">
-                            </label>
-                        </div>
-                        <small class="text-danger">*Please upload a file with .pdf extension.</small>
-                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -128,17 +118,7 @@
                         <label class="form-label fw-semibold">Answer Key</label>
                         <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Modul (PDF, optional)</label>
-                        <div class="custom-file-group">
-                            <input type="text" class="form-control custom-file-label" id="edit-modul-filename" placeholder="No file chosen" readonly>
-                            <label class="custom-file-btn mb-0">
-                                Choose File
-                                <input type="file" class="custom-file-input" name="modul" id="edit-modul-input" accept=".pdf">
-                            </label>
-                        </div>
-                        <small class="text-danger">*Please upload a file with .pdf extension.</small>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
