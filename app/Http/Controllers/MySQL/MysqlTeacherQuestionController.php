@@ -23,23 +23,7 @@ class MysqlTeacherQuestionController extends Controller
             'question' => 'required|string',
             'answer_key' => 'required|string',
             'topic_detail_id' => 'required|exists:mysql_topic_details,id',
-            // 'modul' => 'nullable|file|mimes:pdf|max:20480',
         ]);
-
-        $fileName = null;
-        $filePath = null;
-        if ($request->hasFile('modul')) {
-            $file = $request->file('modul');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = 'mysql/DML/';
-            $file->move(public_path($filePath), $fileName);
-
-            // Simpan ke mysql_topic_details
-            $topicDetail = MySqlTopicDetails::find($request->topic_detail_id);
-            $topicDetail->file_name = $fileName;
-            $topicDetail->file_path = $filePath;
-            $topicDetail->save();
-        }
 
         $question = MySqlQuestions::create([
             'question' => $request->question,
@@ -57,36 +41,9 @@ class MysqlTeacherQuestionController extends Controller
             'question' => 'required|string',
             'answer_key' => 'required|string',
             'topic_detail_id' => 'required|exists:mysql_topic_details,id',
-            'modul' => 'nullable|file|mimes:pdf|max:20480',
         ]);
 
         $question = MySqlQuestions::findOrFail($id);
-
-        // Handle file upload
-        if ($request->hasFile('modul')) {
-            $topicDetail = MySqlTopicDetails::find($request->topic_detail_id);
-
-            // Hapus file lama jika ada
-            if ($topicDetail && $topicDetail->file_name && $topicDetail->file_path) {
-                $oldFile = public_path($topicDetail->file_path . $topicDetail->file_name);
-                if (file_exists($oldFile)) {
-                    @unlink($oldFile);
-                }
-            }
-
-            $file = $request->file('modul');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = 'mysql/DML/';
-            $file->move(public_path($filePath), $fileName);
-
-            // Simpan ke mysql_topic_details
-            if ($topicDetail) {
-                $topicDetail->file_name = $fileName;
-                $topicDetail->file_path = $filePath;
-                $topicDetail->save();
-            }
-        }
-
         $question->question = $request->question;
         $question->answer_key = $request->answer_key;
         $question->topic_detail_id = $request->topic_detail_id;
@@ -117,17 +74,6 @@ class MysqlTeacherQuestionController extends Controller
     public function destroy($id)
     {
         $question = MySqlQuestions::findOrFail($id);
-
-        // Hapus file jika ada
-        if ($question->file_name && $question->folder_path) {
-            $filePath = public_path($question->folder_path . $question->file_name);
-            // Debug: cek path dan file_exists
-            Log::info('Try delete file: ' . $filePath . ' exists: ' . (file_exists($filePath) ? 'yes' : 'no'));
-            if (file_exists($filePath)) {
-                @unlink($filePath);
-            }
-        }
-
         $question->delete();
 
         return response()->json(['success' => true]);
