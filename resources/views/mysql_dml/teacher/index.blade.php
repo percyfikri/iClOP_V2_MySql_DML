@@ -885,8 +885,25 @@
                 $('#detail_subtopic').val(data.topic_detail?.title ?? '-');
                 $('#detail_question').val(data.question ?? '-');
                 $('#detail_answer_key').val(data.answer_key ?? '-');
-                $('#detail_modul').val(data.file_name ?? '-');
                 $('#detail_created_by').val(data.created_by_user?.name ?? '-');
+
+                var $btn = $('#view-open-pdf-btn');
+                var $msg = $('#view-modul-preview-message');
+                var $file = $('#view-modul-preview-file');
+
+                if (data.file_name && data.file_path) {
+                    var fileUrl = '{{ asset('') }}' + data.file_path + data.file_name;
+                    $btn.removeClass('disabled').attr('href', fileUrl).attr('tabindex', '0')
+                        .attr('aria-disabled', 'false').css('pointer-events', 'auto');
+                    $msg.html('');
+                    $file.html(`<iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`);
+                } else {
+                    $btn.addClass('disabled').attr('href', '#').attr('tabindex', '-1')
+                        .attr('aria-disabled', 'true').css('pointer-events', 'none');
+                    $msg.html('No module uploaded yet. Please upload a PDF module to preview.');
+                    $file.html('');
+                }
+
                 $('#viewQuestionDetailsModal').modal('show');
             }).fail(function(xhr) {
                 alert('Failed to fetch question details.');

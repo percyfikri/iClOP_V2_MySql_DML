@@ -174,36 +174,51 @@
 
 <!-- Modal View Question Details -->
 <div class="modal fade" id="viewQuestionDetailsModal" tabindex="-1" aria-labelledby="viewQuestionDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content" style="border-radius: 1rem;">
             <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                 <h5 class="modal-title fw-bold" id="viewQuestionDetailsModalLabel">Question Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Sub-Topic</label>
-                    <input type="text" class="form-control" id="detail_subtopic" readonly>
+                <div class="row">
+                    <!-- Kolom kiri: Preview Modul -->
+                    <div class="col-md-7 d-flex align-items-stretch" id="view-modul-preview-container">
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between mb-2">
+                                <label class="form-label fw-semibold">Preview Modul</label>
+                                <a id="view-open-pdf-btn" href="#" class="btn btn-sm btn-add-subtopic-hover disabled"
+                                   tabindex="-1" aria-disabled="true"
+                                   style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem; pointer-events: none;">
+                                    <i class="fas fa-file-pdf"></i> Open PDF
+                                </a>
+                            </div>
+                            <div id="view-modul-preview-message" class="text-muted text-center">No module uploaded yet. Please upload a PDF module to preview.</div>
+                            <div id="view-modul-preview-file"></div>
+                        </div>
+                    </div>
+                    <!-- Kolom kanan: Detail (pakai card) -->
+                    <div class="col-md-5">
+                        <div class="card p-3 shadow-sm" style="border-radius: 1rem;">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Sub-Topic</label>
+                                <input type="text" class="form-control" id="detail_subtopic" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Question</label>
+                                <input type="text" class="form-control" id="detail_question" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Answer Key</label>
+                                <input type="text" class="form-control" id="detail_answer_key" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Created By</label>
+                                <input type="text" class="form-control" id="detail_created_by" readonly>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Question</label>
-                    <input type="text" class="form-control" id="detail_question" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Answer Key</label>
-                    <input type="text" class="form-control" id="detail_answer_key" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Modul</label>
-                    <input type="text" class="form-control" id="detail_modul" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Created By</label>
-                    <input type="text" class="form-control" id="detail_created_by" readonly>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
