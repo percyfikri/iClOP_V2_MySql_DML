@@ -63,8 +63,8 @@ class MysqlTeacherQuestionController extends Controller
             'topic_detail' => $question->topicDetail ? [
                 'title' => $question->topicDetail->title
             ] : null,
-            // Ambil file_name dari topicDetail
             'file_name' => $question->topicDetail->file_name ?? '-',
+            'file_path' => $question->topicDetail->file_path ?? '',
             'created_by_user' => $question->createdByUser ? [
                 'name' => $question->createdByUser->name
             ] : null,

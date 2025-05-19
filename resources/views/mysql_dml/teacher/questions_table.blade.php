@@ -92,7 +92,7 @@
 
 <!-- Modal Edit Question -->
 <div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl"> <!-- Ubah ke modal-xl agar lebih lebar -->
         <form id="edit-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="edit_question_id" name="question_id">
@@ -102,23 +102,36 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Sub-Topic</label>
-                        <select class="form-control" id="edit_topic_detail_id" name="topic_detail_id" required>
-                            @foreach($subtopics as $sub)
-                                <option value="{{ $sub->id }}">{{ $sub->title }}</option>
-                            @endforeach
-                        </select>
+                    <div class="row">
+                        <!-- Kolom kiri: Preview Modul -->
+                        <div class="col-md-7 d-flex align-items-stretch" id="edit-modul-preview-container" style="display:none;">
+                            <div class="w-100">
+                                <label class="form-label fw-semibold">Preview Modul</label>
+                                <div id="edit-modul-preview"></div>
+                            </div>
+                        </div>
+                        <!-- Kolom kanan: Form (pakai card) -->
+                        <div class="col-md-5">
+                            <div class="card p-3 shadow-sm" style="border-radius: 1rem;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Sub-Topic</label>
+                                    <select class="form-control" id="edit_topic_detail_id" name="topic_detail_id" required>
+                                        @foreach($subtopics as $sub)
+                                            <option value="{{ $sub->id }}">{{ $sub->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Question</label>
+                                    <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Answer Key</label>
+                                    <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Question</label>
-                        <input type="text" class="form-control" id="edit_question" name="question" required autocomplete="off">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Answer Key</label>
-                        <input type="text" class="form-control" id="edit_answer_key" name="answer_key" required autocomplete="off">
-                    </div>
-                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

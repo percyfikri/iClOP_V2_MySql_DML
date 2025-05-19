@@ -749,7 +749,18 @@
                 $('#edit_answer_key').val(q.answer_key);
                 $('#edit_topic_detail_id').val(q.topic_detail_id);
 
-                $('#current-modul-info').text(q.file_name && q.file_name !== '-' ? 'Current file: ' + q.file_name : 'No file uploaded');
+                // Preview modul PDF jika ada
+                if (q.file_name && q.file_name !== '-') {
+                    var fileUrl = '{{ asset('') }}' + q.file_path + q.file_name;
+                    $('#edit-modul-preview').html(
+                        `<a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary mb-2">Open PDF</a>
+                        <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
+                    );
+                    $('#edit-modul-preview-container').show();
+                } else {
+                    $('#edit-modul-preview').html('<span class="text-muted">No module uploaded.</span>');
+                    $('#edit-modul-preview-container').hide();
+                }
 
                 var modal = new bootstrap.Modal(document.getElementById('editQuestionModal'));
                 modal.show();
