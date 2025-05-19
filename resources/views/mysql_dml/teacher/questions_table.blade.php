@@ -96,8 +96,8 @@
         <form id="edit-question-form" class="needs-validation" novalidate enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="edit_question_id" name="question_id">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content" style="border-radius: 1rem;">
+                <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title fw-bold" id="editQuestionModalLabel">Edit Question</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -106,7 +106,6 @@
                         <!-- Kolom kiri: Preview Modul -->
                         <div class="col-md-7 d-flex align-items-stretch" id="edit-modul-preview-container" style="display:none;">
                             <div class="w-100">
-                                <label class="form-label fw-semibold">Preview Modul</label>
                                 <div id="edit-modul-preview"></div>
                             </div>
                         </div>

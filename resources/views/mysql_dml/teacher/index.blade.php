@@ -753,7 +753,12 @@
                 if (q.file_name && q.file_name !== '-') {
                     var fileUrl = '{{ asset('') }}' + q.file_path + q.file_name;
                     $('#edit-modul-preview').html(
-                        `<a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary mb-2">Open PDF</a>
+                        `<div class="d-flex justify-content-between mb-2">
+                            <label class="form-label fw-semibold">Preview Modul</label>
+                            <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-add-subtopic-hover" style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;">
+                                <i class="fas fa-file-pdf"></i> Open PDF
+                            </a>
+                        </div>
                         <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
                     );
                     $('#edit-modul-preview-container').show();
@@ -866,7 +871,12 @@
                 if (res.file_name && res.file_path) {
                     var fileUrl = '{{ asset('') }}' + res.file_path + res.file_name;
                     $('#edit-modul-preview').html(
-                        `<a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary mb-2">Open PDF</a>
+                        `<div class="d-flex justify-content-between mb-2">
+                            <label class="form-label fw-semibold">Preview Modul</label>
+                            <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-add-subtopic-hover" style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;">
+                                <i class="fas fa-file-pdf"></i> Open PDF
+                            </a>
+                        </div>
                         <iframe src="${fileUrl}" width="100%" height="400px" style="border:1px solid #ccc;"></iframe>`
                     );
                     $('#edit-modul-preview-container').show();
