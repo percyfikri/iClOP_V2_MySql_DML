@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::post('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']); // Untuk AJAX _method=PUT
         Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
         Route::delete('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'destroy'])->name('teacher.questions.destroy');
+        Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
         //-----------------CHANGED-----------------
     });
 });

@@ -47,10 +47,23 @@ class MysqlController extends Controller
         $html_start = '';
         $pdf_reader = 0;
 
+        // foreach ($results as $r) {
+        //     if ($mysqlid == $r->topic_id) {
+        //         $html_start = empty($r->file_name) ? $r->description : $r->file_name;
+        //         $pdf_reader = !empty($r->file_name) ? 1 : 0;
+        //         break;
+        //     }
+        // }
+
         foreach ($results as $r) {
             if ($mysqlid == $r->topic_id) {
-                $html_start = empty($r->file_name) ? $r->description : $r->file_name;
-                $pdf_reader = !empty($r->file_name) ? 1 : 0;
+                if (!empty($r->file_name)) {
+                    $html_start = $r->file_name;
+                    $pdf_reader = 1;
+                } else {
+                    $html_start = "No Modules";
+                    $pdf_reader = 0;
+                }
                 break;
             }
         }

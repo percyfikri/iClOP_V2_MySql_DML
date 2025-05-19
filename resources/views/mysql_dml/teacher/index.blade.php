@@ -438,7 +438,7 @@
 
     {{-- TOPICS MANAGEMENT --}}
     {{-- Script untuk menambahkan sub-topik pada modal --}}
-    <script>
+    {{-- <script>
         document.addEventListener('click', function(e) {
             if (e.target && e.target.id === 'add-subtopic-btn') {
                 const container = document.getElementById('subtopics-container');
@@ -463,6 +463,70 @@
                 btn.closest('.subtopic-group').remove();
             }
         });
+    </script> --}}
+
+    <script>
+        // Add Topics
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'add-subtopic-btn') {
+                const container = document.getElementById('subtopics-container');
+                if (container) {
+                    const newGroup = document.createElement('div');
+                    newGroup.className = 'row mb-3 subtopic-group align-items-center';
+                    newGroup.innerHTML = `
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Sub-Topic</label>
+                                <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                            </div>
+                            <div class="col-md-5 mt-3">
+                                <label class="form-label fw-semibold">Upload Module</label>
+                                <div class="custom-file-group">
+                                    <input type="text" class="form-control custom-file-label" id="modul-filename" placeholder="No file chosen" readonly>
+                                    <label class="custom-file-btn mb-0">
+                                        Choose File
+                                        <input type="file" class="custom-file-input" name="sub_topic_file[]" id="modul-input" accept=".pdf">
+                                    </label>
+                                </div>
+                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                            </div>
+                            <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
+                                <button type="button" class="btn btn-minus-red remove-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                    `;
+                    container.appendChild(newGroup);
+        
+                    // Event untuk menampilkan nama file yang dipilih pada placeholder kolom Upload Module
+                    const fileInput = newGroup.querySelector('.custom-file-input');
+                    const fileLabel = newGroup.querySelector('.custom-file-label');
+                    fileInput.addEventListener('change', function() {
+                        fileLabel.value = this.files.length ? this.files[0].name : '';
+                    });
+                }
+            }
+        });
+        
+        // Remove subtopic (add modal)
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.classList.contains('remove-subtopic-btn') || e.target.closest('.remove-subtopic-btn'))) {
+                const btn = e.target.closest('.remove-subtopic-btn');
+                btn.closest('.subtopic-group').remove();
+            }
+        });
+    </script>
+    {{-- Menampilkan nama file yang dipilih pada kolom Upload Module di Add Modal --}}
+    <script>
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('custom-file-input')) {
+                // Cari input text (label) di parent yang sama
+                const fileInput = e.target;
+                const fileLabel = fileInput.closest('.custom-file-group').querySelector('.custom-file-label');
+                if (fileLabel) {
+                    fileLabel.value = fileInput.files.length ? fileInput.files[0].name : '';
+                }
+            }
+        });
     </script>
 
     {{-- Script untuk edit topik dan sub-topik pada modal --}}
@@ -477,13 +541,27 @@
                 let subtopicsHtml = '';
                 data.subtopics.forEach(function(sub, idx) {
                     subtopicsHtml += `
-                        <div class="mb-3 edit-subtopic-group">
-                            ${idx === 0 ? '<label class="form-label fw-bold">Sub-Topic</label>' : ''}
-                            <div class="mb-3 edit-subtopic-group d-flex align-items-center">
+                        <div class="row mb-3 edit-subtopic-group align-items-center">
+                            <div class="col-md-6">
+                                ${idx === 0 ? '<label class="form-label fw-bold">Sub-Topic</label>' : ''}
+                                <label class="form-label fw-bold mb-4"></label>
                                 <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
-                                <input type="text" class="form-control me-2" name="sub_topic_titles[]" value="${sub.title}" required>
-                                <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn">
-                                    <span class="minus-sign">-</span>
+                                <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
+                            </div>
+                            <div class="col-md-5 mt-3">
+                                <label class="form-label fw-semibold">Upload Module</label>
+                                <div class="custom-file-group">
+                                    <input type="text" class="form-control custom-file-label" value="${sub.file_name ?? ''}" placeholder="No file chosen" readonly>
+                                    <label class="custom-file-btn mb-0">
+                                        Choose File
+                                        <input type="file" class="custom-file-input" name="edit_sub_topic_file[]" accept=".pdf">
+                                    </label>
+                                </div>
+                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                            </div>
+                            <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
+                                <button type="button" class="btn btn-minus-red remove-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
+                                    <i class="fas fa-minus"></i>
                                 </button>
                             </div>
                         </div>
@@ -500,18 +578,62 @@
         // Tambah subtopic baru di modal edit
         $(document).on('click', '#add-edit-subtopic-btn', function() {
             $('#edit-subtopics-container').append(`
-                <div class="mb-3 edit-subtopic-group d-flex align-items-center">
-                    <input type="hidden" name="sub_topic_ids[]" value="">
-                    <input type="text" class="form-control me-2" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
-                    <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn">
-                        <span class="minus-sign">-</span>
-                    </button>
+                <div class="row mb-3 edit-subtopic-group align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"></label>
+                        <input type="hidden" name="sub_topic_ids[]" value="">
+                        <input type="text" class="form-control" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
+                    </div>
+                    <div class="col-md-5 mt-3">
+                        <label class="form-label fw-semibold">Upload Module</label>
+                        <div class="custom-file-group">
+                            <input type="text" class="form-control custom-file-label" placeholder="No file chosen" readonly>
+                            <label class="custom-file-btn mb-0">
+                                Choose File
+                                <input type="file" class="custom-file-input" name="edit_sub_topic_file[]" accept=".pdf">
+                            </label>
+                        </div>
+                        <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                    </div>
+                    <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
+                        <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
                 </div>
             `);
         });
         
         // Hapus subtopic di modal edit
+        // $(document).on('click', '.remove-edit-subtopic-btn', function() {
+        //     $(this).closest('.edit-subtopic-group').remove();
+        // });
         $(document).on('click', '.remove-edit-subtopic-btn', function() {
+            var $row = $(this).closest('.edit-subtopic-group');
+            var subtopicId = $row.find('input[name="sub_topic_ids[]"]').val();
+
+            if (subtopicId) {
+                if (confirm('Hapus subtopik ini beserta file-nya?')) {
+                    $.ajax({
+                        url: '/mysql/teacher/subtopics/' + subtopicId + '/delete',
+                        method: 'DELETE',
+                        data: { _token: '{{ csrf_token() }}' },
+                        success: function(res) {
+                            $row.remove();
+                        },
+                        error: function() {
+                            alert('Gagal menghapus subtopik.');
+                        }
+                    });
+                }
+            } else {
+                // Jika subtopic baru (belum ada di DB), cukup hapus dari DOM
+                $row.remove();
+            }
+        });
+
+        // Jika ada kemungkinan class-nya .remove-subtopic-btn (untuk konsistensi)
+        $(document).on('click', '.remove-subtopic-btn', function() {
             $(this).closest('.edit-subtopic-group').remove();
         });
         
@@ -519,15 +641,16 @@
         $(document).on('submit', '#edit-topic-form', function(e) {
             e.preventDefault();
             var topicId = $('#edit_topic_id').val();
-            var formData = $(this).serialize();
-        
+            var formData = new FormData(this);
+            formData.append('_method', 'PUT');
             $.ajax({
                 url: '/mysql/teacher/topics/' + topicId,
                 method: 'POST',
-                data: formData + '&_method=PUT',
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(res) {
                     $('#editTopicModal').modal('hide');
-                    // Reload tabel topics
                     $.get("{{ route('teacher.topics.table') }}", function(data) {
                         $('#main-table-content').html(data);
                     });
@@ -543,11 +666,15 @@
     <script>
         $(document).on('submit', 'form[action="{{ route('teacher.topics.addTopicSubtopic') }}"]', function(e) {
             e.preventDefault();
-            var $form = $(this);
+            var $form = $(this)[0];
+            var formData = new FormData($form);
+
             $.ajax({
-                url: $form.attr('action'),
+                url: $form.action,
                 method: 'POST',
-                data: $form.serialize(),
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(res) {
                     $('#addTopicModal').modal('hide');
                     // Reload tabel topics
@@ -555,13 +682,29 @@
                         $('#main-table-content').html(data);
                     });
                     // Reset form dan subtopics
-                    $form[0].reset();
+                    $form.reset();
                     $('#subtopics-container').html(`
-                        <div class="mb-3 subtopic-group d-flex align-items-center">
-                            <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Sub-Topic">
-                            <button type="button" class="btn btn-minus-red remove-subtopic-btn">
-                                <span class="minus-sign">-</span>
-                            </button>
+                        <div class="row mb-3 subtopic-group align-items-center">
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold">Sub-Topic</label>
+                                <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold">Upload Module</label>
+                                <div class="custom-file-group">
+                                    <input type="text" class="form-control custom-file-label" placeholder="No file chosen" readonly>
+                                    <label class="custom-file-btn mb-0">
+                                        Choose File
+                                        <input type="file" class="custom-file-input" name="sub_topic_file[]" accept=".pdf">
+                                    </label>
+                                </div>
+                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end" style="margin-top: 30px;">
+                                <button type="button" class="btn btn-minus-red remove-subtopic-btn" style="height: 38px;">
+                                    <span class="minus-sign">-</span>
+                                </button>
+                            </div>
                         </div>
                     `);
                 },

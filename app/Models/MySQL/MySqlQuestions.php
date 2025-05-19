@@ -16,8 +16,6 @@ class MySqlQuestions extends Model
         'topic_detail_id',
         'question',
         'answer_key',
-        'folder_path',
-        'file_name',
         'created_by',
     ];
 

@@ -54,23 +54,38 @@
 
 <!-- Modal Add Topic & Sub-Topic -->
 <div class="modal fade" id="addTopicModal" tabindex="-1" aria-labelledby="addTopicModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" action="{{ route('teacher.topics.addTopicSubtopic') }}">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="{{ route('teacher.topics.addTopicSubtopic') }}" enctype="multipart/form-data">
             @csrf
-            <div class="modal-content"style="border-radius: 1rem;">
+            <div class="modal-content" style="border-radius: 1rem;">
                 <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title" id="addTopicModalLabel">Add Topic & Sub-Topic</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="topicTitle" class="form-label fw-bold">Topic</label>
-                        <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="topicTitle" class="form-label fw-bold">Topic</label>
+                            <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
+                        </div>
                     </div>
                     <div id="subtopics-container">
-                        <div class="mb-3 subtopic-group">
-                            <label class="form-label fw-bold">Sub-Topic</label>
-                            <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                        <div class="row mb-3 subtopic-group align-items-center">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Sub-Topic</label>
+                                <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
+                            </div>
+                            <div class="col-md-5 mt-3">
+                                <label class="form-label fw-semibold">Upload Module</label>
+                                <div class="custom-file-group">
+                                    <input type="text" class="form-control custom-file-label" placeholder="No file chosen" readonly>
+                                    <label class="custom-file-btn mb-0">
+                                        Choose File
+                                        <input type="file" class="custom-file-input" name="sub_topic_file[]" accept=".pdf">
+                                    </label>
+                                </div>
+                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end">
@@ -92,21 +107,24 @@
 
 <!-- Modal Edit Topic & Sub-Topic -->
 <div class="modal fade" id="editTopicModal" tabindex="-1" aria-labelledby="editTopicModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="edit-topic-form">
+    <div class="modal-dialog modal-lg">
+        <form id="edit-topic-form" enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="edit_topic_id" name="topic_id">
-            <div class="modal-content"style="border-radius: 1rem;">
+            <div class="modal-content" style="border-radius: 1rem;">
                 <div class="modal-header text-white" style="background-color: #258eff; border-radius: 0.9rem 0.9rem 0 0;">
                     <h5 class="modal-title" id="editTopicModalLabel">Edit Topic & Sub-Topic</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
-                        <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
+                    <div class="mb-3 row">
+                        <div class="col-md-5">
+                            <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
+                            <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
+                        </div>
                     </div>
-                    <div id="edit-subtopics-container"></div>
+                    <div id="edit-subtopics-container">
+                    </div>
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-sm fw-bold btn-add-subtopic-hover"
                             style="border: 1px solid #258eff; color: #258eff; background-color: white; border-radius: 0.5rem;"

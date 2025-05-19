@@ -8,6 +8,7 @@ use App\Models\MySQL\MySqlTopicDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MysqlTeacherTopicsController extends Controller
 {
@@ -48,6 +49,7 @@ class MysqlTeacherTopicsController extends Controller
             'topic_title' => 'required|string|max:255',
             'sub_topic_title' => 'required|array|min:1',
             'sub_topic_title.*' => 'required|string|max:255',
+            'sub_topic_file.*' => 'nullable|file|mimes:pdf|max:20480',
         ]);
 
         $topic = MySqlTopics::create([
@@ -55,10 +57,24 @@ class MysqlTeacherTopicsController extends Controller
             'created_by' => $userId,
         ]);
 
-        foreach ($request->sub_topic_title as $subtopicTitle) {
+        if ($request->hasFile('sub_topic_file')) {
+            $files = $request->file('sub_topic_file');
+        }
+
+        foreach ($request->sub_topic_title as $i => $subtopicTitle) {
+            $fileName = null;
+            $filePath = null;
+            if (isset($files[$i]) && $files[$i]) {
+                $file = $files[$i];
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = 'mysql/DML/';
+                $file->move(public_path($filePath), $fileName);
+            }
             MySqlTopicDetails::create([
                 'topic_id' => $topic->id,
                 'title' => $subtopicTitle,
+                'file_name' => $fileName,
+                'file_path' => $filePath,
                 'created_by' => $userId,
             ]);
         }
@@ -90,26 +106,62 @@ class MysqlTeacherTopicsController extends Controller
         // Update subtopics
         $ids = $request->sub_topic_ids ?? [];
         $titles = $request->sub_topic_titles ?? [];
+        $files = $request->file('edit_sub_topic_file', []);
 
         // Hapus subtopic yang dihapus user
         MySqlTopicDetails::where('topic_id', $id)
             ->whereNotIn('id', array_filter($ids))
-            ->delete();
+            ->each(function ($subtopic) {
+                // Hapus file lama jika ada
+                if ($subtopic->file_name && $subtopic->file_path) {
+                    $oldFile = public_path(rtrim($subtopic->file_path, '/\\') . DIRECTORY_SEPARATOR . $subtopic->file_name);
+                    if (file_exists($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+                $subtopic->delete();
+            });
 
         // Update atau tambah subtopic
         foreach ($titles as $i => $title) {
+            $fileName = null;
+            $filePath = null;
             if (!empty($ids[$i])) {
                 // Update existing
                 $sub = MySqlTopicDetails::find($ids[$i]);
                 if ($sub) {
                     $sub->title = $title;
+                    // Jika ada file baru diupload
+                    if (isset($files[$i]) && $files[$i]) {
+                        // Hapus file lama jika ada
+                        if ($sub->file_name && $sub->file_path) {
+                            $oldFile = public_path(rtrim($sub->file_path, '/\\') . DIRECTORY_SEPARATOR . $sub->file_name);
+                            if (file_exists($oldFile)) {
+                                @unlink($oldFile);
+                            }
+                        }
+                        $file = $files[$i];
+                        $fileName = time() . '_' . $file->getClientOriginalName();
+                        $filePath = 'mysql/DML/';
+                        $file->move(public_path($filePath), $fileName);
+                        $sub->file_name = $fileName;
+                        $sub->file_path = $filePath;
+                    }
                     $sub->save();
                 }
             } else {
                 // Tambah baru
+                if (isset($files[$i]) && $files[$i]) {
+                    $file = $files[$i];
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = 'mysql/DML/';
+                    $file->move(public_path($filePath), $fileName);
+                }
                 MySqlTopicDetails::create([
                     'topic_id' => $id,
                     'title' => $title,
+                    'file_name' => $fileName,
+                    'file_path' => $filePath,
                     'created_by' => auth()->id(),
                 ]);
             }
@@ -122,6 +174,16 @@ class MysqlTeacherTopicsController extends Controller
     {
         $topic = MySqlTopics::findOrFail($id);
 
+        // Hapus file PDF pada setiap subtopic
+        foreach ($topic->topicDetails as $subtopic) {
+            if ($subtopic->file_name && $subtopic->file_path) {
+                $filePath = public_path(rtrim($subtopic->file_path, '/\\') . DIRECTORY_SEPARATOR . $subtopic->file_name);
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+        }
+
         // Hapus semua subtopic terkait
         $topic->topicDetails()->delete();
 
@@ -133,5 +195,27 @@ class MysqlTeacherTopicsController extends Controller
             return response()->json(['success' => true]);
         }
         return redirect()->route('mysql_teacher')->with('success', 'Topic dan seluruh sub-topic berhasil dihapus.');
+    }
+
+    // Delete Topic, SubTopik dan juga file uploadnya
+    public function deleteSubtopic($id)
+    {
+        $subtopic = MySqlTopicDetails::findOrFail($id);
+
+        // Hapus file jika ada
+        if ($subtopic->file_name && $subtopic->file_path) {
+            $filePath = public_path(rtrim($subtopic->file_path, '/\\') . DIRECTORY_SEPARATOR . $subtopic->file_name);
+            Log::info('Try delete file: ' . $filePath . ' exists: ' . (file_exists($filePath) ? 'yes' : 'no'));
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+                Log::info('File deleted: ' . $filePath);
+            } else {
+                Log::warning('File not found: ' . $filePath);
+            }
+        }
+
+        $subtopic->delete();
+
+        return response()->json(['success' => true]);
     }
 }

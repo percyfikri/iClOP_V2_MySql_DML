@@ -14,6 +14,8 @@ class MySqlTopicDetails extends Model
     protected $fillable = [
         'topic_id',
         'title',
+        'file_path',
+        'file_name',
         'created_by',
     ];
 
