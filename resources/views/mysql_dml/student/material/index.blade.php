@@ -604,7 +604,7 @@
         let id = $("#id").val();
         let title = $("#title").val();
         let controller = $("#controller").val();
-        window.location.href = "{{ route('mysql_material_detail') }}?mysqlid=" + id + "&start=" + controller;
+        window.location.href = "{{ route('showTopicDetail') }}?mysqlid=" + id + "&start=" + controller;
 
         /*$.ajax({
             type: "POST",

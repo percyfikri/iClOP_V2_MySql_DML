@@ -212,7 +212,7 @@
                         <div class="row px-4 py-2">
                             <div class="col" style="padding-bottom: 1rem;">
                                 <img src="{{ asset('images/book.png') }}" style="height: 24px; margin-right: 10px;">
-                                <a class="text" style="{{ $active }};" href="{{ route('mysql_material_detail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">
+                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">
                                     {{ $row->title }}
                                 </a>
                             </div>
@@ -242,27 +242,122 @@
         </div>
     </div>
     
+    {{-- Tampilkan Soal --}}
+    @if(isset($currentQuestion))
+        <div style="padding-top: 20px; max-width: 65%; margin-left:25px;">
+            <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
+                <p class="text-list" style="font-size: 22px; font-weight: 600;">
+                    Soal {{ $questionIndex + 1 }} dari {{ count($questions) }}
+                </p>
+                <ol>
+                    <li style="margin-bottom: 10px;">
+                        {{ $currentQuestion->question }}
+                    </li>
+                </ol>
+            </div>
+        </div>
+    @endif
+
     {{-- Submit Query from user input --}}
+    @if(isset($currentQuestion))
     <div style="padding-top: 20px; padding-bottom: 2rem; max-width: 65%; margin-left:25px; margin-bottom: 5rem;">
         <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
             <div style="padding-top: 15px; padding-bottom: 15px;">
-                <p class="text-list" style="font-size: 24px; font-weight: 600; width: 400px !important;">Submit Your Query</p>
-                <form action="{{ route('mysql_submit_user_input') }}" method="POST">
+                <form action="{{ route('submitUserInput') }}" method="POST" style="display: flex; align-items: center; margin-bottom: 1rem;">
                     @csrf
-                    <input type="hidden" name="topic_detail_id" value="{{ $row->id }}"> <!-- Tambahkan ini -->
-                    <div class="form-group">
-                        <label class="mb-2" for="userInput">Your Answer</label>
-                        <input type="text" name="userInput" id="userInput" class="form-control" placeholder="Enter your input here" required>
+                    <input type="hidden" name="mysqlid" value="{{ $mysqlid }}">
+                    <input type="hidden" name="start" value="{{ $currentQuestion->topic_detail_id }}">
+                    <input type="hidden" name="topic_detail_id" value="{{ $currentQuestion->topic_detail_id }}">
+                    <input type="hidden" name="question_id" value="{{ $currentQuestion->id }}">
+                    <input type="hidden" name="question_index" value="{{ $questionIndex }}">
+                    <div class="form-group" style="flex: 1; margin-right: 10px;">
+                        <label class="mb-2" for="userInput">Jawaban Anda</label>
+                        @if($lastAnswer)
+                            @if($lastStatus == 'benar')
+                                <input type="text" name="userInput" id="userInput" class="form-control" value="{{ $lastAnswer }}" disabled>
+                            @else
+                                <input type="text" name="userInput" id="userInput" class="form-control" value="{{ $lastAnswer }}" required>
+                            @endif
+                        @else
+                            <input type="text" name="userInput" id="userInput" class="form-control" placeholder="Masukkan jawaban Anda di sini" required>
+                        @endif
                     </div>
-                    <br />
-                    <div class="form-group">
-                        <input type="submit" value="Submit" class="btn btn-primary">
-                    </div>
+                    @if($lastAnswer)
+                        @if($lastStatus == 'benar')
+                            {{-- Tidak tampilkan tombol submit --}}
+                        @else
+                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 30px;">
+                        @endif
+                    @else
+                        <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 30px;">
+                    @endif
                 </form>
+
+                {{-- Pesan Benar/Salah --}}
+                @if($lastStatus == 'true')
+                    <div class="alert alert-success">
+                        Jawaban Anda BENAR!
+                    </div>
+                @elseif($lastStatus == 'false')
+                    <div class="alert alert-danger">
+                        Jawaban Anda SALAH!
+                    </div>
+                @endif
+
+                {{-- Kolom 2: Run Query --}}
+                {{-- <form action="{{ route('mysql_run_user_query') }}" method="POST" style="display: flex; align-items: center;">
+                    @csrf
+                    <input type="hidden" name="topic_detail_id" value="{{ $row->id }}">
+                    <div class="form-group" style="flex: 1; margin-right: 10px;">
+                        <label class="mb-2" for="runInput">Run Query</label>
+                        <input type="text" name="runInput" id="runInput" class="form-control" placeholder="Enter query to run" required>
+                    </div>
+                    <input type="submit" value="Run" class="btn btn-success" style="height: 38px; margin-top: 24px;">
+                </form> --}}
+
+                {{-- Tampilan sementar tanpa fungsi --}}
+                <form style="display: flex; align-items: center;">
+                    <input type="hidden" name="topic_detail_id" value="{{ $row->id }}">
+                    <div class="form-group" style="flex: 1; margin-right: 10px;">
+                        <label class="mb-2" for="runInput">Check Result Query</label>
+                        <input type="text" name="runInput" id="runInput" class="form-control" placeholder="Enter query to run" disabled>
+                    </div>
+                    <button type="button" class="btn btn-success" style="height: 38px; margin-top: 30px;" disabled>Run</button>
+                </form>
+
+                {{-- Tombol Previous & Next dengan Bootstrap Pagination --}}
+                <nav aria-label="Soal navigation" style="margin-top: 2rem;">
+                    <ul class="pagination justify-content-end">
+                        {{-- Previous --}}
+                        <li class="page-item {{ $questionIndex == 0 ? 'disabled' : '' }}">
+                            <a class="page-link" 
+                                href="{{ $questionIndex == 0 ? '#' : route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'q' => max(0, $questionIndex - 1)]) }}"
+                                tabindex="-1"
+                                @if($questionIndex == 0) aria-disabled="true" @endif
+                            >Previous</a>
+                        </li>
+                        {{-- Nomor Soal --}}
+                        @for($i = 0; $i < count($questions); $i++)
+                            <li class="page-item {{ $i == $questionIndex ? 'active' : '' }}">
+                                <a class="page-link" 
+                                    href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'q' => $i]) }}"
+                                    @if($i == $questionIndex) aria-current="page" @endif
+                                >{{ $i + 1 }}</a>
+                            </li>
+                        @endfor
+                        {{-- Next --}}
+                        <li class="page-item {{ $questionIndex >= count($questions) - 1 ? 'disabled' : '' }}">
+                            <a class="page-link" 
+                                href="{{ $questionIndex >= count($questions) - 1 ? '#' : route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'q' => min(count($questions) - 1, $questionIndex + 1)]) }}"
+                                @if($questionIndex >= count($questions) - 1) aria-disabled="true" @endif
+                            >Next</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
-
+    @endif
 
     <!-- Footer -->
     <footer class="footer">

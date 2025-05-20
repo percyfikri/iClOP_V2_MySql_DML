@@ -26,8 +26,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('mysql')->group(function () {
         //-----------------CHANGED-----------------
         Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
-        Route::get('/detail-topics', [MysqlStudentController::class, 'mysql_material_detail'])->name('mysql_material_detail');
-        Route::post('/submit_user_input', [MysqlStudentController::class, 'submit_user_input'])->name('mysql_submit_user_input');
+        Route::get('/detail-topics', [MysqlStudentController::class, 'showTopicDetail'])->name('showTopicDetail');
+        Route::post('/submit', [MysqlStudentController::class, 'submitUserInput'])->name('submitUserInput');
         //-----------------CHANGED-----------------
     });
 });

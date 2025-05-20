@@ -11,26 +11,44 @@ use Illuminate\Support\Facades\DB;
 
 class MysqlStudentController extends Controller
 {
-    function mysql_material_detail()
+    public function showTopicDetail(Request $request)
     {
-        $mysqlid = (int)$_GET['mysqlid'] ?? '';
-        $start = (int)$_GET['start'] ?? '';
-        $output = $_GET['output'] ?? '';
+        $mysqlid = (int) $request->get('mysqlid');
+        $start = (int) $request->get('start');
+        $output = $request->get('output', '');
+        $questionIndex = (int) $request->get('q', 0); // index soal, default 0 (soal pertama)
+        $answerStatus = session('answer_status'); // pesan benar/salah
 
-        // Ambil topic detail
+        // Ambil semua soal terkait subtopik
+        $questions = DB::table('mysql_questions')
+            ->where('topic_detail_id', $start)
+            ->orderBy('id')
+            ->get();
+
+        $userId = Auth::user()->id;
+
+        // Ambil soal yang sedang aktif
+        $currentQuestion = $questions->get($questionIndex);
+
+        // Ambil jawaban terakhir user untuk soal ini
+        $lastSubmission = DB::table('mysql_student_submissions')
+            ->where('user_id', $userId)
+            ->where('question_id', $currentQuestion->id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $lastAnswer = '';
+        $lastStatus = null;
+        if ($lastSubmission) {
+            $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
+            $lastAnswer = $lastQuery ? $lastQuery->query : '';
+            $lastStatus = $lastSubmission->status ?? null;
+        }
+
+        // Data lain (tidak berubah)
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
-
         $html_start = '';
         $pdf_reader = 0;
-
-        // foreach ($results as $r) {
-        //     if ($mysqlid == $r->topic_id) {
-        //         $html_start = empty($r->file_name) ? $r->description : $r->file_name;
-        //         $pdf_reader = !empty($r->file_name) ? 1 : 0;
-        //         break;
-        //     }
-        // }
-
         foreach ($results as $r) {
             if ($mysqlid == $r->topic_id) {
                 if (!empty($r->file_name)) {
@@ -43,10 +61,8 @@ class MysqlStudentController extends Controller
                 break;
             }
         }
-
         $idUser = Auth::user()->id;
         $roleTeacher = DB::select("select role from users where id = $idUser");
-
         $topics = MySqlTopics::all();
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
         $detail = MySqlTopicDetails::findOrFail($start);
@@ -64,39 +80,65 @@ class MysqlStudentController extends Controller
             'detailCount' => $detailCount,
             'output' => $output,
             'role' => isset($roleTeacher[0]) ? $roleTeacher[0]->role : '',
+            'questions' => $questions,
+            'currentQuestion' => $currentQuestion,
+            'questionIndex' => $questionIndex,
+            'answerStatus' => $answerStatus,
+            'lastAnswer' => $lastAnswer,
+            'lastStatus' => $lastStatus,
+            'detail' => $detail,
         ]);
     }
 
-    function submit_user_input(Request $request)
+    public function submitUserInput(Request $request)
     {
-        // Validasi input
         $request->validate([
             'userInput' => 'required|string|max:255',
+            'topic_detail_id' => 'required|integer',
+            'question_id' => 'required|integer',
+            'question_index' => 'required|integer',
+            'mysqlid' => 'required|integer',
+            'start' => 'required|integer',
         ]);
 
-        // Ambil data dari request
-        $userInput = $request->input('userInput');
-        $userId = Auth::user()->id; // Ambil ID pengguna yang sedang login
-        $topicDetailId = $request->input('topic_detail_id'); // Pastikan Anda mengirimkan topic_detail_id dari form
+        $userInput = trim($request->input('userInput'));
+        $questionId = $request->input('question_id');
+        $questionIndex = $request->input('question_index');
+        $mysqlid = $request->input('mysqlid');
+        $start = $request->input('start');
 
-        // Simpan ke tabel mysql_student_submissions terlebih dahulu
-        $submissionId = DB::table('mysql_student_submissions')->insertGetId([
-            'user_id' => $userId,
-            'topic_detail_id' => $topicDetailId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Ambil kunci jawaban dari DB
+        $question = DB::table('mysql_questions')->where('id', $questionId)->first();
+        $isCorrect = false;
+        if ($question) {
+            $isCorrect = trim(strtolower($userInput)) === trim(strtolower($question->answer_key));
+        }
 
-        // Simpan query ke tabel mysql_queries
-        DB::table('mysql_queries')->insert([
-            'submission_id' => $submissionId,
-            'question_number' => 1, // Anda bisa mengganti ini sesuai kebutuhan
+        $userId = Auth::user()->id;
+
+        // 1. Simpan ke tabel queries dan ambil ID-nya
+        $queryId = DB::table('mysql_queries')->insertGetId([
             'query' => $userInput,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // Redirect dengan pesan sukses
-        return redirect()->back()->with('success', 'Your query has been submitted successfully.');
+        // 2. Simpan ke tabel submission, isi kolom query_id dan status
+        DB::table('mysql_student_submissions')->insertGetId([
+            'user_id' => $userId,
+            'question_id' => $questionId,
+            'query_id' => $queryId,
+            'status' => $isCorrect ? 'true' : 'false', // <-- tambahkan ini
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Redirect ke soal yang sama dengan pesan benar/salah
+        $status = $isCorrect ? 'Jawaban Anda BENAR!' : 'Jawaban Anda SALAH!';
+        return redirect()->route('showTopicDetail', [
+            'mysqlid' => $mysqlid,
+            'start' => $start,
+            'q' => $questionIndex,
+        ])->with('answer_status', $status);
     }
 }
