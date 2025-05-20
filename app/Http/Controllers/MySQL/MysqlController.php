@@ -73,7 +73,7 @@ class MysqlController extends Controller
 
         $topics = MySqlTopics::all();
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
-        $detail = MySqlTopicDetails::findOrFail($mysqlid);
+        $detail = MySqlTopicDetails::findOrFail($start);
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
 
