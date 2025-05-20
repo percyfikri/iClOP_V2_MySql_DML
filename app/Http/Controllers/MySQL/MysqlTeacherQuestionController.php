@@ -7,6 +7,7 @@ use App\Models\MySQL\MySqlQuestions;
 use App\Models\MySQL\MySqlTopicDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class MysqlTeacherQuestionController extends Controller
 {
@@ -20,9 +21,18 @@ class MysqlTeacherQuestionController extends Controller
     public function storeQuestion(Request $request)
     {
         $request->validate([
-            'question' => 'required|string',
+            'question' => [
+                'required',
+                'string',
+                // Unik per subtopic
+                Rule::unique('mysql_questions')->where(function ($query) use ($request) {
+                    return $query->where('topic_detail_id', $request->topic_detail_id);
+                }),
+            ],
             'answer_key' => 'required|string',
             'topic_detail_id' => 'required|exists:mysql_topic_details,id',
+        ], [
+            'question.unique' => 'Pertanyaan sudah ada pada subtopik ini.'
         ]);
 
         $question = MySqlQuestions::create([
@@ -38,16 +48,25 @@ class MysqlTeacherQuestionController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'question' => 'required|string',
+            'question' => [
+                'required',
+                'string',
+                Rule::unique('mysql_questions')->where(function ($query) use ($request) {
+                    return $query->where('topic_detail_id', $request->topic_detail_id);
+                })->ignore($id),
+            ],
             'answer_key' => 'required|string',
             'topic_detail_id' => 'required|exists:mysql_topic_details,id',
+        ], [
+            'question.unique' => 'Pertanyaan sudah ada pada subtopik ini.'
         ]);
 
         $question = MySqlQuestions::findOrFail($id);
-        $question->question = $request->question;
-        $question->answer_key = $request->answer_key;
-        $question->topic_detail_id = $request->topic_detail_id;
-        $question->save();
+        $question->update([
+            'question' => $request->question,
+            'answer_key' => $request->answer_key,
+            'topic_detail_id' => $request->topic_detail_id,
+        ]);
 
         return response()->json(['success' => true, 'question' => $question]);
     }
@@ -62,6 +81,24 @@ class MysqlTeacherQuestionController extends Controller
             'file_name' => $subtopic->file_name,
             'file_path' => $subtopic->file_path,
         ]);
+    }
+
+    public function checkDuplicate(Request $request)
+    {
+        $question = $request->question;
+        $topic_detail_id = $request->topic_detail_id;
+        $exclude_id = $request->exclude_id; // Untuk edit
+
+        $query = MySqlQuestions::where('question', $question)
+            ->where('topic_detail_id', $topic_detail_id);
+
+        if ($exclude_id) {
+            $query->where('id', '!=', $exclude_id);
+        }
+
+        $exists = $query->exists();
+
+        return response()->json(['exists' => $exists]);
     }
 
     public function show($id)

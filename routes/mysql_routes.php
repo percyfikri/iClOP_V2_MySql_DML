@@ -57,6 +57,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
 
         Route::get('/mysql/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
+        Route::get('/teacher/questions/check-duplicate', [MysqlTeacherQuestionController::class, 'checkDuplicate']);
         Route::post('/teacher/questions', [MysqlTeacherQuestionController::class, 'storeQuestion']);
         Route::put('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']);
         Route::post('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']); // Untuk AJAX _method=PUT

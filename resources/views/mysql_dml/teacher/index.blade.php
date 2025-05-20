@@ -646,7 +646,15 @@
                     });
                 },
                 error: function(xhr) {
-                    alert('Update failed!');
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        let errors = xhr.responseJSON.errors;
+                        let msg = '';
+                        if (errors.question) msg += errors.question.join('<br>');
+                        // Tambahkan error lain jika perlu
+                        alert(msg || 'Gagal menyimpan data. Pastikan semua field terisi dengan benar.');
+                    } else {
+                        alert('Gagal menyimpan data. Pastikan semua field terisi dengan benar.');
+                    }
                 }
             });
         });
@@ -809,26 +817,40 @@
         // Submit edit
         $(document).on('submit', '#edit-question-form', function(e) {
             e.preventDefault();
-            var id = $('#edit_question_id').val();
             var form = this;
-            var formData = new FormData(form);
-            formData.append('_method', 'PUT');
+            var question = $('#edit_question').val().trim();
+            var topic_detail_id = $('#edit_topic_detail_id').val();
+            var id = $('#edit_question_id').val();
 
-            $.ajax({
-                url: '/mysql/teacher/questions/' + id,
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function() {
-                    $('#editQuestionModal').modal('hide');
-                    $.get("{{ route('teacher.questions.table') }}", function(data) {
-                        $('#main-table-content').html(data);
-                    });
-                },
-                error: function(xhr) {
-                    alert('Failed to update question.\n' + xhr.responseText);
+            // FE validation: Cek duplikat sebelum submit
+            $.get('/mysql/teacher/questions/check-duplicate', {
+                question: question,
+                topic_detail_id: topic_detail_id,
+                exclude_id: id
+            }, function(res) {
+                if (res.exists) {
+                    alert('Question already exists on this subtopic.');
+                    return;
                 }
+                // Jika tidak duplikat, lanjut submit AJAX
+                var formData = new FormData(form);
+                formData.append('_method', 'PUT');
+                $.ajax({
+                    url: '/mysql/teacher/questions/' + id,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function() {
+                        $('#editQuestionModal').modal('hide');
+                        $.get("{{ route('teacher.questions.table') }}", function(data) {
+                            $('#main-table-content').html(data);
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Failed to update question.\n' + xhr.responseText);
+                    }
+                });
             });
         });
 
@@ -857,25 +879,38 @@
         // Handler untuk add question
         $(document).on('submit', '#add-question-form', function(e) {
             e.preventDefault();
-            var form = $(this)[0];
-            var formData = new FormData(form);
+            var form = this;
+            var question = $('#add_question').val().trim();
+            var topic_detail_id = $('#add_topic_detail_id').val();
 
-            $.ajax({
-                url: '/mysql/teacher/questions',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function() {
-                    $('#addQuestionModal').modal('hide');
-                    $.get("{{ route('teacher.questions.table') }}", function(data) {
-                        $('#main-table-content').html(data);
-                    });
-                    form.reset();
-                },
-                error: function(xhr) {
-                    alert('Failed to add question. Please check all fields.\n' + xhr.responseText);
+            // FE validation: Cek duplikat sebelum submit
+            $.get('/mysql/teacher/questions/check-duplicate', {
+                question: question,
+                topic_detail_id: topic_detail_id
+            }, function(res) {
+                if (res.exists) {
+                    alert('Question already exists on this subtopic.');
+                    return;
                 }
+                // Jika tidak duplikat, lanjut submit AJAX
+                var formData = new FormData(form);
+                $.ajax({
+                    url: '/mysql/teacher/questions',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function() {
+                        $('#addQuestionModal').modal('hide');
+                        $.get("{{ route('teacher.questions.table') }}", function(data) {
+                            $('#main-table-content').html(data);
+                        });
+                        form.reset();
+                    },
+                    error: function(xhr) {
+                        alert('Failed to add question. Please check all fields.\n' + xhr.responseText);
+                    }
+                });
             });
         });
 
