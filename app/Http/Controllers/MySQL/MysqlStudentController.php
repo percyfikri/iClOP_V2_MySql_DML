@@ -30,19 +30,21 @@ class MysqlStudentController extends Controller
         // Ambil soal yang sedang aktif
         $currentQuestion = $questions->get($questionIndex);
 
-        // Ambil jawaban terakhir user untuk soal ini
-        $lastSubmission = DB::table('mysql_student_submissions')
-            ->where('user_id', $userId)
-            ->where('question_id', $currentQuestion->id)
-            ->orderByDesc('created_at')
-            ->first();
-
+        // Cek jika ada soal, baru ambil submission terakhir
         $lastAnswer = '';
         $lastStatus = null;
-        if ($lastSubmission) {
-            $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
-            $lastAnswer = $lastQuery ? $lastQuery->query : '';
-            $lastStatus = $lastSubmission->status ?? null;
+        if ($currentQuestion) {
+            $lastSubmission = DB::table('mysql_student_submissions')
+                ->where('user_id', $userId)
+                ->where('question_id', $currentQuestion->id)
+                ->orderByDesc('created_at')
+                ->first();
+
+            if ($lastSubmission) {
+                $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
+                $lastAnswer = $lastQuery ? $lastQuery->query : '';
+                $lastStatus = $lastSubmission->status ?? null;
+            }
         }
 
         // Data lain (tidak berubah)

@@ -242,8 +242,13 @@
         </div>
     </div>
     
+    
     {{-- Tampilkan Soal --}}
-    @if(isset($currentQuestion))
+    @if(isset($questions) && count($questions) == 0)
+        <div class="alert alert-warning" style="max-width: 65%; margin: 2rem 0 2rem 25px;">
+            Tidak ada soal terkait pada subtopik ini.
+        </div>
+    @elseif(isset($currentQuestion))
         <div style="padding-top: 20px; max-width: 65%; margin-left:25px;">
             <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
                 <p class="text-list" style="font-size: 22px; font-weight: 600;">
@@ -322,7 +327,7 @@
                         <label class="mb-2" for="runInput">Check Result Query</label>
                         <input type="text" name="runInput" id="runInput" class="form-control" placeholder="Enter query to run" disabled>
                     </div>
-                    <button type="button" class="btn btn-success" style="height: 38px; margin-top: 30px;" disabled>Run</button>
+                    <button type="button" class="btn btn-success" style="height: 38px; width: 75px; margin-top: 30px;" disabled>Run</button>
                 </form>
 
                 {{-- Tombol Previous & Next dengan Bootstrap Pagination --}}
