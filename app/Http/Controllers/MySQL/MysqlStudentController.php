@@ -26,6 +26,8 @@ class MysqlStudentController extends Controller
             ->get();
 
         $userId = Auth::user()->id;
+        // $progressPercent = $this->getStudentProgressBySubtopic($userId, $start);
+        $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
 
         // Ambil soal yang sedang aktif
         $currentQuestion = $questions->get($questionIndex);
@@ -89,6 +91,7 @@ class MysqlStudentController extends Controller
             'lastAnswer' => $lastAnswer,
             'lastStatus' => $lastStatus,
             'detail' => $detail,
+            'progressPercent' => $progressPercent,
         ]);
     }
 
@@ -142,5 +145,34 @@ class MysqlStudentController extends Controller
             'start' => $start,
             'q' => $questionIndex,
         ])->with('answer_status', $status);
+    }
+
+    public function getStudentProgressByTopic($userId, $topicId)
+    {
+        // Ambil semua id subtopik pada topik ini
+        $subtopicIds = DB::table('mysql_topic_details')
+            ->where('topic_id', $topicId)
+            ->pluck('id');
+
+        // Hitung total soal pada semua subtopik topik ini
+        $totalQuestions = DB::table('mysql_questions')
+            ->whereIn('topic_detail_id', $subtopicIds)
+            ->count();
+
+        // Hitung jumlah jawaban benar user pada semua soal topik ini
+        $correctAnswers = DB::table('mysql_student_submissions')
+            ->where('user_id', $userId)
+            ->where('status', 'true')
+            ->whereIn('question_id', function ($query) use ($subtopicIds) {
+                $query->select('id')
+                    ->from('mysql_questions')
+                    ->whereIn('topic_detail_id', $subtopicIds);
+            })
+            ->distinct('question_id')
+            ->count('question_id');
+
+        $progressPercent = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
+
+        return $progressPercent;
     }
 }

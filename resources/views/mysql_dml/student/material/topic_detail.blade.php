@@ -122,22 +122,23 @@
         .progress-container {
             width: 100%;
             background-color: #f1f1f1;
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
 
-        .progress-bar {
-            width: 40;
-            height: 30px;
+        #progressbar {
+            height: 20px;
             background-color: #4caf50;
-            text-align: center;
-            line-height: 30px;
-            color: white;
+            border-radius: 10px;
+            transition: width 0.5s;
         }
 
         .progress-text {
-            margin-top: 10px;
+            /* margin-top: 10px; */
             font-size: 18px;
-            text-align: center;
+            text-align: end;
         }
+
         .text:hover {
         color: black; /* Change text color to blue on hover */
         text-decoration: underline; /* Add underline on hover */
@@ -154,19 +155,6 @@
                 max-width: 90%; /* Adjust max-width of container */
             }
         }
-    </style>
-    <style>
-        #progressbar {
-            width: @php 
-                    $width = session('params');
-                    echo $width."%"; 
-                   @endphp;
-            height: 20px;
-            background-color: #4caf50;
-            border-radius: 10px;
-        }
-
-        
     </style>
 </head>
 <!-- This is body test -->
@@ -185,10 +173,10 @@
             <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px">
                 <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
             </p>
+            <div class="progress-text">{{ $progressPercent }}%</div>
             <div class="progress-container">
-                <div id="progressbar"></div>
+                <div id="progressbar" style="width: {{ $progressPercent }}%;"></div>
             </div>
-            <div id="progress">0%</div>
             <ul class="list pt-3">
                 
                     @php
@@ -212,7 +200,7 @@
                         <div class="row px-4 py-2">
                             <div class="col" style="padding-bottom: 1rem;">
                                 <img src="{{ asset('images/book.png') }}" style="height: 24px; margin-right: 10px;">
-                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement" onclick="updateProgress(@php echo $count_ @endphp)">
+                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement">
                                     {{ $row->title }}
                                 </a>
                             </div>
@@ -223,7 +211,7 @@
         </div>
 
     <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
-        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:40px">
+        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:10px">
             @php
                 if($pdf_reader == 0):
                 echo $html_start;
@@ -246,13 +234,13 @@
     {{-- Tampilkan Soal --}}
     @if(isset($questions) && count($questions) == 0)
         <div class="alert alert-warning" style="max-width: 65%; margin: 2rem 0 2rem 25px;">
-            Tidak ada soal terkait pada subtopik ini.
+            There are no related questions on this subtopic.
         </div>
     @elseif(isset($currentQuestion))
         <div style="padding-top: 20px; max-width: 65%; margin-left:25px;">
-            <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
+            <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;">
                 <p class="text-list" style="font-size: 22px; font-weight: 600;">
-                    Soal {{ $questionIndex + 1 }} dari {{ count($questions) }}
+                    Question {{ $questionIndex + 1 }} of {{ count($questions) }}
                 </p>
                 <ol>
                     <li style="margin-bottom: 10px;">
@@ -276,7 +264,7 @@
                     <input type="hidden" name="question_id" value="{{ $currentQuestion->id }}">
                     <input type="hidden" name="question_index" value="{{ $questionIndex }}">
                     <div class="form-group" style="flex: 1; margin-right: 10px;">
-                        <label class="mb-2" for="userInput">Jawaban Anda</label>
+                        <label class="mb-2" for="userInput">Your Answer</label>
                         @if($lastAnswer)
                             @if($lastStatus == 'benar')
                                 <input type="text" name="userInput" id="userInput" class="form-control" value="{{ $lastAnswer }}" disabled>
@@ -407,47 +395,6 @@
                 });
             });
         });
-        function move() {
-            
-            var progressBar = document.getElementById("myProgressBar");
-            var progressText = document.getElementById("progressText");
-            var width = 0;
-            var interval = setInterval(frame, progress);
-
-            function frame() {
-            if (width >= progress) {
-                clearInterval(interval);
-            } else {
-                width++;
-                progressBar.style.width = width + "%";
-                progressText.innerHTML = width + "%";
-            }
-            }
-        }
-        move();
-        function updateProgress(params) {
-            // Get CSRF token from the meta tag
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            }
-        });
-            $.ajax({
-                type: "POST",
-                url: "{{ Route('session_progress') }}",
-                data: {params: params},
-                success: function(response) { 
-                    $('#progressbar').css('width', params + '%');
-                   
-                }
-            });
-        }
-        $('#progress').text("@php 
-                                $width = session('params');
-                                echo $width."%"; 
-                            @endphp");
     </script>
 </body>
 
