@@ -63,14 +63,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(100%);"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3 row">
+                    <div class="mb-4 row">
                         <div class="col-md-6">
                             <label for="topicTitle" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
                         </div>
                     </div>
                     <div id="subtopics-container">
-                        <div class="row mb-3 subtopic-group align-items-center">
+                        <div class="row mb-3 subtopic-group align-items-center" style="border-top: 1px solid #ccc">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Sub-Topic</label>
                                 <input type="text" class="form-control" name="sub_topic_title[]" autocomplete="off" required>
@@ -86,6 +86,10 @@
                                 </div>
                                 <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
                             </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Number of Answers</label>
+                            <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
                         </div>
                     </div>
                     <div class="d-flex justify-content-end">

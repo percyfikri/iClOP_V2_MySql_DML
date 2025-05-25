@@ -50,6 +50,8 @@ class MysqlTeacherTopicsController extends Controller
             'sub_topic_title' => 'required|array|min:1',
             'sub_topic_title.*' => 'required|string|max:255',
             'sub_topic_file.*' => 'nullable|file|mimes:pdf|max:20480',
+            'sub_topic_jumlah_jawaban' => 'required|array|min:1',
+            'sub_topic_jumlah_jawaban.*' => 'required|integer|min:1',
         ]);
 
         $topic = MySqlTopics::create([
@@ -57,6 +59,7 @@ class MysqlTeacherTopicsController extends Controller
             'created_by' => $userId,
         ]);
 
+        $files = [];
         if ($request->hasFile('sub_topic_file')) {
             $files = $request->file('sub_topic_file');
         }
@@ -76,6 +79,7 @@ class MysqlTeacherTopicsController extends Controller
                 'file_name' => $fileName,
                 'file_path' => $filePath,
                 'created_by' => $userId,
+                'total_answer' => $request->sub_topic_jumlah_jawaban[$i] ?? null,
             ]);
         }
         // dd($request->all());
@@ -106,6 +110,7 @@ class MysqlTeacherTopicsController extends Controller
         // Update subtopics
         $ids = $request->sub_topic_ids ?? [];
         $titles = $request->sub_topic_titles ?? [];
+        $jumlahJawaban = $request->sub_topic_jumlah_jawaban ?? [];
         $files = $request->file('edit_sub_topic_file', []);
 
         // Hapus subtopic yang dihapus user
@@ -126,11 +131,13 @@ class MysqlTeacherTopicsController extends Controller
         foreach ($titles as $i => $title) {
             $fileName = null;
             $filePath = null;
+            $totalAnswer = isset($jumlahJawaban[$i]) ? $jumlahJawaban[$i] : null;
             if (!empty($ids[$i])) {
                 // Update existing
                 $sub = MySqlTopicDetails::find($ids[$i]);
                 if ($sub) {
                     $sub->title = $title;
+                    $sub->total_answer = $totalAnswer;
                     // Jika ada file baru diupload
                     if (isset($files[$i]) && $files[$i]) {
                         // Hapus file lama jika ada
@@ -163,6 +170,7 @@ class MysqlTeacherTopicsController extends Controller
                     'file_name' => $fileName,
                     'file_path' => $filePath,
                     'created_by' => auth()->id(),
+                    'total_answer' => $totalAnswer,
                 ]);
             }
         }

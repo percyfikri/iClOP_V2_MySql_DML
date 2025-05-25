@@ -427,34 +427,6 @@
     </script>
 
     {{-- TOPICS MANAGEMENT --}}
-    {{-- Script untuk menambahkan sub-topik pada modal --}}
-    {{-- <script>
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.id === 'add-subtopic-btn') {
-                const container = document.getElementById('subtopics-container');
-                if (container) {
-                    const newGroup = document.createElement('div');
-                    newGroup.className = 'mb-3 subtopic-group d-flex align-items-center';
-                    newGroup.innerHTML = `
-                        <input type="text" class="form-control me-2" name="sub_topic_title[]" autocomplete="off" required placeholder="Other Sub-Topics">
-                        <button type="button" class="btn btn-minus-red remove-subtopic-btn">
-                            <span class="minus-sign">-</span>
-                        </button>
-                    `;
-                    container.appendChild(newGroup);
-                }
-            }
-        });
-
-        // Remove subtopic (add modal)
-        document.addEventListener('click', function(e) {
-            if (e.target && (e.target.classList.contains('remove-subtopic-btn') || e.target.closest('.remove-subtopic-btn'))) {
-                const btn = e.target.closest('.remove-subtopic-btn');
-                btn.closest('.subtopic-group').remove();
-            }
-        });
-    </script> --}}
-
     <script>
         // Add Topics
         document.addEventListener('click', function(e) {
@@ -462,7 +434,8 @@
                 const container = document.getElementById('subtopics-container');
                 if (container) {
                     const newGroup = document.createElement('div');
-                    newGroup.className = 'row mb-3 subtopic-group align-items-center';
+                    newGroup.className = 'row mt-3 mb-3 subtopic-group align-items-center';
+                    newGroup.style.borderTop = '1px solid #ccc';
                     newGroup.innerHTML = `
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Sub-Topic</label>
@@ -483,6 +456,10 @@
                                 <button type="button" class="btn btn-minus-red remove-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
                                     <i class="fas fa-minus"></i>
                                 </button>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Number of Answers</label>
+                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
                             </div>
                     `;
                     container.appendChild(newGroup);
@@ -531,10 +508,9 @@
                 let subtopicsHtml = '';
                 data.subtopics.forEach(function(sub, idx) {
                     subtopicsHtml += `
-                        <div class="row mb-3 edit-subtopic-group align-items-center">
+                        <div class="row mb-3 edit-subtopic-group align-items-center" style="border-top: 1px solid #ccc">
                             <div class="col-md-6">
-                                ${idx === 0 ? '<label class="form-label fw-bold">Sub-Topic</label>' : ''}
-                                <label class="form-label fw-bold mb-4"></label>
+                                <label class="form-label fw-bold">Sub-Topic</label>
                                 <input type="hidden" name="sub_topic_ids[]" value="${sub.id}">
                                 <input type="text" class="form-control" name="sub_topic_titles[]" value="${sub.title}" required>
                             </div>
@@ -554,6 +530,10 @@
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Number of Answers</label>
+                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0" value="${sub.total_answer !== null && sub.total_answer !== undefined ? sub.total_answer : ''}">
+                            </div>
                         </div>
                     `;
                 });
@@ -568,9 +548,9 @@
         // Tambah subtopic baru di modal edit
         $(document).on('click', '#add-edit-subtopic-btn', function() {
             $('#edit-subtopics-container').append(`
-                <div class="row mb-3 edit-subtopic-group align-items-center">
+                <div class="row mb-3 edit-subtopic-group align-items-center" style="border-top: 1px solid #ccc">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold"></label>
+                        <label class="form-label fw-bold">Sub-Topic</label>
                         <input type="hidden" name="sub_topic_ids[]" value="">
                         <input type="text" class="form-control" name="sub_topic_titles[]" required placeholder="Other Sub-Topics">
                     </div>
@@ -589,6 +569,10 @@
                         <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
                             <i class="fas fa-minus"></i>
                         </button>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Number of Answers</label>
+                        <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
                     </div>
                 </div>
             `);
@@ -1051,7 +1035,7 @@
                                 Topics Management
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link d-flex align-items-center"
                                href="/mysql/teacher/questions"
                                onclick="showContent('questions')"
@@ -1059,7 +1043,7 @@
                                 <i class="fas fa-book" style="margin-right: 12px;"></i>
                                 Questions Management
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </div>
