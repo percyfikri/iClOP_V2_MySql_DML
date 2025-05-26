@@ -277,12 +277,12 @@
                     </div>
                     @if($lastAnswer)
                         @if($lastStatus == 'true')
-                            {{-- Tidak tampilkan tombol submit --}}
+                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;" disabled>
                         @else
-                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 30px;">
+                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;">
                         @endif
                     @else
-                        <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 30px;">
+                        <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;">
                     @endif
                 </form>
 
