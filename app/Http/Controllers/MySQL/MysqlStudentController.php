@@ -25,19 +25,24 @@ class MysqlStudentController extends Controller
         // Ambil detail subtopik
         $detail = MySqlTopicDetails::findOrFail($start);
 
-        // Ambil submission terakhir user pada subtopik ini
-        $lastSubmission = DB::table('mysql_student_submissions')
+        $page = (int) $request->get('page', 1); // halaman aktif, default 1
+        $totalAnswer = $detail->total_answer;
+
+        // Ambil submission terakhir untuk nomor ke-(page)
+        $submission = DB::table('mysql_student_submissions')
             ->where('user_id', $userId)
             ->where('topic_detail_id', $start)
-            ->orderByDesc('created_at')
+            ->where('answer_number', $page) // pastikan field answer_number ada dan diisi saat submit
+            ->orderByDesc('id')
             ->first();
 
         $lastAnswer = '';
         $lastStatus = null;
-        if ($lastSubmission) {
-            $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
+        $lastSubmission = $submission;
+        if ($submission) {
+            $lastQuery = DB::table('mysql_queries')->where('id', $submission->query_id)->first();
             $lastAnswer = $lastQuery ? $lastQuery->query : '';
-            $lastStatus = $lastSubmission->status ?? null;
+            $lastStatus = $submission->status ?? null;
         }
 
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
@@ -79,6 +84,8 @@ class MysqlStudentController extends Controller
             'lastSubmission' => $lastSubmission,
             'detail' => $detail,
             'progressPercent' => $progressPercent,
+            'totalAnswer' => $totalAnswer,
+            'page' => $page,
         ]);
     }
 
@@ -94,6 +101,7 @@ class MysqlStudentController extends Controller
         $userInput = trim($request->input('userInput'));
         $topicDetailId = $request->input('topic_detail_id');
         $userId = Auth::user()->id;
+        $answerNumber = $request->input('answer_number', 1);
 
         // Simpan query ke file
         file_put_contents(base_path('tests/query_user.sql'), $userInput);
@@ -140,6 +148,7 @@ class MysqlStudentController extends Controller
             'query_id' => $queryId,
             'feedback_id' => $feedbackId,
             'status' => $status,
+            'answer_number' => $answerNumber, // tambahkan ini
             'created_at' => now(),
             'updated_at' => now(),
         ]);

@@ -229,41 +229,20 @@
 
         </div>
     </div>
-    
-    
-    {{-- Tampilkan Soal --}}
-    {{-- @if(isset($questions) && count($questions) == 0)
-        <div class="alert alert-warning" style="max-width: 65%; margin: 2rem 0 2rem 25px;">
-            There are no related questions on this subtopic.
-        </div>
-    @elseif(isset($currentQuestion))
-        <div style="padding-top: 20px; max-width: 65%; margin-left:25px;">
-            <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;">
-                <p class="text-list" style="font-size: 22px; font-weight: 600;">
-                    Question {{ $questionIndex + 1 }} of {{ count($questions) }}
-                </p>
-                <ol>
-                    <li style="margin-bottom: 10px;">
-                        {{ $currentQuestion->question }}
-                    </li>
-                </ol>
-            </div>
-        </div>
-    @endif --}}
 
     {{-- Submit Query from user input --}}
-    {{-- @if(isset($currentQuestion)) --}}
     <div style="padding-top: 20px; padding-bottom: 2rem; max-width: 65%; margin-left:25px; margin-bottom: 5rem;">
         <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
             <div style="padding-top: 15px; padding-bottom: 15px;">
-                <form action="{{ route('submitUserInput') }}" method="POST" style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <form action="{{ route('submitUserInput') }}?page={{ $page }}" method="POST" style="display: flex; align-items: center; margin-bottom: 1rem;">
                     @csrf
                     <input type="hidden" name="mysqlid" value="{{ $mysqlid }}">
                     <input type="hidden" name="start" value="{{ $detail->id }}">
                     <input type="hidden" name="topic_detail_id" value="{{ $detail->id }}">
+                    <input type="hidden" name="answer_number" value="{{ $page }}">
                     <div class="form-group" style="flex: 1; margin-right: 10px;">
                         <label class="mb-2" for="userInput">
-                            <h4>Your Answer (SQL Query)</h4>
+                            <h4>Your Answer (SQL Query) #{{ $page }}</h4>
                         </label>
                         @if($lastAnswer)
                             @if($lastStatus == 'true')
@@ -307,7 +286,6 @@
                     </div>
                 @elseif($lastStatus == 'false')
                     <div class="alert alert-danger text-start p-3">
-                        {{-- <div class="fw-bold mb-1">Jawaban Anda SALAH!</div> --}}
                         <div class="fw-bold mb-2">Your Query Is Wrong!</div>
                         @if($feedback)
                             @php
@@ -319,10 +297,18 @@
                         @endif
                     </div>
                 @endif
+
+                {{-- Pagination --}}
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ $page > 1 ? route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'page' => $page-1]) : '#' }}"
+                       class="btn btn-outline-secondary {{ $page == 1 ? 'disabled' : '' }}">Previous</a>
+                    <span>Page {{ $page }} of {{ $totalAnswer }}</span>
+                    <a href="{{ $page < $totalAnswer ? route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'page' => $page+1]) : '#' }}"
+                       class="btn btn-outline-secondary {{ $page == $totalAnswer ? 'disabled' : '' }}">Next</a>
+                </div>
             </div>
         </div>
     </div>
-    {{-- @endif --}}
 
     <!-- Footer -->
     <footer class="footer">
