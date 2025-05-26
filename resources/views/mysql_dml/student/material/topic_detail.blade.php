@@ -287,33 +287,37 @@
                 </form>
 
                 {{-- Pesan Benar/Salah --}}
+                @php
+                    $feedback = null;
+                    if(isset($lastSubmission) && $lastSubmission->feedback_id) {
+                        $feedback = \App\Models\MySQL\MySqlFeedbacks::find($lastSubmission->feedback_id);
+                    }
+                @endphp
+
                 @if($lastStatus == 'true')
-                    <div class="alert alert-success">
-                        Jawaban Anda BENAR!
+                    <div class="alert alert-success text-start p-3">
+                        <div class="fw-bold mb-2">Your Query Is Correct!</div>
+                        @if($feedback)
+                            @php
+                                $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
+                                $feedbackText = implode('<br>', array_map('trim', $lines));
+                            @endphp
+                            <div style="margin-bottom:0;">{!! $feedbackText !!}</div>
+                        @endif
                     </div>
                 @elseif($lastStatus == 'false')
-                    <div class="alert alert-danger">
-                        Jawaban Anda SALAH!
+                    <div class="alert alert-danger text-start p-3">
+                        {{-- <div class="fw-bold mb-1">Jawaban Anda SALAH!</div> --}}
+                        <div class="fw-bold mb-2">Your Query Is Wrong!</div>
+                        @if($feedback)
+                            @php
+                                // Gabungkan semua baris feedback jadi satu string dengan <br>
+                                $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
+                                $feedbackText = implode('<br><br>', array_map('trim', $lines));
+                            @endphp
+                            <div style="margin-bottom:0;">{!! $feedbackText !!}</div>
+                        @endif
                     </div>
-                @endif
-
-                {{-- Tampilkan feedback detail jika ada --}}
-                @if(session('answer_status'))
-                    {{-- <div class="alert alert-info">{{ session('answer_status') }}</div>
-                @endif --}}
-                    <div class="alert alert-info" style="white-space: pre-wrap;">{{ session('answer_status') }}</div>
-                @endif
-
-                {{-- Jika ingin tampilkan feedback dari database --}}
-                @if(isset($lastSubmission) && $lastSubmission->feedback_id)
-                    @php
-                        $feedback = \App\Models\MySQL\MySqlFeedbacks::find($lastSubmission->feedback_id);
-                    @endphp
-                    @if($feedback)
-                        <div class="alert alert-warning" style="white-space: pre-wrap;">
-                            {{ $feedback->feedback }}
-                        </div>
-                    @endif
                 @endif
             </div>
         </div>

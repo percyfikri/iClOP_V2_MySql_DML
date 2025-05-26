@@ -76,6 +76,7 @@ class MysqlStudentController extends Controller
             'answerStatus' => $answerStatus,
             'lastAnswer' => $lastAnswer,
             'lastStatus' => $lastStatus,
+            'lastSubmission' => $lastSubmission,
             'detail' => $detail,
             'progressPercent' => $progressPercent,
         ]);
@@ -120,17 +121,13 @@ class MysqlStudentController extends Controller
         Log::info("Codeception output: " . $testResult);
 
         // 3. Simpan feedback ke mysql_feedbacks
-        if ($testResult) {
-            $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
-                'query_id' => $queryId,
-                'feedback' => $testResult,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            // Handle error, misal tampilkan pesan gagal testing
-            return back()->with('answer_status', 'Gagal menjalankan pengujian query.');
-        }
+        $shortFeedback = $this->getShortFeedback($testResult);
+        $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
+            'query_id' => $queryId,
+            'feedback' => $shortFeedback,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // 4. Simpan ke mysql_student_submissions
         $status = (strpos($testResult, 'OK (1 test') !== false &&
@@ -193,5 +190,30 @@ class MysqlStudentController extends Controller
         $progressPercent = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
 
         return $progressPercent;
+    }
+
+    private function getShortFeedback($testResult)
+    {
+        // Jika benar, ambil baris mengandung "OK (1 test"
+        if (strpos($testResult, 'OK (1 test') !== false) {
+            if (preg_match('/OK \(1 test, 0 assertions\)/', $testResult, $okMatch)) {
+                return $okMatch[0];
+            }
+            return 'OK (1 test, 0 assertions)';
+        }
+
+        // Jika salah, ambil pesan error SQL dan baris error summary
+        $lines = explode("\n", $testResult);
+        $errorMsg = '';
+        $summary = '';
+        foreach ($lines as $line) {
+            if (stripos($line, 'SQLSTATE') !== false || stripos($line, 'syntax error') !== false) {
+                $errorMsg = trim($line);
+            }
+            if (preg_match('/Tests:\s*\d+,\s*Assertions:\s*\d+,\s*Errors:\s*\d+\./', $line, $sumMatch)) {
+                $summary = $sumMatch[0];
+            }
+        }
+        return trim($errorMsg . "\n" . $summary);
     }
 }
