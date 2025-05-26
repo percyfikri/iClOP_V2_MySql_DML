@@ -20,7 +20,7 @@ class MysqlStudentController extends Controller
         $answerStatus = session('answer_status');
 
         $userId = Auth::user()->id;
-        $progressPercent = 0; // Anda bisa buat logika progress baru jika perlu
+        $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
 
         // Ambil detail subtopik
         $detail = MySqlTopicDetails::findOrFail($start);
@@ -182,35 +182,6 @@ class MysqlStudentController extends Controller
         return redirect()->back()->with('answer_status', $testResult);
     }
 
-    public function getStudentProgressByTopic($userId, $topicId)
-    {
-        // Ambil semua id subtopik pada topik ini
-        $subtopicIds = DB::table('mysql_topic_details')
-            ->where('topic_id', $topicId)
-            ->pluck('id');
-
-        // Hitung total soal pada semua subtopik topik ini
-        $totalQuestions = DB::table('mysql_questions')
-            ->whereIn('topic_detail_id', $subtopicIds)
-            ->count();
-
-        // Hitung jumlah jawaban benar user pada semua soal topik ini
-        $correctAnswers = DB::table('mysql_student_submissions')
-            ->where('user_id', $userId)
-            ->where('status', 'true')
-            ->whereIn('question_id', function ($query) use ($subtopicIds) {
-                $query->select('id')
-                    ->from('mysql_questions')
-                    ->whereIn('topic_detail_id', $subtopicIds);
-            })
-            ->distinct('question_id')
-            ->count('question_id');
-
-        $progressPercent = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
-
-        return $progressPercent;
-    }
-
     private function getShortFeedback($testResult)
     {
         // Hilangkan karakter escape ANSI (warna terminal dsb)
@@ -266,5 +237,30 @@ class MysqlStudentController extends Controller
             return $errorMsg . '<br><br>' . $summary;
         }
         return $errorMsg;
+    }
+
+    public function getStudentProgressByTopic($userId, $topicId)
+    {
+        // Ambil semua id subtopik pada topik ini
+        $subtopicIds = DB::table('mysql_topic_details')
+            ->where('topic_id', $topicId)
+            ->pluck('id');
+
+        // Hitung total expected answer (total_answer) pada semua subtopik
+        $totalAnswer = DB::table('mysql_topic_details')
+            ->where('topic_id', $topicId)
+            ->sum('total_answer');
+
+        // Hitung jumlah submission status=true pada semua subtopik topik ini
+        $correctSubmissions = DB::table('mysql_student_submissions')
+            ->where('user_id', $userId)
+            ->where('status', 'true')
+            ->whereIn('topic_detail_id', $subtopicIds)
+            ->count();
+
+        // Hitung persentase progress
+        $progressPercent = $totalAnswer > 0 ? round(($correctSubmissions / $totalAnswer) * 100) : 0;
+
+        return $progressPercent;
     }
 }

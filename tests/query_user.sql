@@ -1,1 +1,1 @@
-INSERT INTO mk VALUES('02041', 'Teknologi Data');
+INSERT INTO mk VALUES('02042', 'Coba');
