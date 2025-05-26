@@ -138,9 +138,15 @@ class MysqlStudentController extends Controller
         ]);
 
         // 4. Simpan ke mysql_student_submissions
-        $status = (strpos($testResult, 'OK (1 test') !== false &&
+        $status = 'false';
+        if (
+            strpos($testResult, 'OK (1 test') !== false &&
             stripos($testResult, 'error') === false &&
-            stripos($testResult, 'Exception') === false) ? 'true' : 'false';
+            stripos($testResult, 'Exception') === false &&
+            stripos($testResult, 'SQLSTATE') === false // tambahkan pengecekan SQLSTATE
+        ) {
+            $status = 'true';
+        }
 
         DB::table('mysql_student_submissions')->insert([
             'user_id' => $userId,
@@ -153,21 +159,25 @@ class MysqlStudentController extends Controller
             'updated_at' => now(),
         ]);
 
+        // HAPUS DATA KETIKA STATUS QUERY SALAH. HAL INI UNTUK MENGHINDARI KESALAHAN PADA DATABASE TESTING
+        // TETAPI KETIKA USER INPUT QUERY (NO 3) YANG SAMA DENGAN JAWABAN SEBELUMNYA (NO 2) AKAN TERJADI ERROR DUPLIKAT
+        // KEMUDIAN DATA OTOMATIS AKAN DIHAPUS, DIMANA HAL INI SAMA SAJA MENGHAPUS HASIL QUERY SEBELUMNYA (NO 2)
+
         // Jika status salah, hapus data yang baru saja dimasukkan user di database testing
-        if ($status === 'false') {
-            // Contoh: hapus data dari tabel mk dengan kode_mk yang baru saja di-insert user
-            // Anda bisa parsing $userInput untuk mendapatkan nilai yang di-insert, atau simpan nilai insert di session/variabel
-            try {
-                // Contoh sederhana untuk kasus INSERT INTO mk (kode_mk, nama_mk) VALUES ('02010', 'Basis Data');
-                // Anda bisa gunakan regex atau parser sederhana untuk mengambil nilai kode_mk
-                if (preg_match("/INSERT INTO mk.*VALUES\s*\(\s*'([^']+)'/", $userInput, $matches)) {
-                    $kode_mk = $matches[1];
-                    DB::connection('mysql_testing')->table('mk')->where('kode_mk', $kode_mk)->delete();
-                }
-            } catch (\Exception $e) {
-                Log::error('Gagal menghapus data mk dari database testing: ' . $e->getMessage());
-            }
-        }
+        // if ($status === 'false') {
+        //     // Contoh: hapus data dari tabel mk dengan kode_mk yang baru saja di-insert user
+        //     // Anda bisa parsing $userInput untuk mendapatkan nilai yang di-insert, atau simpan nilai insert di session/variabel
+        //     try {
+        //         // Contoh sederhana untuk kasus INSERT INTO mk (kode_mk, nama_mk) VALUES ('02010', 'Basis Data');
+        //         // Anda bisa gunakan regex atau parser sederhana untuk mengambil nilai kode_mk
+        //         if (preg_match("/INSERT INTO mk.*VALUES\s*\(\s*'([^']+)'/", $userInput, $matches)) {
+        //             $kode_mk = $matches[1];
+        //             DB::connection('mysql_testing')->table('mk')->where('kode_mk', $kode_mk)->delete();
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::error('Gagal menghapus data mk dari database testing: ' . $e->getMessage());
+        //     }
+        // }
 
         return redirect()->back()->with('answer_status', $testResult);
     }
@@ -203,6 +213,9 @@ class MysqlStudentController extends Controller
 
     private function getShortFeedback($testResult)
     {
+        // Hilangkan karakter escape ANSI (warna terminal dsb)
+        $testResult = preg_replace('/\e\[[\d;]*m/', '', $testResult);
+
         // Jika benar, ambil baris mengandung "OK (1 test"
         if (strpos($testResult, 'OK (1 test') !== false) {
             if (preg_match('/OK \(1 test, 0 assertions\)/', $testResult, $okMatch)) {
@@ -211,18 +224,47 @@ class MysqlStudentController extends Controller
             return 'OK (1 test, 0 assertions)';
         }
 
-        // Jika salah, ambil pesan error SQL dan baris error summary
+        // Jika salah, ambil hanya pesan error SQLSTATE yang penting
         $lines = explode("\n", $testResult);
         $errorMsg = '';
         $summary = '';
+
         foreach ($lines as $line) {
-            if (stripos($line, 'SQLSTATE') !== false || stripos($line, 'syntax error') !== false) {
-                $errorMsg = trim($line);
+            // Cari baris yang mengandung SQLSTATE
+            if (preg_match('/SQLSTATE\[[^\]]+\]:.*$/', $line, $matches)) {
+                $errorMsg = trim($matches[0]);
             }
+            // Cari baris summary
             if (preg_match('/Tests:\s*\d+,\s*Assertions:\s*\d+,\s*Errors:\s*\d+\./', $line, $sumMatch)) {
                 $summary = $sumMatch[0];
             }
+            if ($errorMsg && $summary) break;
         }
-        return trim($errorMsg . "\n" . $summary);
+
+        // Jika tidak ketemu, fallback ke pesan error lain yang mengandung "syntax error"
+        if (!$errorMsg) {
+            foreach ($lines as $line) {
+                if (stripos($line, 'syntax error') !== false) {
+                    $errorMsg = trim($line);
+                    break;
+                }
+            }
+        }
+
+        // Jika masih tidak ketemu, ambil baris error pertama yang tidak kosong
+        if (!$errorMsg) {
+            foreach ($lines as $line) {
+                if (trim($line) !== '') {
+                    $errorMsg = trim($line);
+                    break;
+                }
+            }
+        }
+
+        // Gabungkan errorMsg dan summary jika ada
+        if ($summary) {
+            return $errorMsg . '<br><br>' . $summary;
+        }
+        return $errorMsg;
     }
 }

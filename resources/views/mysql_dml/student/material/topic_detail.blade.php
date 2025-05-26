@@ -234,7 +234,7 @@
     <div style="padding-top: 20px; padding-bottom: 2rem; max-width: 65%; margin-left:25px; margin-bottom: 5rem;">
         <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px; margin-bottom: 40px;">
             <div style="padding-top: 15px; padding-bottom: 15px;">
-                <form action="{{ route('submitUserInput') }}?page={{ $page }}" method="POST" style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <form action="{{ route('submitUserInput') }}?page={{ $page }}" method="POST" style="display: flex; align-items: flex-start; margin-bottom: 1rem;">
                     @csrf
                     <input type="hidden" name="mysqlid" value="{{ $mysqlid }}">
                     <input type="hidden" name="start" value="{{ $detail->id }}">
@@ -242,27 +242,29 @@
                     <input type="hidden" name="answer_number" value="{{ $page }}">
                     <div class="form-group" style="flex: 1; margin-right: 10px;">
                         <label class="mb-2" for="userInput">
-                            <h4>Your Answer (SQL Query) #{{ $page }}</h4>
+                            <h4>{{ $page }}. Your Answer (SQL Query)</h4>
                         </label>
                         @if($lastAnswer)
                             @if($lastStatus == 'true')
-                                <input type="text" name="userInput" id="userInput" class="form-control" value="{{ $lastAnswer }}" disabled>
+                                <textarea name="userInput" id="userInput" class="form-control" rows="4" disabled>{{ $lastAnswer }}</textarea>
                             @else
-                                <input type="text" name="userInput" id="userInput" class="form-control" value="{{ $lastAnswer }}" required>
+                                <textarea name="userInput" id="userInput" class="form-control" rows="4" required>{{ $lastAnswer }}</textarea>
                             @endif
                         @else
-                            <input type="text" name="userInput" id="userInput" class="form-control" placeholder="Masukkan jawaban Anda di sini" required>
+                            <textarea name="userInput" id="userInput" class="form-control" rows="4" placeholder="Input your answer in here" required></textarea>
                         @endif
                     </div>
-                    @if($lastAnswer)
-                        @if($lastStatus == 'true')
-                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;" disabled>
+                    <div style="margin-top: 3rem; margin-left: 10px;">
+                        @if($lastAnswer)
+                            @if($lastStatus == 'true')
+                                <input type="submit" value="Submit" class="btn btn-primary" disabled>
+                            @else
+                                <input type="submit" value="Submit" class="btn btn-primary">
+                            @endif
                         @else
-                            <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;">
+                            <input type="submit" value="Submit" class="btn btn-primary">
                         @endif
-                    @else
-                        <input type="submit" value="Submit" class="btn btn-primary" style="height: 38px; margin-top: 2.7rem;">
-                    @endif
+                    </div>
                 </form>
 
                 {{-- Pesan Benar/Salah --}}
@@ -302,7 +304,7 @@
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ $page > 1 ? route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'page' => $page-1]) : '#' }}"
                        class="btn btn-outline-secondary {{ $page == 1 ? 'disabled' : '' }}">Previous</a>
-                    <span>Page {{ $page }} of {{ $totalAnswer }}</span>
+                    <span class="fw-semibold">Answer {{ $page }} of {{ $totalAnswer }}</span>
                     <a href="{{ $page < $totalAnswer ? route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $detail->id, 'page' => $page+1]) : '#' }}"
                        class="btn btn-outline-secondary {{ $page == $totalAnswer ? 'disabled' : '' }}">Next</a>
                 </div>
