@@ -15,9 +15,14 @@ class MySqlQueries extends Model
         'query',
     ];
 
-    // Relasi: Setiap query milik satu submission
-    public function submission()
+    // Relasi: Setiap query memiliki satu feedback
+    public function feedback()
     {
-        return $this->belongsTo(MySqlStudentSubmissions::class, 'submission_id');
+        return $this->hasOne(MySqlFeedbacks::class, 'query_id');
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(MySqlStudentSubmissions::class, 'query_id');
     }
 }

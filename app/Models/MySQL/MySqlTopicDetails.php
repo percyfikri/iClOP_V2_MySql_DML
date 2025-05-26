@@ -31,5 +31,11 @@ class MySqlTopicDetails extends Model
     {
         return $this->hasMany(MySqlQuestions::class, 'topic_detail_id');
     }
+
+    // Relasi: Setiap topic detail memiliki banyak student submissions
+    public function studentSubmissions()
+    {
+        return $this->hasMany(MySqlStudentSubmissions::class, 'topic_detail_id');
+    }
 }
 

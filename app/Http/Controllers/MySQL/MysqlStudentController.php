@@ -8,6 +8,7 @@ use App\Models\MySQL\MySqlTopics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MysqlStudentController extends Controller
 {
@@ -16,40 +17,29 @@ class MysqlStudentController extends Controller
         $mysqlid = (int) $request->get('mysqlid');
         $start = (int) $request->get('start');
         $output = $request->get('output', '');
-        $questionIndex = (int) $request->get('q', 0); // index soal, default 0 (soal pertama)
-        $answerStatus = session('answer_status'); // pesan benar/salah
-
-        // Ambil semua soal terkait subtopik
-        $questions = DB::table('mysql_questions')
-            ->where('topic_detail_id', $start)
-            ->orderBy('id')
-            ->get();
+        $answerStatus = session('answer_status');
 
         $userId = Auth::user()->id;
-        // $progressPercent = $this->getStudentProgressBySubtopic($userId, $start);
-        $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
+        $progressPercent = 0; // Anda bisa buat logika progress baru jika perlu
 
-        // Ambil soal yang sedang aktif
-        $currentQuestion = $questions->get($questionIndex);
+        // Ambil detail subtopik
+        $detail = MySqlTopicDetails::findOrFail($start);
 
-        // Cek jika ada soal, baru ambil submission terakhir
+        // Ambil submission terakhir user pada subtopik ini
+        $lastSubmission = DB::table('mysql_student_submissions')
+            ->where('user_id', $userId)
+            ->where('topic_detail_id', $start)
+            ->orderByDesc('created_at')
+            ->first();
+
         $lastAnswer = '';
         $lastStatus = null;
-        if ($currentQuestion) {
-            $lastSubmission = DB::table('mysql_student_submissions')
-                ->where('user_id', $userId)
-                ->where('question_id', $currentQuestion->id)
-                ->orderByDesc('created_at')
-                ->first();
-
-            if ($lastSubmission) {
-                $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
-                $lastAnswer = $lastQuery ? $lastQuery->query : '';
-                $lastStatus = $lastSubmission->status ?? null;
-            }
+        if ($lastSubmission) {
+            $lastQuery = DB::table('mysql_queries')->where('id', $lastSubmission->query_id)->first();
+            $lastAnswer = $lastQuery ? $lastQuery->query : '';
+            $lastStatus = $lastSubmission->status ?? null;
         }
 
-        // Data lain (tidak berubah)
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
         $html_start = '';
         $pdf_reader = 0;
@@ -69,7 +59,6 @@ class MysqlStudentController extends Controller
         $roleTeacher = DB::select("select role from users where id = $idUser");
         $topics = MySqlTopics::all();
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
-        $detail = MySqlTopicDetails::findOrFail($start);
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
 
@@ -84,9 +73,6 @@ class MysqlStudentController extends Controller
             'detailCount' => $detailCount,
             'output' => $output,
             'role' => isset($roleTeacher[0]) ? $roleTeacher[0]->role : '',
-            'questions' => $questions,
-            'currentQuestion' => $currentQuestion,
-            'questionIndex' => $questionIndex,
             'answerStatus' => $answerStatus,
             'lastAnswer' => $lastAnswer,
             'lastStatus' => $lastStatus,
@@ -100,51 +86,84 @@ class MysqlStudentController extends Controller
         $request->validate([
             'userInput' => 'required|string|max:255',
             'topic_detail_id' => 'required|integer',
-            'question_id' => 'required|integer',
-            'question_index' => 'required|integer',
             'mysqlid' => 'required|integer',
             'start' => 'required|integer',
         ]);
 
         $userInput = trim($request->input('userInput'));
-        $questionId = $request->input('question_id');
-        $questionIndex = $request->input('question_index');
-        $mysqlid = $request->input('mysqlid');
-        $start = $request->input('start');
-
-        // Ambil kunci jawaban dari DB
-        $question = DB::table('mysql_questions')->where('id', $questionId)->first();
-        $isCorrect = false;
-        if ($question) {
-            $isCorrect = trim(strtolower($userInput)) === trim(strtolower($question->answer_key));
-        }
-
+        $topicDetailId = $request->input('topic_detail_id');
         $userId = Auth::user()->id;
 
-        // 1. Simpan ke tabel queries dan ambil ID-nya
+        // Simpan query ke file
+        file_put_contents(base_path('tests/query_user.sql'), $userInput);
+
+        // 1. Simpan query ke mysql_queries
         $queryId = DB::table('mysql_queries')->insertGetId([
             'query' => $userInput,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // 2. Simpan ke tabel submission, isi kolom query_id dan status
-        DB::table('mysql_student_submissions')->insertGetId([
+        // 2. Jalankan Codeception (pastikan query user bisa diakses oleh UserQueryCest)
+        // Kirim query_id sebagai environment variable
+        $projectPath = base_path();
+        $codeceptPath = $projectPath . '\\vendor\\bin\\codecept.bat';
+        $command = "cd /d \"{$projectPath}\" && set QUERY_ID={$queryId} && \"{$codeceptPath}\" run acceptance UserQueryCest:testUserQuery --env testing 2>&1";
+        Log::info("Codeception command: " . $command);
+        $testResult = shell_exec($command);
+
+        // Debug: log atau tampilkan hasil
+        if ($testResult === null || trim($testResult) === '') {
+            return back()->with('answer_status', "Codeception tidak berjalan. Cek perintah: $command");
+        }
+
+        Log::info("Codeception output: " . $testResult);
+
+        // 3. Simpan feedback ke mysql_feedbacks
+        if ($testResult) {
+            $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
+                'query_id' => $queryId,
+                'feedback' => $testResult,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            // Handle error, misal tampilkan pesan gagal testing
+            return back()->with('answer_status', 'Gagal menjalankan pengujian query.');
+        }
+
+        // 4. Simpan ke mysql_student_submissions
+        $status = (strpos($testResult, 'OK (1 test') !== false &&
+            stripos($testResult, 'error') === false &&
+            stripos($testResult, 'Exception') === false) ? 'true' : 'false';
+
+        DB::table('mysql_student_submissions')->insert([
             'user_id' => $userId,
-            'question_id' => $questionId,
+            'topic_detail_id' => $topicDetailId,
             'query_id' => $queryId,
-            'status' => $isCorrect ? 'true' : 'false', // <-- tambahkan ini
+            'feedback_id' => $feedbackId,
+            'status' => $status,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // Redirect ke soal yang sama dengan pesan benar/salah
-        $status = $isCorrect ? 'Jawaban Anda BENAR!' : 'Jawaban Anda SALAH!';
-        return redirect()->route('showTopicDetail', [
-            'mysqlid' => $mysqlid,
-            'start' => $start,
-            'q' => $questionIndex,
-        ])->with('answer_status', $status);
+        // Jika status salah, hapus data yang baru saja dimasukkan user di database testing
+        if ($status === 'false') {
+            // Contoh: hapus data dari tabel mk dengan kode_mk yang baru saja di-insert user
+            // Anda bisa parsing $userInput untuk mendapatkan nilai yang di-insert, atau simpan nilai insert di session/variabel
+            try {
+                // Contoh sederhana untuk kasus INSERT INTO mk (kode_mk, nama_mk) VALUES ('02010', 'Basis Data');
+                // Anda bisa gunakan regex atau parser sederhana untuk mengambil nilai kode_mk
+                if (preg_match("/INSERT INTO mk.*VALUES\s*\(\s*'([^']+)'/", $userInput, $matches)) {
+                    $kode_mk = $matches[1];
+                    DB::connection('mysql_testing')->table('mk')->where('kode_mk', $kode_mk)->delete();
+                }
+            } catch (\Exception $e) {
+                Log::error('Gagal menghapus data mk dari database testing: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('answer_status', $testResult);
     }
 
     public function getStudentProgressByTopic($userId, $topicId)

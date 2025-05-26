@@ -1,0 +1,1 @@
+INSERT INTO mk (kode_mk, nama_mk) VALUES ('02010', 'Basis Data');

@@ -12,6 +12,7 @@ class MySqlFeedbacks extends Model
     protected $table = 'mysql_feedbacks'; //Name of the table in the database
 
     protected $fillable = [
+        'query_id',
         'feedback',
     ];
 
@@ -19,5 +20,11 @@ class MySqlFeedbacks extends Model
     public function studentSubmissions()
     {
         return $this->hasMany(MySqlStudentSubmissions::class, 'feedback_id');
+    }
+
+    // Relasi: Setiap feedback milik satu query
+    public function mysqlQuery()
+    {
+        return $this->belongsTo(MySqlQueries::class, 'query_id');
     }
 }

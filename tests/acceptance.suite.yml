@@ -17,9 +17,7 @@ modules:
             transaction: false
             # cleanup: true
             # populate: true
-
-            # file SQL untuk reset database sebelum test
-            # dump: 'tests/_data/dump.sql'
+            
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
     - Codeception\Step\ConditionalAssertion

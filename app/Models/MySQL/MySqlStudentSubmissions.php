@@ -13,10 +13,11 @@ class MySqlStudentSubmissions extends Model
     protected $table = 'mysql_student_submissions';
 
     protected $fillable = [
-        'user_id', 
-        'question_id', 
-        'query_id', 
-        'feedback_id', 
+        'user_id',
+        'topic_detail_id',
+        'query_id',
+        'feedback_id',
+        'status',
     ];
 
     // Relasi BelongsTo dengan User
@@ -32,9 +33,9 @@ class MySqlStudentSubmissions extends Model
     }
 
     // Relasi: Setiap submission memiliki satu queries
-    public function mysqlQueries()
+    public function mysqlQuery()
     {
-        return $this->hasOne(MySqlQueries::class, 'submission_id');
+        return $this->belongsTo(MySqlQueries::class, 'query_id');
     }
 
     // Relasi: Setiap submission milik satu feedback
