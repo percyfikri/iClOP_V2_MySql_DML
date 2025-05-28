@@ -195,14 +195,23 @@
                             $count_ = ($no / $detailCount) * 10;
                             $mysqldid = isset($_GET['start']) ? $_GET['start'] : '';
                             $active = ($row->id == $mysqldid) ? 'color:#000; font-weight:bold; text-decoration: underline;' : '';
+
+                            // Cek apakah semua jawaban pada subtopik ini sudah benar
+                            $correctCount = DB::table('mysql_student_submissions')
+                                ->where('user_id', Auth::user()->id)
+                                ->where('topic_detail_id', $row->id)
+                                ->where('status', 'true')
+                                ->count();
+                            $isComplete = ($correctCount >= $row->total_answer);
                         @endphp
                         {{-- Title topic detail --}}
                         <div class="row px-4 py-2">
                             <div class="col" style="padding-bottom: 1rem;">
                                 <img src="{{ asset('images/book.png') }}" style="height: 24px; margin-right: 10px;">
-                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement">
-                                    {{ $row->title }}
-                                </a>
+                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement">{{ $row->title }}</a>
+                                @if($isComplete)
+                                    <span style="color: #28a745; font-size: 18px; margin-left: 6px; font-weight:bold;" title="Completed">&#10003;</span>
+                                @endif
                             </div>
                         </div>
                     @endforeach
