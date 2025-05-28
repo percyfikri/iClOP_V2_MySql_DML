@@ -318,7 +318,8 @@
                     .then(html => {
                         document.getElementById('answer-section').innerHTML = html;
                         bindAnswerSectionForm();
-                        bindAnswerSectionPagination(); // re-bind after AJAX
+                        bindAnswerSectionPagination();
+                        bindRunQueryForm(); // <-- tambahkan ini di sini!
                     })
                     .catch(err => {
                         alert('Error: ' + err);
@@ -349,7 +350,8 @@
                     .then(html => {
                         document.getElementById('answer-section').innerHTML = html;
                         bindAnswerSectionForm();
-                        bindAnswerSectionPagination(); // re-bind after AJAX
+                        bindAnswerSectionPagination();
+                        bindRunQueryForm(); // <-- tambahkan ini di sini juga!
                     })
                     .catch(err => alert('Error: ' + err));
                 });

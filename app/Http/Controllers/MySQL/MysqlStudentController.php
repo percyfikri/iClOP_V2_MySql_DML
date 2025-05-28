@@ -299,7 +299,15 @@ class MysqlStudentController extends Controller
 
         // Hanya izinkan SELECT
         if (!preg_match('/^select\s+/i', $query)) {
-            $html = '<div class="alert alert-danger">Only SELECT queries are allowed.</div>';
+            $html = '<div style="
+                background-color: #f8d7da;
+                color: #ff0000;
+                border-radius: 0.5rem;
+                display: inline-block;
+                font-size: 14px;
+                padding: 8px 10px;
+                margin-bottom: 16px;
+            ">Only <b>SELECT</b> queries are allowed!</div>';
             if ($request->ajax()) {
                 return response()->json(['html' => $html]);
             }
@@ -310,7 +318,15 @@ class MysqlStudentController extends Controller
             $results = DB::connection('mysql_testing')->select($query);
 
             if (empty($results)) {
-                $html = '<div class="alert alert-info">No data found.</div>';
+                $html = '<div style="
+                    background-color: #f8d7da;
+                    color: #ff0000;
+                    border-radius: 0.5rem;
+                    display: inline-block;
+                    font-size: 14px;
+                    padding: 8px 10px;
+                    margin-bottom: 16px;
+                ">Data Not found.</div>';
             } else {
                 $columns = array_keys((array)$results[0]);
                 $html = <<<HTML
@@ -319,7 +335,7 @@ class MysqlStudentController extends Controller
                         background: #288cff !important;
                         color: #ffffff !important;
                         font-weight: bold !important;
-                        border: 1px solid #bfc9d1 !important;
+                        border: 1px solid #288cff !important;
                         text-align: center !important;
                     }
                     .iclop-table-custom tbody tr:hover td {
@@ -327,7 +343,7 @@ class MysqlStudentController extends Controller
                         transition: background 0.2s;
                     }
                     .iclop-table-custom td, .iclop-table-custom th {
-                        border: 1px solid #bfc9d1 !important;
+                        border: 1px solid #288cff !important;
                     }
                 </style>
                 <div class="table-responsive" style="max-width:320px;margin:20px auto;">
@@ -335,11 +351,11 @@ class MysqlStudentController extends Controller
                     width:100%;
                     border-collapse:separate;
                     border-spacing:0;
-                    border-radius:10px;
+                    border-radius:5px;
                     overflow:hidden;
                     box-shadow:0 2px 8px rgba(0,0,0,0.07);
                     background:#fff;
-                    border: 1px solid #bfc9d1;
+                    border: 1px solid #288cff;
                 ">
                     <thead>
                         <tr>
@@ -358,7 +374,16 @@ class MysqlStudentController extends Controller
                 $html .= '</tbody></table></div>';
             }
         } catch (\Exception $e) {
-            $html = '<div class="alert alert-danger">Query error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            $html = '<div style="
+                max-width: 85%;
+                background-color: #f8d7da;
+                color: #ff0000;
+                border-radius: 0.5rem;
+                display: inline-block;
+                font-size: 14px;
+                padding: 8px 10px;
+                margin-bottom: 16px;
+            ">Query error: ' . htmlspecialchars($e->getMessage()) . '</div>';
         }
 
         if ($request->ajax()) {
