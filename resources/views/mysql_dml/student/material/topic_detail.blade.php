@@ -220,7 +220,7 @@
         </div>
 
     <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
-        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 5px;margin-bottom:10px">
+        <div style="border: 1px solid #ccc; padding: 20px 10px 10px 30px; border-radius: 10px;margin-bottom:10px">
             @php
                 if($pdf_reader == 0):
                 echo $html_start;
@@ -356,9 +356,42 @@
             });
         }
 
+        function bindRunQueryForm() {
+            const form = document.getElementById('run-query-form');
+            if(form){
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.textContent = 'Loading...';
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams(new FormData(form))
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('query-result').innerHTML = data.html;
+                    })
+                    .catch(() => {
+                        document.getElementById('query-result').innerHTML = '<div class="alert alert-danger">Query failed or not allowed.</div>';
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.textContent = 'Run Query';
+                    });
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             bindAnswerSectionForm();
             bindAnswerSectionPagination();
+            bindRunQueryForm();
         });
     </script>
 </body>

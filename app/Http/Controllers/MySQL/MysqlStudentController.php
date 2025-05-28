@@ -260,7 +260,7 @@ class MysqlStudentController extends Controller
 
         // Gabungkan errorMsg dan summary jika ada
         if ($summary) {
-            return $errorMsg . '<br><br>' . $summary;
+            return $errorMsg . '<br>' . $summary;
         }
         return $errorMsg;
     }
@@ -288,5 +288,82 @@ class MysqlStudentController extends Controller
         $progressPercent = $totalAnswer > 0 ? round(($correctSubmissions / $totalAnswer) * 100) : 0;
 
         return $progressPercent;
+    }
+
+    public function runUserSelectQuery(Request $request)
+    {
+        $request->validate([
+            'userSelectQuery' => 'required|string|max:255',
+        ]);
+        $query = trim($request->input('userSelectQuery'));
+
+        // Hanya izinkan SELECT
+        if (!preg_match('/^select\s+/i', $query)) {
+            $html = '<div class="alert alert-danger">Only SELECT queries are allowed.</div>';
+            if ($request->ajax()) {
+                return response()->json(['html' => $html]);
+            }
+            return back()->with('query_result', $html)->withInput();
+        }
+
+        try {
+            $results = DB::connection('mysql_testing')->select($query);
+
+            if (empty($results)) {
+                $html = '<div class="alert alert-info">No data found.</div>';
+            } else {
+                $columns = array_keys((array)$results[0]);
+                $html = <<<HTML
+                <style>
+                    .iclop-table-custom thead th {
+                        background: #288cff !important;
+                        color: #ffffff !important;
+                        font-weight: bold !important;
+                        border: 1px solid #bfc9d1 !important;
+                        text-align: center !important;
+                    }
+                    .iclop-table-custom tbody tr:hover td {
+                        background: #e3f0fb !important;
+                        transition: background 0.2s;
+                    }
+                    .iclop-table-custom td, .iclop-table-custom th {
+                        border: 1px solid #bfc9d1 !important;
+                    }
+                </style>
+                <div class="table-responsive" style="max-width:320px;margin:20px auto;">
+                <table class="iclop-table-custom" style="
+                    width:100%;
+                    border-collapse:separate;
+                    border-spacing:0;
+                    border-radius:10px;
+                    overflow:hidden;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.07);
+                    background:#fff;
+                    border: 1px solid #bfc9d1;
+                ">
+                    <thead>
+                        <tr>
+                HTML;
+                foreach ($columns as $col) {
+                    $html .= '<th style="padding:8px 14px;">' . htmlspecialchars($col) . '</th>';
+                }
+                $html .= '</tr></thead><tbody>';
+                foreach ($results as $row) {
+                    $html .= '<tr>';
+                    foreach ($columns as $col) {
+                        $html .= '<td style="padding:7px 14px; color:#222; background:#fff;">' . htmlspecialchars($row->$col) . '</td>';
+                    }
+                    $html .= '</tr>';
+                }
+                $html .= '</tbody></table></div>';
+            }
+        } catch (\Exception $e) {
+            $html = '<div class="alert alert-danger">Query error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['html' => $html]);
+        }
+        return back()->with('query_result', $html)->withInput();
     }
 }
