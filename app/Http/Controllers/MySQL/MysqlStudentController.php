@@ -335,7 +335,6 @@ class MysqlStudentController extends Controller
                         background: #288cff !important;
                         color: #ffffff !important;
                         font-weight: bold !important;
-                        border: 1px solid #288cff !important;
                         text-align: center !important;
                     }
                     .iclop-table-custom tbody tr:hover td {
@@ -349,13 +348,11 @@ class MysqlStudentController extends Controller
                 <div class="table-responsive" style="max-width:320px;margin:20px auto;">
                 <table class="iclop-table-custom" style="
                     width:100%;
-                    border-collapse:separate;
+                    /* border-collapse:separate; */
                     border-spacing:0;
                     border-radius:5px;
                     overflow:hidden;
-                    box-shadow:0 2px 8px rgba(0,0,0,0.07);
                     background:#fff;
-                    border: 1px solid #288cff;
                 ">
                     <thead>
                         <tr>

@@ -15,15 +15,15 @@
                             </label>
                             @if($lastAnswer)
                                 @if($lastStatus == 'true')
-                                    <textarea name="userInput" id="userInput" class="form-control" rows="4" disabled>{{ $lastAnswer }}</textarea>
+                                    <textarea name="userInput" id="userInput" class="form-control" rows="4" disabled style="background-color: #f1f1f1; color: #525252;">{{ $lastAnswer }}</textarea>
                                 @else
                                     <textarea name="userInput" id="userInput" class="form-control" rows="4" required>{{ $lastAnswer }}</textarea>
                                 @endif
                             @else
-                                <textarea name="userInput" id="userInput" class="form-control" rows="4" placeholder="Input your answer in here" required></textarea>
+                                <textarea name="userInput" id="userInput" class="form-control" rows="4" placeholder="Input your query in here" required></textarea>
                             @endif
                         </div>
-                        <div style="margin-top: 3rem; margin-left: 10px;">
+                        <div style="margin-top: 2.8rem; margin-left: 10px;">
                             <button type="submit"
                                 class="btn btn-primary d-flex align-items-center justify-content-center"
                                 id="submit-btn"
