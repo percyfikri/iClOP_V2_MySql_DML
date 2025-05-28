@@ -86,6 +86,25 @@
                         Next
                     </button>
                 </div>
+
+                {{-- Next Sub-Topics Button --}}
+                @if($page == $totalAnswer)
+                    @php
+                        // Cari subtopik berikutnya
+                        $nextDetail = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
+                            ->where('id', '>', $detail->id)
+                            ->orderBy('id')
+                            ->first();
+                    @endphp
+                    @if($nextDetail)
+                        <div class="mt-4 text-end">
+                            <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                            class="btn btn-primary fw-semibold">
+                                Next Sub-Topics &rarr;
+                            </a>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>
