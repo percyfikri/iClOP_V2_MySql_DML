@@ -283,7 +283,20 @@
             if(form){
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    const formData = new FormData(form);
+                    // Spinner & disable
+                    const submitBtn = form.querySelector('#submit-btn');
+                    const spinner = form.querySelector('#submit-spinner');
+                    const btnText = form.querySelector('#submit-btn-text');
+                    const textarea = form.querySelector('textarea[name="userInput"]');
+                    if(submitBtn && spinner && btnText) {
+                        submitBtn.disabled = true;
+                        btnText.style.display = 'none';
+                        spinner.style.display = 'inline-block';
+                    }
+
+                    const formData = new FormData(form); // Ambil data sebelum disable textarea!
+                    if(textarea) textarea.disabled = true;
+
                     fetch(form.action, {
                         method: 'POST',
                         headers: {
@@ -298,7 +311,15 @@
                         bindAnswerSectionForm();
                         bindAnswerSectionPagination(); // re-bind after AJAX
                     })
-                    .catch(err => alert('Error: ' + err));
+                    .catch(err => {
+                        alert('Error: ' + err);
+                        if(submitBtn && spinner && btnText) {
+                            submitBtn.disabled = false;
+                            btnText.style.display = '';
+                            spinner.style.display = 'none';
+                        }
+                        if(textarea) textarea.disabled = false;
+                    });
                 });
             }
         }

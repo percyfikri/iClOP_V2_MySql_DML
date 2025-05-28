@@ -23,15 +23,17 @@
                         @endif
                     </div>
                     <div style="margin-top: 3rem; margin-left: 10px;">
-                        @if($lastAnswer)
-                            @if($lastStatus == 'true')
-                                <input type="submit" value="Submit" class="btn btn-primary" disabled>
-                            @else
-                                <input type="submit" value="Submit" class="btn btn-primary">
-                            @endif
-                        @else
-                            <input type="submit" value="Submit" class="btn btn-primary">
-                        @endif
+                        <button type="submit"
+                            class="btn btn-primary d-flex align-items-center justify-content-center"
+                            id="submit-btn"
+                            style="width: max-content; min-width: 90px; min-height: 40px; padding: 0 22px; position: relative;"
+                            @if($lastStatus == 'true') disabled @endif>
+                            <span id="submit-btn-text" style="width:100%; text-align:center;">Submit</span>
+                            <span id="submit-spinner"
+                                class="spinner-border spinner-border-sm"
+                                style="display:none; margin-left: 1.1rem; margin-right: 1.1rem;"
+                                role="status" aria-hidden="true"></span>
+                        </button>
                     </div>
                 </form>
 

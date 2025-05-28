@@ -201,7 +201,11 @@ class MysqlStudentController extends Controller
         //     }
         // }
 
-        return redirect()->back()->with('answer_status', $testResult);
+        return redirect()->route('showTopicDetail', [
+            'mysqlid' => $request->input('mysqlid'),
+            'start' => $request->input('start'),
+            'page' => $request->input('answer_number', 1)
+        ])->with('answer_status', $testResult);
     }
 
     private function getShortFeedback($testResult)
