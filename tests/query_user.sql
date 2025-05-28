@@ -1,1 +1,2 @@
-INSERT INTO mk VALUES('02042', 'Coba');
+INSERT INTO mk_backup
+  SELECT * FROM mk;
