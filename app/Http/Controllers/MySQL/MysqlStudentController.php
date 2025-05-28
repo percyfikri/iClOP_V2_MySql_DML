@@ -67,6 +67,28 @@ class MysqlStudentController extends Controller
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
 
+        if ($request->ajax()) {
+            return view('mysql_dml.student.material._answer_section', compact(
+                'detail',
+                'topics',
+                'topicsNavbar',
+                'mysqlid',
+                'html_start',
+                'pdf_reader',
+                'topicsCount',
+                'detailCount',
+                'output',
+                'roleTeacher',
+                'answerStatus',
+                'lastAnswer',
+                'lastStatus',
+                'lastSubmission',
+                'progressPercent',
+                'totalAnswer',
+                'page'
+            ));
+        }
+
         return view('mysql_dml.student.material.topic_detail', [
             'row' => $detail,
             'topics' => $topics,
