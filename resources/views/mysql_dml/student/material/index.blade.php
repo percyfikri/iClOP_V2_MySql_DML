@@ -321,10 +321,15 @@
                                         </div>
                                         <div class="col" style="text-align: right;">
                                             <div class="custom-button-detail">
-                                                <a class="button-text" data-toggle="modal" data-target="#exampleModal" onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')">
-                                                    <i class="fas fa-key" style="margin-right: 5px;"></i> <!-- Ikon kunci -->
+                                                <button type="button"
+                                                        class="button-text"
+                                                        data-toggle="modal"
+                                                        data-target="#exampleModal"
+                                                        onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
+                                                        style="background: none; border: none; padding: 0; cursor: pointer;">
+                                                    <i class="fas fa-key" style="margin-right: 5px;"></i>
                                                     Material Details
-                                                </a>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
