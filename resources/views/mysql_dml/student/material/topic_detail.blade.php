@@ -319,7 +319,8 @@
                         document.getElementById('answer-section').innerHTML = html;
                         bindAnswerSectionForm();
                         bindAnswerSectionPagination();
-                        bindRunQueryForm(); // <-- tambahkan ini di sini!
+                        bindRunQueryForm();
+                        updateSidebarProgress(); // <-- Tambahkan ini!
                     })
                     .catch(err => {
                         alert('Error: ' + err);
@@ -351,7 +352,8 @@
                         document.getElementById('answer-section').innerHTML = html;
                         bindAnswerSectionForm();
                         bindAnswerSectionPagination();
-                        bindRunQueryForm(); // <-- tambahkan ini di sini juga!
+                        bindRunQueryForm();
+                        updateSidebarProgress(); // <-- Tambahkan ini!
                     })
                     .catch(err => alert('Error: ' + err));
                 });
@@ -388,6 +390,20 @@
                     });
                 });
             }
+        }
+
+        function updateSidebarProgress() {
+            // Update progress text dan progressbar AJAX
+            const mysqlid = document.querySelector('input[name="mysqlid"]').value;
+            fetch('{{ route('student.progress.ajax') }}?mysqlid=' + mysqlid, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Update progress text dan progressbar
+                document.querySelector('.progress-text').textContent = data.progress + '%';
+                document.getElementById('progressbar').style.width = data.progress + '%';
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {

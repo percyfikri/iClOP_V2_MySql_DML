@@ -29,6 +29,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/detail-topics', [MysqlStudentController::class, 'showTopicDetail'])->name('showTopicDetail');
         Route::post('/submit', [MysqlStudentController::class, 'submitUserInput'])->name('submitUserInput');
         Route::post('/run-user-select-query', [MysqlStudentController::class, 'runUserSelectQuery'])->name('runUserSelectQuery');
+        Route::get('/student/progress', [MysqlStudentController::class, 'getStudentProgressAjax'])->name('student.progress.ajax');
         //-----------------CHANGED-----------------
     });
 });

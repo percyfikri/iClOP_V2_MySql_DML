@@ -388,4 +388,12 @@ class MysqlStudentController extends Controller
         }
         return back()->with('query_result', $html)->withInput();
     }
+
+    public function getStudentProgressAjax(Request $request)
+    {
+        $userId = Auth::user()->id;
+        $mysqlid = (int) $request->get('mysqlid');
+        $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
+        return response()->json(['progress' => $progressPercent]);
+    }
 }
