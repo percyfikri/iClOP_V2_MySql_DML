@@ -1,8 +1,8 @@
-INSERT INTO `prodi` (`kode_prodi`, `nama_prodi`) VALUES
+INSERT IGNORE INTO `prodi` (`kode_prodi`, `nama_prodi`) VALUES
 ('001', 'D3 Manajemen Informatika'),
 ('002', 'D4 Teknik Informatika');
 
-INSERT INTO `kelas` (`kode_kelas`, `kode_prodi`, `nama_kelas`) VALUES
+INSERT IGNORE INTO `kelas` (`kode_kelas`, `kode_prodi`, `nama_kelas`) VALUES
 ('2021010101', '001', 'MI-1A'),
 ('2021010102', '001', 'MI-1B'),
 ('2021010103', '001', 'MI-1C'),
@@ -56,7 +56,7 @@ INSERT INTO `kelas` (`kode_kelas`, `kode_prodi`, `nama_kelas`) VALUES
 ('2021020406', '002', 'TI-4F'),
 ('2021020407', '002', 'TI-4G');
 
-INSERT INTO `dosen` (`kode_dosen`, `nama_dosen`) VALUES
+INSERT IGNORE INTO `dosen` (`kode_dosen`, `nama_dosen`) VALUES
 ('D001', 'Abdul Chalim, SAg., MPd.I'),
 ('D002', 'Ade Ismail'),
 ('D003', 'Agung Nugroho Pramudhita ST., MT.'),
@@ -143,7 +143,7 @@ INSERT INTO `dosen` (`kode_dosen`, `nama_dosen`) VALUES
 ('D084', 'Yuri Ariyanto, SKom., MKom.'),
 ('D085', 'Zulmy Faqihuddin Putera, S.Pd., M.Pd');
 
-INSERT INTO `hari` (`kode_hari`, `nama_hari`) VALUES
+INSERT IGNORE INTO `hari` (`kode_hari`, `nama_hari`) VALUES
 ('001', 'Senin'),
 ('002', 'Selasa'),
 ('003', 'Rabu'),
@@ -152,7 +152,7 @@ INSERT INTO `hari` (`kode_hari`, `nama_hari`) VALUES
 ('006', 'Sabtu'),
 ('007', 'Minggu');
 
-INSERT INTO `jp` (`kode_jp`, `jp_mulai`, `jp_selesai`) VALUES
+INSERT IGNORE INTO `jp` (`kode_jp`, `jp_mulai`, `jp_selesai`) VALUES
 (1, '07:00:00', '07:50:00'),
 (2, '07:50:00', '08:40:00'),
 (3, '08:40:00', '09:30:00'),
@@ -166,7 +166,7 @@ INSERT INTO `jp` (`kode_jp`, `jp_mulai`, `jp_selesai`) VALUES
 (11, '16:20:00', '17:10:00'),
 (12, '17:10:00', '18:00:00');
 
-INSERT INTO `mk` (`kode_mk`, `nama_mk`) VALUES
+INSERT IGNORE INTO `mk` (`kode_mk`, `nama_mk`) VALUES
 
 ('02007', 'Bahasa Inggris'),
 ('02008', 'Bahasa Inggris 2'),
@@ -201,7 +201,7 @@ INSERT INTO `mk` (`kode_mk`, `nama_mk`) VALUES
 ('02039', 'Sistem Pendukung Keputusan'),
 ('02040', 'Struktur Data');
 
-INSERT INTO `ruang` (`kode_ruang`, `nama_ruang`, `deskripsi_ruang`) VALUES
+INSERT IGNORE INTO `ruang` (`kode_ruang`, `nama_ruang`, `deskripsi_ruang`) VALUES
 ('0501', 'RT01', 'Ruang Teori 1'),
 ('0502', 'RT02', 'Ruang Teori 2'),
 ('0503', 'RT03', 'Ruang Teori 3'),
@@ -239,7 +239,7 @@ INSERT INTO `ruang` (`kode_ruang`, `nama_ruang`, `deskripsi_ruang`) VALUES
 ('1003', 'ROL2', 'Ruang Online 2'),
 ('1004', 'ROL3', 'Ruang Online 3');
 
-INSERT INTO `jadwal` (`kode_jadwal`, `kode_kelas`, `kode_dosen`, `kode_mk`, `kode_ruang`, `kode_hari`, `jp_mulai`, `jp_selesai`) VALUES
+INSERT IGNORE INTO `jadwal` (`kode_jadwal`, `kode_kelas`, `kode_dosen`, `kode_mk`, `kode_ruang`, `kode_hari`, `jp_mulai`, `jp_selesai`) VALUES
 (8, '2021010206', 'D002', '02037', '0702', '001', 7, 12),
 (9, '2021020202', 'D002', '02036', '0708', '003', 2, 4),
 (10, '2021010205', 'D002', '02037', '0713', '004', 1, 6),
