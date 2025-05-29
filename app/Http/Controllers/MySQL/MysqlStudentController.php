@@ -451,4 +451,30 @@ class MysqlStudentController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function resetTestingDatabase(Request $request)
+    {
+        $connection = DB::connection('mysql_testing');
+        $dbName = $connection->getDatabaseName();
+
+        // 1. Disable foreign key checks
+        $connection->statement('SET FOREIGN_KEY_CHECKS=0');
+
+        // 2. Drop all tables
+        $tables = $connection->select('SHOW TABLES');
+        foreach ($tables as $table) {
+            $tableName = array_values((array)$table)[0];
+            $connection->statement("DROP TABLE IF EXISTS `$tableName`");
+        }
+
+        // 3. Enable foreign key checks
+        $connection->statement('SET FOREIGN_KEY_CHECKS=1');
+
+        // 4. Import default SQL
+        $sqlFile = base_path('database/default null data_iclop_v2_testing.sql');
+        $sql = file_get_contents($sqlFile);
+        $connection->unprepared($sql);
+
+        return response()->json(['success' => true, 'message' => 'Database testing berhasil direset!']);
+    }
 }

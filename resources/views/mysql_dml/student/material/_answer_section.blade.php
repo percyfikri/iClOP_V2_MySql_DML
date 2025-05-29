@@ -130,7 +130,7 @@
                                     </button>
                                 @endif
                             @else
-                                <a href="{{ url('/mysql/start') }}" class="btn btn-success fw-semibold">
+                                <a href="{{ url('/mysql/start') }}" id="reset-testing-db-btn" class="btn btn-success fw-semibold">
                                     Submit All Answer
                                 </a>
                             @endif
@@ -172,6 +172,34 @@ document.addEventListener('click', function(e) {
                 alert('Import gagal: ' + data.message);
                 importBtn.disabled = false;
                 importBtn.textContent = 'Next Sub-Topics →';
+            }
+        });
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'reset-testing-db-btn') {
+        e.preventDefault();
+        if(!confirm('Yakin ingin mengakhiri dan reset database testing?')) return;
+        const btn = e.target;
+        btn.disabled = true;
+        btn.textContent = 'Resetting...';
+        fetch('{{ route('student.reset.testing.db') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                alert('Database berhasil direset!');
+                window.location.href = '{{ url("/mysql/start") }}';
+            } else {
+                alert('Gagal reset: ' + data.message);
+                btn.disabled = false;
+                btn.textContent = 'Submit All Answer';
             }
         });
     }
