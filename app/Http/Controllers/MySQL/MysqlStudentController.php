@@ -474,7 +474,7 @@ class MysqlStudentController extends Controller
         $connection->statement('SET FOREIGN_KEY_CHECKS=1');
 
         // 4. Import default SQL
-        $sqlFile = base_path('database/default null data_iclop_v2_testing.sql');
+        $sqlFile = base_path('database/v8_iclop_v2_testing.sql');
         $sql = file_get_contents($sqlFile);
         $connection->unprepared($sql);
 
