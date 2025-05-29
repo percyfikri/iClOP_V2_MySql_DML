@@ -336,6 +336,7 @@ class MysqlStudentController extends Controller
                         color: #ffffff !important;
                         font-weight: bold !important;
                         text-align: center !important;
+                        white-space: nowrap;
                     }
                     .iclop-table-custom tbody tr:hover td {
                         background: #e3f0fb !important;
@@ -343,16 +344,28 @@ class MysqlStudentController extends Controller
                     }
                     .iclop-table-custom td, .iclop-table-custom th {
                         border: 1px solid #288cff !important;
+                        white-space: nowrap;
+                    }
+                    .iclop-table-scroll {
+                        max-height: 350px;
+                        overflow-y: auto;
+                        overflow-x: auto;
+                        margin: 20px auto;
+                        display: flex;
+                        justify-content: center;
+                        width: fit-content;
+                        max-width: 100%;
                     }
                 </style>
-                <div class="table-responsive" style="max-width:320px;margin:20px auto;">
+                <div class="iclop-table-scroll">
                 <table class="iclop-table-custom" style="
-                    width:100%;
-                    /* border-collapse:separate; */
+                    width: auto;
+                    min-width: 100px;
                     border-spacing:0;
                     border-radius:5px;
                     overflow:hidden;
                     background:#fff;
+                    margin: 0 auto;
                 ">
                     <thead>
                         <tr>

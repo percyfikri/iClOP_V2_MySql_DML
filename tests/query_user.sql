@@ -1,2 +1,1 @@
-INSERT INTO mk_backup
-  SELECT * FROM mk;
+DELETE FROM jadwal;
