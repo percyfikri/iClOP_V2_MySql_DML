@@ -169,54 +169,24 @@
     </nav>
 
         <!-- Sidebar -->
-        <div id="sidebar" class="sidebar" style="border-left: 1px solid #E4E4E7; padding: 20px; width: 100%; max-width: 400px;">
+        <div class="sidebar" style="border-left: 1px solid #E4E4E7; padding: 20px; width: 100%; max-width: 400px;">
             <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px">
                 <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
             </p>
-            <div class="progress-text">{{ $progressPercent }}%</div>
+            <div class="progress-text" id="progress-text">{{ $progressPercent }}%</div>
             <div class="progress-container">
                 <div id="progressbar" style="width: {{ $progressPercent }}%;"></div>
             </div>
-            <ul class="list pt-3">
-                
-                    @php
-                    // Ambil mysqlid dari query string
-                    $mysqlid = request()->get('mysqlid');
-
-                    // Ambil data mysql_topic_details berdasarkan mysqlid
-                    $rows = DB::table('mysql_topic_details')
-                        ->where('topic_id', $mysqlid)
-                        ->get();
-                        $no = 1;
-                    @endphp
-                    @foreach($rows as $row)
-                        @php
-                            $no++;
-                            $count_ = ($no / $detailCount) * 10;
-                            $mysqldid = isset($_GET['start']) ? $_GET['start'] : '';
-                            $active = ($row->id == $mysqldid) ? 'color:#000; font-weight:bold; text-decoration: underline;' : '';
-
-                            // Cek apakah semua jawaban pada subtopik ini sudah benar
-                            $correctCount = DB::table('mysql_student_submissions')
-                                ->where('user_id', Auth::user()->id)
-                                ->where('topic_detail_id', $row->id)
-                                ->where('status', 'true')
-                                ->count();
-                            $isComplete = ($correctCount >= $row->total_answer);
-                        @endphp
-                        {{-- Title topic detail --}}
-                        <div class="row px-4 py-2">
-                            <div class="col" style="padding-bottom: 1rem;">
-                                <img src="{{ asset('images/book.png') }}" style="height: 24px; margin-right: 10px;">
-                                <a class="text" style="{{ $active }};" href="{{ route('showTopicDetail') }}?mysqlid={{ $mysqlid }}&start={{ $row->id }}" id="requirement">{{ $row->title }}</a>
-                                @if($isComplete)
-                                    <span style="color: #28a745; font-size: 18px; margin-left: 6px; font-weight:bold;" title="Completed">&#10003;</span>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                
-            </ul>
+            
+            {{-- Bagian checklist subtopik, hanya ini yang AJAX --}}
+            <div id="sidebar">
+                @include('mysql_dml.student.material.sidebar', [
+                    'rows' => $rows,
+                    'detailCount' => $detailCount,
+                    'mysqlid' => $mysqlid,
+                    'detailId' => $detail->id ?? null
+                ])
+            </div>
         </div>
 
     <div style="padding: 20px; max-width: 68%; margin-left:5px;  ">
@@ -320,7 +290,8 @@
                         bindAnswerSectionForm();
                         bindAnswerSectionPagination();
                         bindRunQueryForm();
-                        updateSidebarProgress(); // <-- Tambahkan ini!
+                        updateSidebarProgress();
+                        updateSidebar(); // <-- Tambahkan ini!
                     })
                     .catch(err => {
                         alert('Error: ' + err);
@@ -353,7 +324,8 @@
                         bindAnswerSectionForm();
                         bindAnswerSectionPagination();
                         bindRunQueryForm();
-                        updateSidebarProgress(); // <-- Tambahkan ini!
+                        updateSidebarProgress();
+                        updateSidebar();
                     })
                     .catch(err => alert('Error: ' + err));
                 });
@@ -403,6 +375,18 @@
                 // Update progress text dan progressbar
                 document.querySelector('.progress-text').textContent = data.progress + '%';
                 document.getElementById('progressbar').style.width = data.progress + '%';
+            });
+        }
+
+        function updateSidebar() {
+            const mysqlid = document.querySelector('input[name="mysqlid"]').value;
+            const start = document.querySelector('input[name="start"]').value;
+            fetch('{{ route('student.sidebar.ajax') }}?mysqlid=' + mysqlid + '&start=' + start, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('sidebar').innerHTML = html;
             });
         }
 

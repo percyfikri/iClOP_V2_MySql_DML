@@ -46,6 +46,7 @@ class MysqlStudentController extends Controller
         }
 
         $results = DB::select("select * from mysql_topic_details where topic_id = $mysqlid and id ='$start' ");
+        $rows = DB::table('mysql_topic_details')->where('topic_id', $mysqlid)->get();
         $html_start = '';
         $pdf_reader = 0;
         foreach ($results as $r) {
@@ -108,6 +109,7 @@ class MysqlStudentController extends Controller
             'progressPercent' => $progressPercent,
             'totalAnswer' => $totalAnswer,
             'page' => $page,
+            'rows' => $rows,
         ]);
     }
 
@@ -408,6 +410,31 @@ class MysqlStudentController extends Controller
         $mysqlid = (int) $request->get('mysqlid');
         $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
         return response()->json(['progress' => $progressPercent]);
+    }
+
+    // Method untuk mengambil data sidebar checklist
+    public function sidebarAjax(Request $request)
+    {
+        $mysqlid = $request->get('mysqlid');
+        $detailId = $request->get('start');
+        $progressPercent = $this->getStudentProgressByTopic(Auth::id(), $mysqlid);
+        $detailCount = DB::table('mysql_topic_details')->where('topic_id', $mysqlid)->count();
+        $detail = DB::table('mysql_topic_details')->where('id', $detailId)->first();
+        $pdf_reader = 0; // atau sesuai kebutuhan
+        $html_start = ''; // atau sesuai kebutuhan
+
+        $rows = DB::table('mysql_topic_details')->where('topic_id', $mysqlid)->get();
+
+        return view('mysql_dml.student.material.sidebar', compact(
+            'mysqlid',
+            'detail',
+            'progressPercent',
+            'detailCount',
+            'pdf_reader',
+            'html_start',
+            'rows',
+            'detailId'
+        ))->render();
     }
 
     public function importSqlData(Request $request)
