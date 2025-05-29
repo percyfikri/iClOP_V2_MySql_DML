@@ -112,12 +112,23 @@
                                     ->where('id', '>', $detail->id)
                                     ->orderBy('id')
                                     ->first();
+                                // Cek semua jawaban benar
+                                $allCorrect = \DB::table('mysql_student_submissions')
+                                    ->where('user_id', Auth::user()->id)
+                                    ->where('topic_detail_id', $detail->id)
+                                    ->where('status', 'true')
+                                    ->count() >= $detail->total_answer;
                             @endphp
                             @if($nextDetail)
-                                <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
-                                    class="btn btn-primary fw-semibold">
-                                    Next Sub-Topics &rarr;
-                                </a>
+                                @if($allCorrect)
+                                    <button id="import-next-btn" class="btn btn-primary fw-semibold" data-next="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}">
+                                        Next Sub-Topics &rarr;
+                                    </button>
+                                @else
+                                    <button class="btn btn-primary fw-semibold" disabled>
+                                        Next Sub-Topics &rarr;
+                                    </button>
+                                @endif
                             @else
                                 <a href="{{ url('/mysql/start') }}" class="btn btn-success fw-semibold">
                                     Submit All Answer
@@ -137,3 +148,32 @@
             </div>
         {{-- </div> --}}
     </div>
+
+<script>
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'import-next-btn') {
+        // alert('Button clicked!');
+        const importBtn = e.target;
+        importBtn.disabled = true;
+        // importBtn.textContent = 'Importing...';
+        fetch('{{ route('student.import.sql') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            // console.log(data);
+            if(data.success){
+                window.location.href = importBtn.getAttribute('data-next');
+            } else {
+                alert('Import gagal: ' + data.message);
+                importBtn.disabled = false;
+                importBtn.textContent = 'Next Sub-Topics →';
+            }
+        });
+    }
+});
+</script>
