@@ -148,9 +148,19 @@
                             @endphp
                             @if($nextDetail)
                                 @if($allCorrect)
-                                    <button id="import-next-btn" class="btn btn-primary fw-semibold" data-next="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}">
-                                        Next Sub-Topics &rarr;
-                                    </button>
+                                    @if($isReset)
+                                        <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                                           id="import-next-btn"
+                                           class="btn btn-primary fw-semibold">
+                                            Next Sub-Topics &rarr;
+                                        </a>
+                                    @else
+                                        <button id="import-next-btn"
+                                                class="btn btn-primary fw-semibold"
+                                                data-next="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}">
+                                            Next Sub-Topics &rarr;
+                                        </button>
+                                    @endif
                                 @else
                                     <button class="btn btn-primary fw-semibold" disabled>
                                         Next Sub-Topics &rarr;
@@ -198,11 +208,10 @@
 
 <script>
 document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'import-next-btn') {
-        // alert('Button clicked!');
+    // Hanya untuk button, bukan <a>
+    if (e.target && e.target.id === 'import-next-btn' && e.target.tagName === 'BUTTON') {
         const importBtn = e.target;
         importBtn.disabled = true;
-        // importBtn.textContent = 'Importing...';
         fetch('{{ route('student.import.sql') }}', {
             method: 'POST',
             headers: {
@@ -212,7 +221,6 @@ document.addEventListener('click', function(e) {
         })
         .then(res => res.json())
         .then(data => {
-            // console.log(data);
             if(data.success){
                 window.location.href = importBtn.getAttribute('data-next');
             } else {
