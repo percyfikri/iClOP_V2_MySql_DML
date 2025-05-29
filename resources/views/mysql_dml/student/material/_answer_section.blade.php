@@ -87,7 +87,7 @@
                         <label for="userSelectQuery" class="mb-2 fw-semibold">Try Query Data (SELECT only):</label>
                         <div class="d-flex align-items-start mb-2">
                             <textarea name="userSelectQuery" id="userSelectQuery" class="form-control me-3" rows="4" placeholder="e.g. SELECT * FROM mk" style="resize: vertical;"></textarea>
-                            <button type="submit" class="btn btn-primary" style="height: 40px; white-space: nowrap;">Run Query</button>
+                            <button type="submit" class="btn btn-success" style="height: 40px; white-space: nowrap;">Run Query</button>
                         </div>
                     </form>
                     <div id="query-result" class="mt-3">
@@ -105,32 +105,35 @@
                             Previous
                         </button>
                         <span class="fw-semibold">Answer {{ $page }} of {{ $totalAnswer }}</span>
-                        <button type="button"
-                            class="btn btn-outline-secondary answer-pagination"
-                            data-page="{{ $page + 1 }}"
-                            {{ $page == $totalAnswer ? 'disabled' : '' }}>
-                            Next
-                        </button>
+                        @if($page == $totalAnswer)
+                            @php
+                                // Cari subtopik berikutnya
+                                $nextDetail = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
+                                    ->where('id', '>', $detail->id)
+                                    ->orderBy('id')
+                                    ->first();
+                            @endphp
+                            @if($nextDetail)
+                                <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                                    class="btn btn-primary fw-semibold">
+                                    Next Sub-Topics &rarr;
+                                </a>
+                            @else
+                                <a href="{{ url('/mysql/start') }}" class="btn btn-success fw-semibold">
+                                    Submit All Answer
+                                </a>
+                            @endif
+                        @else
+                            <button type="button"
+                                class="btn btn-outline-secondary answer-pagination"
+                                data-page="{{ $page + 1 }}">
+                                Next
+                            </button>
+                        @endif
                     </div>
+                    
+                    {{-- Next Sub-Topics Button --}}
                 </div>
-                {{-- Next Sub-Topics Button --}}
-                @if($page == $totalAnswer)
-                    @php
-                        // Cari subtopik berikutnya
-                        $nextDetail = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
-                            ->where('id', '>', $detail->id)
-                            ->orderBy('id')
-                            ->first();
-                    @endphp
-                    @if($nextDetail)
-                        <div class="mt-4 text-end">
-                            <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
-                            class="btn btn-primary fw-semibold">
-                                Next Sub-Topics &rarr;
-                            </a>
-                        </div>
-                    @endif
-                @endif
             </div>
         {{-- </div> --}}
     </div>
