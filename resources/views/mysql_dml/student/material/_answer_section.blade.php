@@ -19,12 +19,6 @@
         ->value('is_reset');
 @endphp
 
-{{-- Debug --}}
-<div>
-    Completed: {{ $completedSubtopics }} / {{ $totalSubtopics }}<br>
-    All Completed: {{ $allSubtopicsCompleted ? 'YES' : 'NO' }}
-</div>
-
 {{-- Submit Query from user input --}}
     <div id="answer-section">
         {{-- <div style="border: 1px solid #ccc; padding: 20px 20px; border-radius: 10px; margin-bottom: 40px;"> --}}
@@ -235,10 +229,10 @@ document.addEventListener('click', function(e) {
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'reset-testing-db-btn' && !e.target.disabled) {
         e.preventDefault();
-        if(!confirm('Yakin ingin mengakhiri dan reset database testing?')) return;
+        // if(!confirm('Yakin ingin mengakhiri dan reset database testing?')) return;
         const btn = e.target;
         btn.disabled = true;
-        btn.textContent = 'Resetting...';
+        // btn.textContent = 'Resetting...';
         fetch('{{ route('student.reset.testing.db') }}', {
             method: 'POST',
             headers: {
@@ -253,7 +247,7 @@ document.addEventListener('click', function(e) {
         .then(res => res.json())
         .then(data => {
             if(data.success){
-                alert('Database berhasil direset!');
+                // alert('Database berhasil direset!');
                 window.location.href = '{{ url("/mysql/start") }}';
             } else {
                 alert('Gagal reset: ' + data.message);
