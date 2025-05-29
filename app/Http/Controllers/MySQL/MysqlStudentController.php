@@ -454,6 +454,9 @@ class MysqlStudentController extends Controller
 
     public function resetTestingDatabase(Request $request)
     {
+        $userId = Auth::id();
+        $mysqlid = $request->get('mysqlid'); // pastikan dikirim dari AJAX
+
         $connection = DB::connection('mysql_testing');
         $dbName = $connection->getDatabaseName();
 
@@ -474,6 +477,12 @@ class MysqlStudentController extends Controller
         $sqlFile = base_path('database/default null data_iclop_v2_testing.sql');
         $sql = file_get_contents($sqlFile);
         $connection->unprepared($sql);
+
+        // Simpan status reset
+        DB::table('mysql_user_reset')->updateOrInsert(
+            ['user_id' => $userId, 'topic_id' => $mysqlid],
+            ['is_reset' => true]
+        );
 
         return response()->json(['success' => true, 'message' => 'Database testing berhasil direset!']);
     }

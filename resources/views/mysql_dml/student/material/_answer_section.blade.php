@@ -1,3 +1,30 @@
+@php
+    // Hitung jumlah subtopik pada topik ini
+    $totalSubtopics = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)->count();
+    // Hitung jumlah subtopik yang sudah completed (semua jawaban benar)
+    $completedSubtopics = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
+        ->get()
+        ->filter(function($subtopic) {
+            return \DB::table('mysql_student_submissions')
+                ->where('user_id', Auth::user()->id)
+                ->where('topic_detail_id', $subtopic->id)
+                ->where('status', 'true')
+                ->count() >= $subtopic->total_answer;
+        })->count();
+    $allSubtopicsCompleted = ($totalSubtopics > 0 && $completedSubtopics == $totalSubtopics);
+
+    $isReset = \DB::table('mysql_user_reset')
+        ->where('user_id', Auth::id())
+        ->where('topic_id', $mysqlid)
+        ->value('is_reset');
+@endphp
+
+{{-- Debug --}}
+<div>
+    Completed: {{ $completedSubtopics }} / {{ $totalSubtopics }}<br>
+    All Completed: {{ $allSubtopicsCompleted ? 'YES' : 'NO' }}
+</div>
+
 {{-- Submit Query from user input --}}
     <div id="answer-section">
         {{-- <div style="border: 1px solid #ccc; padding: 20px 20px; border-radius: 10px; margin-bottom: 40px;"> --}}
@@ -28,7 +55,7 @@
                                 class="btn btn-primary d-flex align-items-center justify-content-center"
                                 id="submit-btn"
                                 style="width: max-content; min-width: 90px; min-height: 40px; padding: 0 22px; position: relative;"
-                                @if($lastStatus == 'true') disabled @endif>
+                                @if($lastStatus == 'true' || $isReset) disabled @endif>
                                 <span id="submit-btn-text" style="width:100%; text-align:center;">Submit</span>
                                 <span id="submit-spinner"
                                     class="spinner-border spinner-border-sm"
@@ -87,7 +114,7 @@
                         <label for="userSelectQuery" class="mb-2 fw-semibold">Try Query Data (SELECT only):</label>
                         <div class="d-flex align-items-start mb-2">
                             <textarea name="userSelectQuery" id="userSelectQuery" class="form-control me-3" rows="4" placeholder="e.g. SELECT * FROM mk" style="resize: vertical;"></textarea>
-                            <button type="submit" class="btn btn-success" style="height: 40px; white-space: nowrap;">Run Query</button>
+                            <button type="submit" class="btn btn-success" style="height: 40px; white-space: nowrap;" @if($isReset) disabled @endif>Run Query</button>
                         </div>
                     </form>
                     <div id="query-result" class="mt-3">
@@ -130,9 +157,29 @@
                                     </button>
                                 @endif
                             @else
-                                <a href="{{ url('/mysql/start') }}" id="reset-testing-db-btn" class="btn btn-success fw-semibold">
-                                    Submit All Answer
-                                </a>
+                                @if($page == $totalAnswer && !$nextDetail)
+                                    @if($allSubtopicsCompleted)
+                                        @if($isReset)
+                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
+                                                Submit All Answer
+                                            </button>
+                                        @else
+                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
+                                                Submit All Answer
+                                            </button>
+                                        @endif
+                                    @else
+                                        @if($isReset)
+                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
+                                                Submit All Answer
+                                            </button>
+                                        @else
+                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
+                                                Submit All Answer
+                                            </button>
+                                        @endif
+                                    @endif
+                                @endif
                             @endif
                         @else
                             <button type="button"
@@ -178,7 +225,7 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'reset-testing-db-btn') {
+    if (e.target && e.target.id === 'reset-testing-db-btn' && !e.target.disabled) {
         e.preventDefault();
         if(!confirm('Yakin ingin mengakhiri dan reset database testing?')) return;
         const btn = e.target;
@@ -188,8 +235,12 @@ document.addEventListener('click', function(e) {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mysqlid: btn.getAttribute('data-mysqlid')
+            })
         })
         .then(res => res.json())
         .then(data => {
