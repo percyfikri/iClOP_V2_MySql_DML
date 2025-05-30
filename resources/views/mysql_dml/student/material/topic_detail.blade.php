@@ -31,7 +31,8 @@
             background-color: #EAEAEA;
             color: #636363;
             text-align: center;
-            padding: 10px 0;
+            font-size: 12px;
+            padding: 5px 0;
             position: fixed;
             bottom: 0;
             width: 100%;
@@ -212,10 +213,9 @@
         </div>
     </div>
 
-    {{-- Submit Query from user input --}}
     <!-- Footer -->
     <footer class="footer">
-        © 2023 Your Website. All rights reserved.
+        © 2025 Your Website. All rights reserved.
     </footer>
     
     <script src="https://cdn.ckeditor.com/ckeditor5/34.2.0/classic/ckeditor.js"></script>
