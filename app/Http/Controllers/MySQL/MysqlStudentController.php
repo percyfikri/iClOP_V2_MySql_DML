@@ -207,7 +207,7 @@ class MysqlStudentController extends Controller
             'mysqlid' => $request->input('mysqlid'),
             'start' => $request->input('start'),
             'page' => $request->input('answer_number', 1)
-        ])->with('answer_status', $testResult);
+        ])->with('answer_status', $shortFeedback);
     }
 
     private function getShortFeedback($testResult)
@@ -223,11 +223,32 @@ class MysqlStudentController extends Controller
             return 'OK (1 test, 0 assertions)';
         }
 
-        // Jika salah, ambil hanya pesan error SQLSTATE yang penting
         $lines = explode("\n", $testResult);
+        $extraFeedback = [];
+        $hasWhereError = false;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            // Tambahkan filter untuk pesan error baru (EN)
+            if (stripos($line, 'The WHERE condition must have a clear comparison operator or condition') !== false) {
+                $hasWhereError = true;
+                $extraFeedback[] = $line;
+            }
+            // Tambahkan filter untuk pesan error lain jika perlu
+            if (
+                stripos($line, 'The number of columns and values in the INSERT statement must be the same') !== false ||
+                stripos($line, 'Call to undefined method') !== false ||
+                stripos($line, 'Undefined variable') !== false
+            ) {
+                $extraFeedback[] = $line;
+            }
+        }
+        // --- END Tambahan ---
+
+        // Jika salah, ambil hanya pesan error SQLSTATE yang penting dan Summary
         $errorMsg = '';
         $summary = '';
-
         foreach ($lines as $line) {
             // Cari baris yang mengandung SQLSTATE
             if (preg_match('/SQLSTATE\[[^\]]+\]:.*$/', $line, $matches)) {
@@ -250,21 +271,19 @@ class MysqlStudentController extends Controller
             }
         }
 
-        // Jika masih tidak ketemu, ambil baris error pertama yang tidak kosong
-        if (!$errorMsg) {
-            foreach ($lines as $line) {
-                if (trim($line) !== '') {
-                    $errorMsg = trim($line);
-                    break;
-                }
-            }
+        // Gabungkan feedback tambahan dan feedback lama
+        $allFeedback = [];
+        if (!empty($extraFeedback)) {
+            $allFeedback[] = implode('<br>', $extraFeedback);
+        }
+        if ($errorMsg) {
+            $allFeedback[] = $errorMsg;
+        }
+        if ($summary) {
+            $allFeedback[] = $summary;
         }
 
-        // Gabungkan errorMsg dan summary jika ada
-        if ($summary) {
-            return $errorMsg . '<br>' . $summary;
-        }
-        return $errorMsg;
+        return implode('<br>', $allFeedback);
     }
 
     public function getStudentProgressByTopic($userId, $topicId)
