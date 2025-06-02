@@ -413,13 +413,60 @@
                 if (countdownSeconds <= 0) {
                     clearInterval(timerInterval);
                     timerDisplay.textContent = 'Waktu Habis!';
-                    // Optional: lakukan aksi jika waktu habis, misal disable form
-                    // document.querySelectorAll('form').forEach(f => f.querySelector('button[type="submit"]').disabled = true);
+                    // Otomatis submit all answer
+                    autoSubmitAllAnswer();
                 }
                 countdownSeconds--;
             }
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Fungsi otomatis submit all answer
+        function autoSubmitAllAnswer() {
+            // Cegah double submit
+            if (window._autoSubmitRunning) return;
+            window._autoSubmitRunning = true;
+
+            // 1. Simpan durasi pengerjaan
+            fetch('{{ route('student.finish.topic') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mysqlid: '{{ $mysqlid }}'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    // 2. Jika sukses, lanjut reset database
+                    fetch('{{ route('student.reset.testing.db') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            mysqlid: '{{ $mysqlid }}'
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success){
+                            window.location.href = '{{ url("/mysql/start") }}';
+                        } else {
+                            alert('Gagal reset: ' + data.message);
+                        }
+                    });
+                } else {
+                    alert('Gagal menyimpan durasi pengerjaan.');
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
