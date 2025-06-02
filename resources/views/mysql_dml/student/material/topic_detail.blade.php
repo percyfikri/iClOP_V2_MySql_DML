@@ -171,11 +171,14 @@
 
         <!-- Sidebar -->
         <div class="sidebar" style="border-left: 1px solid #E4E4E7; padding: 20px; width: 100%; max-width: 400px;">
-            <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px">
-                <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
-            </p>
-            <div id="countdown-timer" style="font-size: 18px; color: #d9534f; font-weight: bold; margin-bottom: 10px;">
-                <!-- Timer akan muncul di sini -->
+            <div class="d-flex align-items-center justify-content-between mb-3" style="gap: 10px;">
+                <p class="text-list my-2" style="font-size: 18px; font-weight: 600; font-size: 20px">
+                    <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
+                </p>
+                @if(!$isFinished)
+                    <div  id="countdown-timer" style="font-size: 16px; color: white; font-weight: bold; margin-bottom: 0;
+                   background: #0066ff; border-radius: 10px; padding: 5px; text-align: center; border: 1px solid #0066ff;"></div>
+                @endif
             </div>
             <div class="progress-text" id="progress-text">{{ $progressPercent }}%</div>
             <div class="progress-container">

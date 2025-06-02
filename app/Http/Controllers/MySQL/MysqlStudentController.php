@@ -80,6 +80,8 @@ class MysqlStudentController extends Controller
             $sisaDetik = $countdownSeconds;
         }
 
+        $isFinished = $topicTime && $topicTime->is_finished == 1;
+
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
 
@@ -126,6 +128,7 @@ class MysqlStudentController extends Controller
             'page' => $page,
             'rows' => $rows,
             'countdownSeconds' => $sisaDetik,
+            'isFinished' => $isFinished,
         ]);
     }
 
@@ -533,6 +536,7 @@ class MysqlStudentController extends Controller
             ->where('topic_id', $topicId)
             ->first();
 
+        // Jangan buat sesi baru jika sudah selesai
         if (!$existing) {
             DB::table('mysql_student_topic_times')->insert([
                 'user_id' => $userId,
@@ -540,8 +544,10 @@ class MysqlStudentController extends Controller
                 'started_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
+                'is_finished' => 0,
             ]);
         }
+        // Jika sudah selesai, tidak perlu insert apa-apa
 
         return response()->json(['success' => true]);
     }
@@ -561,7 +567,11 @@ class MysqlStudentController extends Controller
             $duration = $now->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
             DB::table('mysql_student_topic_times')
                 ->where('id', $topicTime->id)
-                ->update(['duration_seconds' => $duration, 'updated_at' => $now]);
+                ->update([
+                    'duration_seconds' => $duration,
+                    'is_finished' => 1, // <-- Tandai selesai
+                    'updated_at' => $now
+                ]);
         }
 
         return response()->json(['success' => true]);
