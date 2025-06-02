@@ -50,7 +50,7 @@
                                 id="submit-btn"
                                 style="width: max-content; min-width: 90px; min-height: 40px; padding: 0 22px; position: relative;"
                                 @if($lastStatus == 'true' || $isReset) disabled @endif>
-                                <span id="submit-btn-text" style="width:100%; text-align:center;">Submit</span>
+                                <span id="submit-btn-text" style="width:100%; text-align:center; font-weight: 600;">Submit</span>
                                 <span id="submit-spinner"
                                     class="spinner-border spinner-border-sm"
                                     style="display:none; margin-left: 1.1rem; margin-right: 1.1rem;"
@@ -69,7 +69,7 @@
 
                     @if($lastStatus == 'true')
                         <div class="mb-4">
-                                <div class="fw-bold mb-2" style="background-color: #50db00; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
+                                <div class="fw-bold mb-2" style="background-color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
                                     <div class="text-white">
                                         Your Query Is Correct!
                                     </div>
@@ -79,7 +79,7 @@
                                     $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
                                     $feedbackText = implode('<br>', array_map('trim', $lines));
                                 @endphp
-                                <div class="fw-semibold" style="color: #50db00; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
+                                <div class="fw-semibold" style="color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
                             @endif
                         </div>
                     @elseif($lastStatus == 'false')
@@ -108,7 +108,7 @@
                         <label for="userSelectQuery" class="mb-2 fw-semibold">Try Query Data (SELECT only):</label>
                         <div class="d-flex align-items-start mb-2">
                             <textarea name="userSelectQuery" id="userSelectQuery" class="form-control me-3" rows="4" placeholder="e.g. SELECT * FROM mk" style="resize: vertical;"></textarea>
-                            <button type="submit" class="btn btn-success" style="height: 40px; white-space: nowrap;" @if($isReset) disabled @endif>Run Query</button>
+                            <button type="submit" class="btn btn-success fw-semibold" style="height: 40px; white-space: nowrap;" @if($isReset) disabled @endif>Run Query</button>
                         </div>
                     </form>
                     <div id="query-result" class="mt-3">
