@@ -607,26 +607,28 @@
     function materialDetailPage() {
         var csrfToken = "{{ csrf_token() }}";
         let id = $("#id").val();
-        let title = $("#title").val();
         let controller = $("#controller").val();
-        window.location.href = "{{ route('showTopicDetail') }}?mysqlid=" + id + "&start=" + controller;
 
-        /*$.ajax({
+        // Enroll via AJAX
+        $.ajax({
             type: "POST",
+            url: "{{ route('student.enroll.topic') }}",
             data: {
-                id: id,
-                title: title,
-                _token: csrfToken // Menambahkan token CSRF ke dalam data permintaan
+                mysqlid: id,
+                _token: csrfToken
             },
-            dataType: 'html',
-            url: "{{ route('php_material_detail') }}",
-                success: function(res) {
-
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error:", error);
+            success: function(res) {
+                if(res.success){
+                    // Setelah enroll, redirect ke detail materi
+                    window.location.href = "{{ route('showTopicDetail') }}?mysqlid=" + id + "&start=" + controller;
+                } else {
+                    alert('Gagal enroll, silakan coba lagi.');
                 }
-            });*/
+            },
+            error: function(xhr, status, error) {
+                alert('Gagal enroll: ' + error);
+            }
+        });
     }
 
     // Fungsi untuk mengubah warna ikon, teks, dan link menjadi biru

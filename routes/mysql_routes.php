@@ -33,6 +33,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/student/import-data', [MysqlStudentController::class, 'importSqlData'])->name('student.import.sql');
         Route::get('/student/sidebar', [MysqlStudentController::class, 'sidebarAjax'])->name('student.sidebar.ajax'); // sidebar checklist ajax
         Route::post('/student/reset-testing-db', [MysqlStudentController::class, 'resetTestingDatabase'])->name('student.reset.testing.db');
+        Route::post('/student/enroll-topic', [MysqlStudentController::class, 'enrollTopic'])->name('student.enroll.topic');
+        Route::post('/student/finish-topic', [MysqlStudentController::class, 'finishTopic'])->name('student.finish.topic');
         //-----------------CHANGED-----------------
     });
 });

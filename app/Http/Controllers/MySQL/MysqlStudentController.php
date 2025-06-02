@@ -65,6 +65,21 @@ class MysqlStudentController extends Controller
         $roleTeacher = DB::select("select role from users where id = $idUser");
         $topics = MySqlTopics::all();
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
+        $countdownSeconds = $topicsNavbar->countdown_seconds ?? 3600;
+
+        // Ambil waktu mulai dari tabel mysql_student_topic_times
+        $topicTime = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $mysqlid)
+            ->first();
+
+        if ($topicTime && $topicTime->started_at) {
+            $elapsed = now()->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
+            $sisaDetik = max(0, $countdownSeconds - $elapsed);
+        } else {
+            $sisaDetik = $countdownSeconds;
+        }
+
         $topicsCount = count($topics);
         $detailCount = ($topicsCount / $topicsCount) * 10;
 
@@ -110,6 +125,7 @@ class MysqlStudentController extends Controller
             'totalAnswer' => $totalAnswer,
             'page' => $page,
             'rows' => $rows,
+            'countdownSeconds' => $sisaDetik,
         ]);
     }
 
@@ -504,5 +520,50 @@ class MysqlStudentController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Database testing berhasil direset!']);
+    }
+
+    public function enrollTopic(Request $request)
+    {
+        $userId = Auth::id();
+        $topicId = $request->input('mysqlid');
+        $now = now();
+
+        $existing = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->first();
+
+        if (!$existing) {
+            DB::table('mysql_student_topic_times')->insert([
+                'user_id' => $userId,
+                'topic_id' => $topicId,
+                'started_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function finishTopic(Request $request)
+    {
+        $userId = Auth::id();
+        $topicId = $request->input('mysqlid');
+        $now = now();
+
+        $topicTime = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->first();
+
+        if ($topicTime && $topicTime->started_at && !$topicTime->duration_seconds) {
+            $duration = $now->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
+            DB::table('mysql_student_topic_times')
+                ->where('id', $topicTime->id)
+                ->update(['duration_seconds' => $duration, 'updated_at' => $now]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

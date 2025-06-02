@@ -504,6 +504,13 @@
             $.get('/mysql/teacher/topics/' + topicId + '/edit', function(data) {
                 $('#edit_topic_id').val(data.topic.id);
                 $('#edit_topic_title').val(data.topic.title);
+
+                // Set timer (convert detik ke menit)
+                if (data.topic.countdown_seconds !== undefined && data.topic.countdown_seconds !== null) {
+                    $('#edit_countdown_minutes').val(Math.floor(data.topic.countdown_seconds / 60));
+                } else {
+                    $('#edit_countdown_minutes').val('');
+                }
         
                 // Render subtopics
                 let subtopicsHtml = '';

@@ -47,6 +47,7 @@ class MysqlTeacherTopicsController extends Controller
 
         $request->validate([
             'topic_title' => 'required|string|max:255',
+            'countdown_minutes' => 'required|integer|min:1',
             'sub_topic_title' => 'required|array|min:1',
             'sub_topic_title.*' => 'required|string|max:255',
             'sub_topic_file.*' => 'nullable|file|mimes:pdf|max:20480',
@@ -57,6 +58,7 @@ class MysqlTeacherTopicsController extends Controller
         $topic = MySqlTopics::create([
             'title' => $request->topic_title,
             'created_by' => $userId,
+            'countdown_seconds' => $request->countdown_minutes * 60, // <-- simpan dalam detik
         ]);
 
         $files = [];
@@ -97,14 +99,23 @@ class MysqlTeacherTopicsController extends Controller
         $subtopics = MySqlTopicDetails::where('topic_id', $id)->get();
         return response()->json([
             'topic' => $topic,
-            'subtopics' => $subtopics
+            'subtopics' => $subtopics,
+            'countdown_seconds' => $topic->countdown_seconds // <-- pastikan ada
         ]);
     }
 
     public function updateTopicAjax(Request $request, $id)
     {
         $topic = MySqlTopics::findOrFail($id);
+
+        $request->validate([
+            'topic_title' => 'required|string|max:255',
+            'countdown_minutes' => 'required|integer|min:1',
+            // validasi lain jika perlu
+        ]);
+
         $topic->title = $request->topic_title;
+        $topic->countdown_seconds = $request->countdown_minutes * 60; // <-- simpan dalam detik
         $topic->save();
 
         // Update subtopics

@@ -174,6 +174,9 @@
             <p class="text-list" style="font-size: 18px; font-weight: 600; font-size: 20px">
                 <img src="{{ asset('images/right.png') }}" style="height: 24px; margin-right: 10px; border:1px solid; border-radius:50%"> Task List
             </p>
+            <div id="countdown-timer" style="font-size: 18px; color: #d9534f; font-weight: bold; margin-bottom: 10px;">
+                <!-- Timer akan muncul di sini -->
+            </div>
             <div class="progress-text" id="progress-text">{{ $progressPercent }}%</div>
             <div class="progress-container">
                 <div id="progressbar" style="width: {{ $progressPercent }}%;"></div>
@@ -390,10 +393,37 @@
             });
         }
 
+        // Timer dari backend (dalam detik), misal 1 jam = 3600 detik
+        let countdownSeconds = {{ $countdownSeconds ?? 3600 }};
+        let timerInterval;
+
+        function startCountdown() {
+            const timerDisplay = document.getElementById('countdown-timer');
+            function updateTimer() {
+                let hours = Math.floor(countdownSeconds / 3600);
+                let minutes = Math.floor((countdownSeconds % 3600) / 60);
+                let seconds = countdownSeconds % 60;
+                timerDisplay.textContent = 
+                    (hours > 0 ? String(hours).padStart(2, '0') + ':' : '') +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+                if (countdownSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = 'Waktu Habis!';
+                    // Optional: lakukan aksi jika waktu habis, misal disable form
+                    // document.querySelectorAll('form').forEach(f => f.querySelector('button[type="submit"]').disabled = true);
+                }
+                countdownSeconds--;
+            }
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             bindAnswerSectionForm();
             bindAnswerSectionPagination();
             bindRunQueryForm();
+            startCountdown();
         });
     </script>
 </body>

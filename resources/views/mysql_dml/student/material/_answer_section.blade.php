@@ -229,11 +229,11 @@ document.addEventListener('click', function(e) {
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'reset-testing-db-btn' && !e.target.disabled) {
         e.preventDefault();
-        // if(!confirm('Yakin ingin mengakhiri dan reset database testing?')) return;
         const btn = e.target;
         btn.disabled = true;
-        // btn.textContent = 'Resetting...';
-        fetch('{{ route('student.reset.testing.db') }}', {
+
+        // 1. Simpan durasi pengerjaan
+        fetch('{{ route('student.finish.topic') }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -247,10 +247,30 @@ document.addEventListener('click', function(e) {
         .then(res => res.json())
         .then(data => {
             if(data.success){
-                // alert('Database berhasil direset!');
-                window.location.href = '{{ url("/mysql/start") }}';
+                // 2. Jika sukses, lanjut reset database
+                fetch('{{ route('student.reset.testing.db') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mysqlid: btn.getAttribute('data-mysqlid')
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success){
+                        window.location.href = '{{ url("/mysql/start") }}';
+                    } else {
+                        alert('Gagal reset: ' + data.message);
+                        btn.disabled = false;
+                        btn.textContent = 'Submit All Answer';
+                    }
+                });
             } else {
-                alert('Gagal reset: ' + data.message);
+                alert('Gagal menyimpan durasi pengerjaan.');
                 btn.disabled = false;
                 btn.textContent = 'Submit All Answer';
             }

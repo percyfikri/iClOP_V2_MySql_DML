@@ -68,6 +68,11 @@
                             <label for="topicTitle" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
                         </div>
+                        <div class="col-md-6" style="max-width: 180px;">
+                            <label for="countdown_minutes" class="form-label fw-bold">Timer (minutes)</label>
+                            <input style="border: 1px solid #fa6767; width: 100px; background-color: #fce3e3;" type="number" class="form-control fw-semibold" id="countdown_minutes" name="countdown_minutes" value="{{ old('countdown_minutes', isset($topic) ? ($topic->countdown_seconds ?? 3600) / 60 : 60) }}" min="1" step="1">
+                            <small class="form-text text-muted">Ex : 60 minutes</small>
+                        </div>
                     </div>
                     <div id="subtopics-container">
                         <div class="row mb-3 subtopic-group align-items-center" style="border-top: 1px solid #ccc">
@@ -122,9 +127,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3 row">
-                        <div class="col-md-5">
+                        <div class="col-md-6">
                             <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
+                        </div>
+                        <div class="col-md-6" style="max-width: 180px;">
+                            <label for="edit_countdown_minutes" class="form-label fw-bold">Timer (minutes)</label>
+                            <input style="border: 1px solid #fa6767; width: 100px; background-color: #fce3e3;" type="number" class="form-control fw-semibold" id="edit_countdown_minutes" name="countdown_minutes" min="1" step="1" style="width: 100px;" placeholder="-">
+                            <small class="form-text text-muted">Ex : 60 minutes.</small>
                         </div>
                     </div>
                     <div id="edit-subtopics-container">
