@@ -58,6 +58,7 @@
         .sidebar .nav-link.active-sidebar {
             background-color: #0077ff !important;
             color: #fff !important;
+            font-weight: 500 !important;   /* Tambahkan ini */
             transition: background-color 0.3s;
         }
         .sidebar .nav-link.active-sidebar i {
@@ -974,6 +975,17 @@
     </script>
     {{----------------------------------------------------------------------------------------------}}
 
+    {{-- AJAX untuk Student Submissions --}}
+    <script>
+        $(document).on('click', 'a[href="/mysql/teacher/submissions"]', function(e) {
+            e.preventDefault();
+            $.get("/mysql/teacher/submissions", function(data) {
+                $('#main-table-content').html(data);
+            });
+        });
+    </script>
+    {{----------------------------------------------------------------------------------------------}}
+
 </head>
 <body>
     <!-- NAVBAR -->
@@ -1043,7 +1055,7 @@
                                 Topics Management
                             </a>
                         </li>
-                        {{-- <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link d-flex align-items-center"
                                href="/mysql/teacher/questions"
                                onclick="showContent('questions')"
@@ -1051,55 +1063,20 @@
                                 <i class="fas fa-book" style="margin-right: 12px;"></i>
                                 Questions Management
                             </a>
-                        </li> --}}
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center"
+                               href="/mysql/teacher/submissions"
+                               style="color: #34364A; white-space: nowrap; font-size: 16px;">
+                                <i class="fas fa-user-graduate" style="margin-right: 12px;"></i>
+                                Student Submissions
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <!-- CONTENT -->
-            {{-- <div class="col content" style="margin-left: 240px;">
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr class="text-center">
-                            <th>No</th>
-                            <th>Topics</th>
-                            <th>Sub-Topics</th>
-                            <th>Questions</th>
-                            <th>Module</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($data as $index => $item)
-                            <tr>
-                                <td class="text-center">{{ $index + 1 }}</td>
-                                <td>{{ $item->topic_title }}</td>
-                                <td>{{ $item->sub_topic_title }}</td>
-                                <td>{{ $item->question }}</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center">
-                                        @if ($item->module)
-                                            <a href="{{ asset('public/mysql/DML/' . $item->module) }}" download class="btn btn-link">
-                                                {{ $item->module }}
-                                            </a>
-                                        @else
-                                            <span class="text-muted">No Module</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center">
-                                        <a href="#" class="btn btn-info btn-sm mx-2 my-2" title="Details">
-                                            <i class="fas fa-info-circle"></i>
-                                            Details
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div> --}}
             <div class="col content px-4" id="main-table-content" style="margin-left: 240px;">
                 {{-- Tabel topik akan dimuat di sini via AJAX --}}
             </div>

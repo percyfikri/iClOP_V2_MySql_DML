@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MySQL\MysqlController;
 use App\Http\Controllers\MySQL\MysqlStudentController;
 use App\Http\Controllers\MySQL\MysqlTeacherQuestionController;
+use App\Http\Controllers\MySQL\MysqlTeacherSubmissionController;
 use App\Http\Controllers\MySQL\MysqlTeacherTopicsController;
 use App\Http\Controllers\MySQL\TopicDetailController;
 use App\Http\Controllers\PHP\PHPController;
@@ -59,6 +60,9 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
         Route::delete('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'destroy'])->name('teacher.questions.destroy');
         Route::get('/teacher/subtopics/{id}/modul', [MysqlTeacherQuestionController::class, 'getSubtopicModul']);
+
+        // Route baru untuk hasil submission mahasiswa
+        Route::get('/teacher/submissions', [MysqlTeacherSubmissionController::class, 'index'])->name('teacher.student.submissions');
         //-----------------CHANGED-----------------
     });
 });
