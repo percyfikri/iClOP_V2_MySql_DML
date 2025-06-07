@@ -14,12 +14,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="exportExcelBtn" type="button" class="btn btn-success">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </button>
-                <button id="exportPdfBtn" type="button" class="btn btn-danger">
-                    <i class="fas fa-file-pdf"></i> Export PDF
-                </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
             </div>
         </div>

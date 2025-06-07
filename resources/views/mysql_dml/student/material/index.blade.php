@@ -25,6 +25,7 @@
             padding-left: 32px; /* Tambahkan ini agar ada jarak dari sidebar */
             margin-bottom: 10rem;
             min-height: 200px; /* opsional, agar konten tetap proporsional */
+            margin-top: 2rem;
             margin-left: 240px; /* Tambahkan/maksimalkan ini sesuai lebar sidebar */
         }
 
@@ -83,7 +84,7 @@
         }
 
         .custom-card {
-            padding: 30px;
+            padding: 10px 30px;
             width: 100%;
             /* height: 280px; */ /* Hapus height tetap */
             background-color: #FFFFFF;
@@ -185,16 +186,6 @@
             margin: 0;
         }
 
-        #submissionDetailModal .btn-success .fa-file-excel,
-        #submissionDetailModal .btn-danger .fa-file-pdf {
-            color: #fff !important;
-        }
-
-        /* Tambahkan di <style> atau file CSS kamu */
-        #submissionDetailModal .badge {
-            font-size: 16px !important;
-        }
-
         #submission-detail-content .badge {
             font-size: 16px !important;
         }
@@ -210,7 +201,7 @@
         .sidebar .nav-link.active-sidebar {
             background-color: #0077ff !important;
             color: #fff !important;
-            border-radius: 8px;
+            /* border-radius: 8px; */
             transition: background-color 0.3s;
         }
         .sidebar .nav-link.active-sidebar i {
@@ -229,6 +220,59 @@
         .button-text:focus i {
             color: #fff !important;
             transition: color 0.3s;
+        }
+
+        /* Pastikan icon pada tombol export selalu putih */
+        #exportAllExcelBtn .fa-file-excel,
+        #exportAllPdfBtn .fa-file-pdf {
+            color: #fff !important;
+            transition: color 0.3s;
+        }
+
+        /* Export Excel Button */
+        #exportAllExcelBtn {
+            background-color: #e6f4ea !important; /* hijau pudar */
+            color: #198754 !important; /* hijau Bootstrap */
+            border: 1.5px solid #198754 !important;
+            border-radius: 10px !important;
+            font-weight: 500;
+            transition: background 0.3s, color 0.3s;
+        }
+        #exportAllExcelBtn:hover, #exportAllExcelBtn:focus {
+            background-color: #198754 !important;
+            color: #fff !important;
+        }
+
+        /* Export PDF Button */
+        #exportAllPdfBtn {
+            background-color: #fdeaea !important; /* merah pudar */
+            color: #dc3545 !important; /* merah Bootstrap */
+            border: 1.5px solid #dc3545 !important;
+            border-radius: 10px !important;
+            font-weight: 500;
+            transition: background 0.3s, color 0.3s;
+        }
+        #exportAllPdfBtn:hover, #exportAllPdfBtn:focus {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+        }
+
+        /* Icon warna hijau/merah saat normal (tidak hover) */
+        #exportAllExcelBtn .fa-file-excel {
+            color: #198754 !important; /* hijau Bootstrap */
+            transition: color 0.3s;
+        }
+        #exportAllPdfBtn .fa-file-pdf {
+            color: #dc3545 !important; /* merah Bootstrap */
+            transition: color 0.3s;
+        }
+
+        /* Icon tetap putih saat hover/focus */
+        #exportAllExcelBtn:hover .fa-file-excel,
+        #exportAllExcelBtn:focus .fa-file-excel,
+        #exportAllPdfBtn:hover .fa-file-pdf,
+        #exportAllPdfBtn:focus .fa-file-pdf {
+            color: #fff !important;
         }
 
     </style>
@@ -327,6 +371,62 @@
             showContent('start-learning', 'learningLink');
         });
     </script>
+    <script>
+    $(document).ready(function () {
+        // Data submissions dari backend ke JS
+        var allStudentSubmissions = @json($studentSubmissions);
+
+        // Export All to Excel
+        $('#exportAllExcelBtn').on('click', function() {
+            let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score\n';
+            allStudentSubmissions.forEach(function(sub) {
+                let durasiDetik = sub.Durasi ?? 0;
+                let jam = Math.floor(durasiDetik / 3600);
+                let menit = Math.floor((durasiDetik % 3600) / 60);
+                let detik = durasiDetik % 60;
+                let durasiFormat = sub.Durasi !== null ? 
+                    (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+                let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+                csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
+            });
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'all_student_submissions.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Export All to PDF (simple, pakai window.print)
+        $('#exportAllPdfBtn').on('click', function() {
+            let html = '<h2>All Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th></tr>';
+            allStudentSubmissions.forEach(function(sub) {
+                let durasiDetik = sub.Durasi ?? 0;
+                let jam = Math.floor(durasiDetik / 3600);
+                let menit = Math.floor((durasiDetik % 3600) / 60);
+                let detik = durasiDetik % 60;
+                let durasiFormat = sub.Durasi !== null ? 
+                    (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+                let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+                html += `<tr>
+                    <td>${sub.UserName}</td>
+                    <td>${sub.SubmissionTopic}</td>
+                    <td>${sub.Time}</td>
+                    <td>${sub.Salah}</td>
+                    <td>${sub.Benar}</td>
+                    <td>${durasiFormat}</td>
+                    <td>${nilai}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            var win = window.open('', '', 'width=1000,height=700');
+            win.document.write(html);
+            win.print();
+            win.close();
+        });
+    });
+</script>
 
 </head>
 
@@ -412,7 +512,7 @@
 <!-- CONTENT -->
 <main id="main-content">
     <div class="content" id="start-learning">
-        <p style="font-size: 24px; font-weight: 500; color: #34364A; margin-left: 10px;">Start Learning</p>
+        <h4 class="mb-4 mx-2 fw-bold">Start Learning</h4>
         <div class="custom-card">
             <div class="topic-list" style="width: 100%;">
                 @foreach($topics as $topic)
@@ -446,8 +546,19 @@
     </div>
 
     <div id="validation" class="content" style="display: none;">
-        <p style="font-size: 24px; font-weight: 500; color: #34364A; margin-left: 1.5rem;">Student Submission</p>
-        <div class="custom-card mx-3">
+        <div class="d-flex justify-content-between align-items-center mb-3" style="width: 100%;">
+            <h4 class="fw-bold ml-2">Student Submission</h4>
+            <div>
+                <button id="exportAllExcelBtn" class="btn btn-success mr-2">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button id="exportAllPdfBtn" class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+            </div>
+        </div>
+        <div class="custom-card">
+            
             <div class="topic-list" style="width: 100%;">
                 @foreach($studentSubmissions as $submission)
                     <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
@@ -462,11 +573,12 @@
                                 Duration: 
                                 @php
                                     $durasiDetik = $submission->Durasi ?? 0;
-                                    $menit = floor($durasiDetik / 60);
+                                    $jam = floor($durasiDetik / 3600);
+                                    $menit = floor(($durasiDetik % 3600) / 60);
                                     $detik = $durasiDetik % 60;
-                                    $durasiFormat = sprintf('%02d:%02d', $menit, $detik);
+                                    $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
                                 @endphp
-                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
+                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }}
                                 <b>Score:</b> 
                                 @php
                                     $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
@@ -927,42 +1039,10 @@
             </div>
         `;
 
-        // Simpan data untuk export
         window.currentSubmissionDetail = {
             username, topic, date, wrong, correct, durasiFormat, nilai
         };
     }
-    
-    // Export Excel
-    document.getElementById('exportExcelBtn').onclick = function() {
-        var d = window.currentSubmissionDetail;
-        var csv = `Field,Value\nName,${d.username}\nTopic,${d.topic}\nDate,${d.date}\nWrong,${d.wrong}\nCorrect,${d.correct}\nDuration,${d.durasiFormat}\nScore,${d.nilai}`;
-        var blob = new Blob([csv], { type: 'text/csv' });
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'submission_detail.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    };
-    
-    // Export PDF (simple, pakai window.print, untuk custom bisa pakai jsPDF)
-    document.getElementById('exportPdfBtn').onclick = function() {
-        var d = window.currentSubmissionDetail;
-        var win = window.open('', '', 'width=800,height=600');
-        win.document.write('<h2>Submission Detail</h2>');
-        win.document.write('<ul>');
-        win.document.write(`<li><b>Name:</b> ${d.username}</li>`);
-        win.document.write(`<li><b>Topic:</b> ${d.topic}</li>`);
-        win.document.write(`<li><b>Date:</b> ${d.date}</li>`);
-        win.document.write(`<li><b>Wrong:</b> ${d.wrong}</li>`);
-        win.document.write(`<li><b>Correct:</b> ${d.correct}</li>`);
-        win.document.write(`<li><b>Duration (minutes):</b> ${d.durasiFormat}</li>`);
-        win.document.write(`<li><b>Score:</b> ${d.nilai}</li>`);
-        win.document.write('</ul>');
-        win.print();
-        win.close();
-    };
 </script>
 
 
