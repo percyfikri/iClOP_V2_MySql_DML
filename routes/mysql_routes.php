@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MySQL\MysqlController;
 use App\Http\Controllers\MySQL\MysqlStudentController;
-use App\Http\Controllers\MySQL\MysqlTeacherQuestionController;
 use App\Http\Controllers\MySQL\MysqlTeacherSubmissionController;
 use App\Http\Controllers\MySQL\MysqlTeacherTopicsController;
 use App\Http\Controllers\MySQL\TopicDetailController;
@@ -51,16 +50,6 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::get('/teacher/topics/{id}/edit', [MysqlTeacherTopicsController::class, 'editTopicAjax']);
         Route::put('/teacher/topics/{id}', [MysqlTeacherTopicsController::class, 'updateTopicAjax']);
         Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
-
-        Route::get('/mysql/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
-        Route::get('/teacher/questions/check-duplicate', [MysqlTeacherQuestionController::class, 'checkDuplicate']);
-        Route::post('/teacher/questions', [MysqlTeacherQuestionController::class, 'storeQuestion']);
-        Route::put('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']);
-        Route::post('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'update']); // Untuk AJAX _method=PUT
-        Route::get('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'show'])->name('teacher.questions.show');
-        Route::delete('/teacher/questions/{id}', [MysqlTeacherQuestionController::class, 'destroy'])->name('teacher.questions.destroy');
-        Route::get('/teacher/subtopics/{id}/modul', [MysqlTeacherQuestionController::class, 'getSubtopicModul']);
-
         // Route baru untuk hasil submission mahasiswa
         Route::get('/teacher/submissions', [MysqlTeacherSubmissionController::class, 'index'])->name('teacher.student.submissions');
         //-----------------CHANGED-----------------
