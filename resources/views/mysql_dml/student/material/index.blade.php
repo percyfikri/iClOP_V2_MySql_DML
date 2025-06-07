@@ -206,7 +206,7 @@
                         <span>/</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/mysql/start">Learning</a>
+                        <a class="nav-link active" aria-current="page" href="/mysql/start">Database Management System with MySQL</a>
                     </li>
                 </ul>
             </div>
@@ -289,9 +289,6 @@
                             <li class="nav-item">
                                 <a class="nav-link active" id="learning-tab" data-toggle="tab" href="#learning"><b>Learning Topic</b></a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="finished-tab" data-toggle="tab" href="#finished"><b>Topic Finished</b></a>
-                            </li>
                             @if($role == "teacher")
                                 <li class="nav-item">
                                     <a class="nav-link" id="finished-tab" data-toggle="tab" href="#progress">Progress Topic Finished</a>
@@ -335,91 +332,6 @@
                                     </div>
                                 @endforeach
                             </div>
-                            <div class="tab-pane fade" id="finished">
-                                <h3>Topic Finished</h3>
-                                <p>Topic Finished as user : @php echo Auth::user()->name; @endphp</p>
-                                @if($role == "student")
-                                    <div class="table-responsive mb-5">
-                                    <table id="progressTable" class="table table-striped ">
-                                        <thead>
-                                        <tr>
-                                            <th>Tanggal Selesai</th>
-                                            <th>Nama User</th>
-                                            <th>Nama Topic</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                        
-                                        @foreach($completedTopics as $topic)
-                                            <tr>
-                                                <td>{{ $topic->created_at }}</td>
-                                                <td>{{ $topic->user_name }}</td>
-                                                <td>{{ $topic->description}}</td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                    </div>
-                                @endif
-                                @if($role == "teacher")
-                                <div class="table-responsive mb-5">
-                                    
-                                    <table id="progressTable" class="table table-striped">
-                                        <thead>
-                                        <tr>
-                                            <th>Tanggal Selesai</th>
-                                            <th>Nama User</th>
-                                            <th>Nama Topic</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach($completedTopics as $topic)
-                                            <tr>
-                                                <td>{{ $topic->created_at }}</td>
-                                                <td>{{ $topic->user_name }}</td>
-                                                <td>{{ $topic->description}}</td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                                    
-                                @endif
-
-                            </div>
-                            <div class="tab-pane fade" id="progress">
-                                <h3>Progress Topic Finished</h3>
-                                <p>This is the content for the Topic Finished.</p>
-                                <div class="table-responsive mb-5">
-                                <table class="table" id="finnishedProgressTable">
-                                    <thead>
-                                    <tr>
-                                        <th>User Name</th>
-                                        <th>Progress (%)</th>
-                                        <th>Progress Bar</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {{-- @foreach($progress as $userId => $userProgress)
-                                        <tr>
-                                            <td>{{ $userProgress['name'] }}</td>
-                                            <td>{{ $userProgress['percent'] }}%</td>
-                                            <td>
-                                                <div class="progress">
-                                                    <div class="progress-bar" role="progressbar"
-                                                            style="width: {{ $userProgress['percent'] }}%;"
-                                                            aria-valuenow="{{ $userProgress['percent'] }}"
-                                                            aria-valuemin="0"
-                                                            aria-valuemax="100">{{ $userProgress['percent'] }}%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach --}}
-                                    </tbody>
-                                </table>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -436,7 +348,7 @@
                                 <th class="text-center">Submission Topic</th>
                                 <th class="text-center">Wrong</th>
                                 <th class="text-center">Correct</th>
-                                <th class="text-center">Duration</th>
+                                <th class="text-center">Duration (minutes)</th>
                                 <th class="text-center">Score</th>
                             </tr>
                         </thead>
@@ -450,9 +362,12 @@
                                     <td class="text-center">{{ $submission->Benar }}</td>
                                     <td class="text-center">
                                         @php
-                                            $durasiMenit = $submission->Durasi ? round($submission->Durasi / 60, 2) : null;
+                                            $durasiDetik = $submission->Durasi ?? 0;
+                                            $menit = floor($durasiDetik / 60);
+                                            $detik = $durasiDetik % 60;
+                                            $durasiFormat = sprintf('%02d:%02d', $menit, $detik);
                                         @endphp
-                                        {{ $durasiMenit !== null ? $durasiMenit . ' minutes' : '-' }}
+                                        {{ $submission->Durasi !== null ? $durasiFormat : '-' }}
                                     </td>
                                     <td class="text-center fw-bold">
                                         {{-- Calculate the score --}}
