@@ -428,56 +428,43 @@
             <div id="validation" class="content" style="display: none;">
                 <h1>Student Submission</h1>
                 <div class="table-responsive mb-5">
-                <table class="table" id="studentSubmissionTable">
-                    <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>User Name</th>
-                        <th>Submission Topic</th>
-                        <th>Score</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @if($role == "teacher")
-                        @php
-
-                            $studentSubmissions = DB::table('react_user_submits')
-                                        ->join('users', 'users.id', '=', 'react_user_submits.user_id')
-                                        ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
-                                        ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
-                                        ->get();
-                        @endphp
-                        @foreach($studentSubmissions as $submission)
+                    <table class="table" id="studentSubmissionTable">
+                        <thead>
                             <tr>
-                                <td>{{ date('Y-m-d H:i', strtotime($submission->Time)) }}</td>
-                                <td>{{ $submission->UserName }}</td>
-                                <td>{{ $submission->TopicName }}</td>
-                                <td>{{ $submission->Score }}</td>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th class="text-center">Submission Topic</th>
+                                <th class="text-center">Wrong</th>
+                                <th class="text-center">Correct</th>
+                                <th class="text-center">Duration</th>
+                                <th class="text-center">Score</th>
                             </tr>
-                        @endforeach
-                    @endif
-                    @if($role == "student")
-                        @php
-
-                            $studentSubmissions = DB::table('react_user_submits')
-                                        ->join('users', 'users.id', '=', 'react_user_submits.user_id')
-                                        ->join('react_topics_detail', 'react_topics_detail.id', '=', 'react_user_submits.topics_id')
-                                        ->select('react_user_submits.created_at as Time', 'users.name as UserName', 'react_topics_detail.description as TopicName', 'react_user_submits.score as Score')
-                                        ->where('users.id', Auth::user()->id)
-                                        ->get();
-                        @endphp
-                        @foreach($studentSubmissions as $submission)
-                            <tr>
-                                <td>{{ date('Y-m-d H:i', strtotime($submission->Time)) }}</td>
-                                <td>{{ $submission->UserName }}</td>
-                                <td>{{ $submission->TopicName }}</td>
-                                <td>{{ $submission->Score }}</td>
-                            </tr>
-                        @endforeach
-                    @endif
-
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($studentSubmissions as $submission)
+                                <tr>
+                                    <td>{{ date('Y-m-d H:i', strtotime($submission->Time)) }}</td>
+                                    <td>{{ $submission->UserName }}</td>
+                                    <td class="text-center">{{ $submission->SubmissionTopic }}</td>
+                                    <td class="text-center">{{ $submission->Salah }}</td>
+                                    <td class="text-center">{{ $submission->Benar }}</td>
+                                    <td class="text-center">
+                                        @php
+                                            $durasiMenit = $submission->Durasi ? round($submission->Durasi / 60, 2) : null;
+                                        @endphp
+                                        {{ $durasiMenit !== null ? $durasiMenit . ' minutes' : '-' }}
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        {{-- Calculate the score --}}
+                                        @php
+                                            $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
+                                        @endphp
+                                        {{ $nilai }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
             
@@ -753,8 +740,8 @@
                 {
                     extend: 'excelHtml5',
                     text: 'Export to Excel',
-                    title: 'Data Export REACT',
-                    filename: 'react_data_export_student_submission_student_' + new Date().toLocaleDateString() + '_' + new Date().toLocaleTimeString(),
+                    title: 'Data Export MySQL',
+                    filename: 'mysql_data_export_student_submission_student_' + new Date().toLocaleDateString() + '_' + new Date().toLocaleTimeString(),
                     customize: function (xlsx) {
                         var sheet = xlsx.xl.worksheets['sheet1.xml'];
                         // Customizations go here
@@ -763,8 +750,8 @@
                {
                 extend: 'pdfHtml5',
                 text: 'Export to PDF',
-                title: 'Data Export REACT',
-                filename: 'react_data_export_student_submission_student_' + new Date().toLocaleDateString().replace(/\//g, '-') + '_' + new Date().toLocaleTimeString().replace(/:/g, '-'),
+                title: 'Data Export MySQL',
+                filename: 'mysql_data_export_student_submission_student_' + new Date().toLocaleDateString().replace(/\//g, '-') + '_' + new Date().toLocaleTimeString().replace(/:/g, '-'),
                 orientation: 'portrait', // 'portrait' or 'landscape'
                 pageSize: 'A4', // 'A3', 'A4', 'A5', 'LEGAL', 'LETTER' or 'TABLOID'
                 exportOptions: {
