@@ -8,18 +8,52 @@
     <style>
         /* Additional styles */
         .sidebar {
-            background-color: #FFFFFF;
-            width: 245px;
+            min-width: 0;
+            width: max-content;
+            max-width: 100vw;
+            background-color: #fff;
+            padding: 20px 24px 20px 24px;
+            z-index: 100;
+            height: 100vh; /* Sidebar full height */
+            position: fixed; /* Fixed di kiri */
+            top: 0;
+            left: 0;
         }
 
         .content {
-            min-height: 400px;
-            background-color: #FFFFFF;
             padding: 20px;
+            padding-left: 32px; /* Tambahkan ini agar ada jarak dari sidebar */
+            margin-bottom: 10rem;
+            min-height: 200px; /* opsional, agar konten tetap proporsional */
+            margin-left: 240px; /* Tambahkan/maksimalkan ini sesuai lebar sidebar */
         }
 
+        .footer {
+            background-color: #EAEAEA;
+            color: #636363;
+            text-align: center;
+            font-size: 12px;
+            padding: 5px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: calc(100% - var(--sidebar-width, 240px));
+            margin-left: var(--sidebar-width, 240px);
+            z-index: 101;
+        }
 
-        /* NAV LINK */
+        /* Highlight menu aktif */
+        .sidebar .nav-link.active-sidebar {
+            background-color: #0077ff !important;
+            color: #fff !important;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar .nav-link.active-sidebar i {
+            color: #fff !important;
+            transition: color 0.3s;
+        }
+
         .nav-link {
             display: flex;
             align-items: center;
@@ -50,11 +84,16 @@
 
         .custom-card {
             padding: 30px;
-            width: 395px;
-            height: 280px;
+            width: 100%;
+            /* height: 280px; */ /* Hapus height tetap */
             background-color: #FFFFFF;
             border-radius: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center horizontal */
+            justify-content: center; /* Center vertical jika tinggi tetap, jika tidak bisa dihapus */
+            margin: 0 auto; /* Center card di parent */
         }
 
         .circle-image {
@@ -139,6 +178,44 @@
             box-shadow: 1px 0px 8px rgba(0, 0, 0, 0.1);
             /* Menambahkan bayangan ke sisi kanan */
         }
+        
+        .container {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        #submissionDetailModal .btn-success .fa-file-excel,
+        #submissionDetailModal .btn-danger .fa-file-pdf {
+            color: #fff !important;
+        }
+
+        /* Tambahkan di <style> atau file CSS kamu */
+        #submissionDetailModal .badge {
+            font-size: 16px !important;
+        }
+
+        #submission-detail-content .badge {
+            font-size: 16px !important;
+        }
+
+        .sidebar .nav-link {
+            color: #34364A !important;
+            background: none !important;
+        }
+        .sidebar .nav-link i {
+            color: #34364A !important;
+            transition: color 0.3s;
+        }
+        .sidebar .nav-link.active-sidebar {
+            background-color: #0077ff !important;
+            color: #fff !important;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .sidebar .nav-link.active-sidebar i {
+            color: #fff !important;
+        }
 
     </style>
 
@@ -183,15 +260,107 @@
           "Roboto-BoldItalic.ttf": robotoBoldItalicBase64
         };
     </script>
+    <script>
+        function adjustContentMargin() {
+            var sidebar = document.querySelector('.sidebar');
+            var content = document.querySelector('.content');
+            var footer = document.querySelector('.footer');
+            var navbar = document.querySelector('.content-navbar');
+            if (sidebar && content) {
+                content.style.marginLeft = sidebar.offsetWidth + 'px';
+            }
+            if (sidebar && navbar) {
+                navbar.style.marginLeft = sidebar.offsetWidth + 'px';
+            }
+            if (sidebar && footer) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar.offsetWidth + 'px');
+            }
+        }
+        window.addEventListener('DOMContentLoaded', adjustContentMargin);
+        window.addEventListener('resize', adjustContentMargin);
+    </script>
+
+    <script>
+        function showContent(contentId, sidebarId) {
+            // Hide all content divs
+            var contentDivs = document.getElementsByClassName('content');
+            for (var i = 0; i < contentDivs.length; i++) {
+                contentDivs[i].style.display = 'none';
+            }
+
+            // Show the selected content div
+            var selectedContent = document.getElementById(contentId);
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+
+            // Remove active-sidebar from all sidebar links
+            document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+                link.classList.remove('active-sidebar');
+            });
+
+            // Add active-sidebar to the clicked sidebar link
+            if (sidebarId) {
+                var sidebarLink = document.getElementById(sidebarId);
+                if (sidebarLink) {
+                    sidebarLink.classList.add('active-sidebar');
+                }
+            }
+        }
+    </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            showContent('start-learning', 'learningLink');
+        });
+    </script>
 
 </head>
 
 <body>
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg" style="background-color: #FEFEFE;">
-    <div class="container-fluid">
-        <!-- <a class="navbar-brand" href="#">Navbar</a> -->
+<!-- SIDEBAR -->
+<div class="sidebar sidebar-right-shadow" style="padding: 20px 0px;">
+    <div class="d-flex justify-content-center mb-5" style="cursor: pointer;" onclick="window.location.href='/dashboard-student'">
         <img src={{asset("./images/logo.png")}} alt="logo" width="104" height="65">
+    </div>
+    <div class="sidebar-sticky" style="margin-top: 20px;">
+        <ul class="nav flex-column">
+            <li class="nav-item" style="margin-bottom: 40px;">
+                <div class="row align-items-start">
+                    <div class="col">
+                        <p style="font-weight: 600; font-size: 14px; color: #34364A; margin-left: 15px;">STUDENT WEBAPPS</p>
+                    </div>
+                    <div class="col d-flex justify-content-center">
+                        <img src="{{asset('./images/mysql/mysql-logo.png')}}" alt="learning-logo" style="height: 45px;">
+                    </div>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center active-sidebar"
+                    href="#"
+                    id="learningLink"
+                    style="white-space: nowrap; font-size: 16px;"
+                    onclick="showContent('start-learning', 'learningLink')">
+                        <i class="fas fa-book" style="margin-right: 12px;" id="learningIcon"></i>
+                        Start Learning
+                    </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center"
+                   href="#"
+                   id="validationLink"
+                   style="white-space: nowrap; font-size: 16px;"
+                   onclick="showContent('validation', 'validationLink')">
+                    <i class="fas fa-check-circle" style="margin-right: 12px;" id="validationIcon"></i>
+                    Student Submission
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg content-navbar" style="background-color: #FEFEFE;">
+    <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -210,7 +379,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="dropdown">
+            <div class="dropdown" id="dropdownContainer">
                 <p style="margin-top: 10px; margin-right: 10px;">{{auth()->user()->name}}
                     <img src="{{ asset('./images/Group.png') }}" alt="Group" style="height: 50px; margin-right: 10px;">
                     <i class="fas fa-chevron-down" style="color: #0079FF;"></i>
@@ -222,201 +391,100 @@
                     </div>
                 </p>
             </div>
-            <!-- <button class="btn btn-primary custom-button-sign-up" onclick="window.location.href='register.html'">Sign Up</button> -->
         </div>
     </div>
 </nav>
-<!-- ------------------------------------------------------------------------------------------ -->
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- SIDEBAR -->
-        <nav class="col-md-2 d-none d-md-block sidebar sidebar-right-shadow">
-            <div class="sidebar-sticky" style="margin-top: 20px;">
-                <ul class="nav flex-column">
-                    <li class="nav-item" style="margin-bottom: 40px;">
-                        <div class="row align-items-start">
-                            <div class="col">
-                                <p style="font-weight: 600; font-size: 14px; color: #34364A; margin-left: 15px;">STUDENT
-                                    WEBAPPS</p>
-                            </div>
-                            <div class="col d-flex justify-content-center">
-                                <img src="{{asset("./images/mysql/mysql-logo.png")}}" alt="learning-logo"
-                                    style="height: 45px;">
-                            </div>
+<!-- CONTENT -->
+<main id="main-content">
+    <div class="content" id="start-learning">
+        <p style="font-size: 24px; font-weight: 500; color: #34364A; margin-left: 10px;">Start Learning</p>
+        <div class="custom-card">
+            <div class="topic-list" style="width: 100%;">
+                @foreach($topics as $topic)
+                    @php
+                        $limit_id = $topic->id;
+                        $row = DB::table('mysql_topic_details')
+                            ->where('topic_id', $limit_id)
+                            ->orderBy('id', 'asc')
+                            ->first();
+                        $rows = $row ? $row->id : null;
+                    @endphp
+                    <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                        <div class="topic-title fw-semibold" style="font-size: 18px; color: #34364A;">
+                            {{ $topic->title }}
                         </div>
-                    </li>
-                    <li class="nav-item">
-                        <div class="row align-items-start">
-                            <div class="col-2">
-                                <i class="fas fa-book" style="margin-top: 12px; margin-left: 15px; color: #676767;"
-                                id="learningIcon"></i>
-                            </div>
-                            <div class="col">
-                                <a class="nav-link active" href="#" onclick="showContent('start-learning')"
-                                style="color: #34364A;" id="learningLink">Start Learning</a>
-                            </div>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <div class="row align-items-start">
-                            <div class="col-2">
-                                <i class="fas fa-check-circle"
-                                style="margin-top: 12px; margin-left: 15px; color: #676767;" id="validationIcon"></i>
-                            </div>
-                            <div class="col">
-                                <a class="nav-link" href="#" onclick="showContent('validation')" style="color: #34364A;"
-                                id="validationLink">Student Submission</a>
-                            </div>
-                        </div>
-                    </li>
-                    
-
-                </ul>
-            </div>
-        </nav>
-        <!-- ------------------------------------------------------------------------------------------ -->
-
-        <!-- CONTENT -->
-        <main class="col-md-9">
-            <div class="content" id="start-learning">
-                <p style="font-size: 24px; font-weight: 500; color: #34364A;">Start Learning</p>
-                <div>
-                    <div class="container mt-4">
-                        <!-- NAV TAB -->
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="learning-tab" data-toggle="tab" href="#learning"><b>Learning Topic</b></a>
-                            </li>
-                            @if($role == "teacher")
-                                <li class="nav-item">
-                                    <a class="nav-link" id="finished-tab" data-toggle="tab" href="#progress">Progress Topic Finished</a>
-                                </li>
-                            @endif
-                        </ul>
-
-                        <!-- TAB CONTENT -->
-                        <div class="tab-content mt-3">
-                            <div class="tab-pane fade show active" id="learning">
-                                @foreach($topics as $topic)
-                                    @php
-                                    $limit_id = $topic->id;
-                                    // Ambil ID pertama dari mysql_topic_details berdasarkan topic_id
-                                    $row = DB::table('mysql_topic_details')
-                                        ->where('topic_id', $limit_id)
-                                        ->orderBy('id', 'asc')
-                                        ->first();
-                            
-                                    // Jika ada data di mysql_topic_details, ambil ID-nya, jika tidak, set null
-                                    $rows = $row ? $row->id : null;
-                                @endphp
-
-                                    <div class="row">
-                                        <div class="col">
-                                            <div class="p-3">{{ $topic->title }}</div>
-                                        </div>
-                                        <div class="col" style="text-align: right;">
-                                            <div class="custom-button-detail">
-                                                <button type="button"
-                                                        class="button-text"
-                                                        data-toggle="modal"
-                                                        data-target="#exampleModal"
-                                                        onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
-                                                        style="background: none; border: none; padding: 0; cursor: pointer;">
-                                                    <i class="fas fa-key" style="margin-right: 5px;"></i>
-                                                    Material Details
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                        <div>
+                            <button type="button"
+                                    class="custom-button-detail button-text"
+                                    data-toggle="modal"
+                                    data-target="#exampleModal"
+                                    onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
+                                    style=" border: none; padding: 0; cursor: pointer;">
+                                <i class="fas fa-key" style="margin-right: 5px;"></i>
+                                Material Details
+                            </button>
                         </div>
                     </div>
-                </div>
+                @endforeach
             </div>
-
-            <div id="validation" class="content" style="display: none;">
-                <h1>Student Submission</h1>
-                <div class="table-responsive mb-5">
-                    <table class="table" id="studentSubmissionTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th class="text-center">Submission Topic</th>
-                                <th class="text-center">Wrong</th>
-                                <th class="text-center">Correct</th>
-                                <th class="text-center">Duration (minutes)</th>
-                                <th class="text-center">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($studentSubmissions as $submission)
-                                <tr>
-                                    <td>{{ date('Y-m-d H:i', strtotime($submission->Time)) }}</td>
-                                    <td>{{ $submission->UserName }}</td>
-                                    <td class="text-center">{{ $submission->SubmissionTopic }}</td>
-                                    <td class="text-center">{{ $submission->Salah }}</td>
-                                    <td class="text-center">{{ $submission->Benar }}</td>
-                                    <td class="text-center">
-                                        @php
-                                            $durasiDetik = $submission->Durasi ?? 0;
-                                            $menit = floor($durasiDetik / 60);
-                                            $detik = $durasiDetik % 60;
-                                            $durasiFormat = sprintf('%02d:%02d', $menit, $detik);
-                                        @endphp
-                                        {{ $submission->Durasi !== null ? $durasiFormat : '-' }}
-                                    </td>
-                                    <td class="text-center fw-bold">
-                                        {{-- Calculate the score --}}
-                                        @php
-                                            $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
-                                        @endphp
-                                        {{ $nilai }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div id="settings" class="content" style="display: none;">
-                <h1>Settings</h1>
-                <p>Possible account settings
-                    needed<br>during the learning process</p>
-
-                <div class="container">
-                    <div class="row">
-                        <div class="col">
-                            <div class="custom-card">
-                                <img src="./images/profile.png" alt="Image 1" class="circle-image">
-                                <h2 class="custom-title">My Profile</h2>
-                                <p class="custom-subtitle">Ubah data diri kamu</p>
-                                {{-- <button type="button" class="btn btn-primary custom-button"><p class="button-text">Edit Now</p></button> --}}
-                                <div class="custom-button">
-                                    <p class="button-text">Edit Now</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="custom-card">
-                                <img src="./images/my-password.png" alt="Image 2" class="circle-image">
-                                <h2 class="custom-title">My Password</h2>
-                                <p class="custom-subtitle">Ganti kata sandimu</p>
-                                <div class="custom-button">
-                                    <p class="button-text">Change Now</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
-</div>
+
+    <div id="validation" class="content" style="display: none;">
+        <p style="font-size: 24px; font-weight: 500; color: #34364A; margin-left: 1.5rem;">Student Submission</p>
+        <div class="custom-card mx-3">
+            <div class="topic-list" style="width: 100%;">
+                @foreach($studentSubmissions as $submission)
+                    <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                        <div>
+                            <div class="fw-semibold" style="font-size: 18px; color: #34364A;">
+                                {{ $submission->UserName }} - {{ $submission->SubmissionTopic }}
+                            </div>
+                            <div class="text-muted" style="font-size: 14px;">
+                                Date: {{ date('Y-m-d H:i', strtotime($submission->Time)) }} |
+                                Wrong: {{ $submission->Salah }} |
+                                Correct: {{ $submission->Benar }} |
+                                Duration: 
+                                @php
+                                    $durasiDetik = $submission->Durasi ?? 0;
+                                    $menit = floor($durasiDetik / 60);
+                                    $detik = $durasiDetik % 60;
+                                    $durasiFormat = sprintf('%02d:%02d', $menit, $detik);
+                                @endphp
+                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
+                                <b>Score:</b> 
+                                @php
+                                    $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
+                                @endphp
+                                <b>{{ $nilai }}</b>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button"
+                                class="custom-button-detail button-text"
+                                style="border: none; padding: 0; cursor: pointer;"
+                                data-toggle="modal"
+                                data-target="#submissionDetailModal"
+                                data-username="{{ $submission->UserName }}"
+                                data-topic="{{ $submission->SubmissionTopic }}"
+                                data-date="{{ date('Y-m-d H:i', strtotime($submission->Time)) }}"
+                                data-wrong="{{ $submission->Salah }}"
+                                data-correct="{{ $submission->Benar }}"
+                                data-duration="{{ $submission->Durasi }}"
+                                data-totaljawaban="{{ $submission->TotalJawaban }}"
+                                onclick="showSubmissionDetail(this)">
+                                <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
+                                Detail
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</main>
+
 <!-- The Modal -->
 <div class="modal fade" id="exampleModal"
      tabindex="-1"
@@ -495,6 +563,8 @@
         </div>
     </div>
 </div>
+
+@include('mysql_dml.student.material.modal.detail_submission')
 <!-- JavaScript untuk mengubah konten tab -->
 <script>
     function materialModal(id, title, controller) {
@@ -582,7 +652,7 @@
 
 
     // Function to show the selected content based on sidebar link click
-    function showContent(contentId) {
+    function showContent(contentId, sidebarId) {
         // Hide all content divs
         var contentDivs = document.getElementsByClassName('content');
         for (var i = 0; i < contentDivs.length; i++) {
@@ -593,6 +663,19 @@
         var selectedContent = document.getElementById(contentId);
         if (selectedContent) {
             selectedContent.style.display = 'block';
+        }
+
+        // Remove active-sidebar from all sidebar links
+        document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+            link.classList.remove('active-sidebar');
+        });
+
+        // Add active-sidebar to the clicked sidebar link
+        if (sidebarId) {
+            var sidebarLink = document.getElementById(sidebarId);
+            if (sidebarLink) {
+                sidebarLink.classList.add('active-sidebar');
+            }
         }
     }
 
@@ -777,6 +860,97 @@
     });
 </script>
 
+{{-- button detail di student submission --}}
+<script>
+    function showSubmissionDetail(btn) {
+        // Ambil data dari attribute
+        var username = btn.getAttribute('data-username');
+        var topic = btn.getAttribute('data-topic');
+        var date = btn.getAttribute('data-date');
+        var wrong = btn.getAttribute('data-wrong');
+        var correct = btn.getAttribute('data-correct');
+        var duration = btn.getAttribute('data-duration');
+        var totalJawaban = btn.getAttribute('data-totaljawaban');
+        var menit = Math.floor(duration / 60);
+        var detik = duration % 60;
+        var durasiFormat = duration ? (('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+        var nilai = (totalJawaban > 0) ? Math.round((correct / totalJawaban) * 100 * 100) / 100 : 0;
+
+        // Isi konten modal dengan card dan table
+        document.getElementById('submission-detail-content').innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fas fa-user"></i> ${username}</h5>
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%"><i class="fas fa-book"></i> Topic</th>
+                                <td>${topic}</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-calendar-alt"></i> Date</th>
+                                <td>${date}</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-times-circle text-danger"></i> Wrong</th>
+                                <td><span class="badge badge-danger">${wrong}</span></td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-check-circle text-success"></i> Correct</th>
+                                <td><span class="badge badge-success">${correct}</span></td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-clock"></i> Duration (minutes)</th>
+                                <td>${durasiFormat}</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-percentage"></i> Score</th>
+                                <td><span class="badge badge-primary" style="font-size:1rem">${nilai}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // Simpan data untuk export
+        window.currentSubmissionDetail = {
+            username, topic, date, wrong, correct, durasiFormat, nilai
+        };
+    }
+    
+    // Export Excel
+    document.getElementById('exportExcelBtn').onclick = function() {
+        var d = window.currentSubmissionDetail;
+        var csv = `Field,Value\nName,${d.username}\nTopic,${d.topic}\nDate,${d.date}\nWrong,${d.wrong}\nCorrect,${d.correct}\nDuration,${d.durasiFormat}\nScore,${d.nilai}`;
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'submission_detail.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+    
+    // Export PDF (simple, pakai window.print, untuk custom bisa pakai jsPDF)
+    document.getElementById('exportPdfBtn').onclick = function() {
+        var d = window.currentSubmissionDetail;
+        var win = window.open('', '', 'width=800,height=600');
+        win.document.write('<h2>Submission Detail</h2>');
+        win.document.write('<ul>');
+        win.document.write(`<li><b>Name:</b> ${d.username}</li>`);
+        win.document.write(`<li><b>Topic:</b> ${d.topic}</li>`);
+        win.document.write(`<li><b>Date:</b> ${d.date}</li>`);
+        win.document.write(`<li><b>Wrong:</b> ${d.wrong}</li>`);
+        win.document.write(`<li><b>Correct:</b> ${d.correct}</li>`);
+        win.document.write(`<li><b>Duration (minutes):</b> ${d.durasiFormat}</li>`);
+        win.document.write(`<li><b>Score:</b> ${d.nilai}</li>`);
+        win.document.write('</ul>');
+        win.print();
+        win.close();
+    };
+</script>
+
 
 <style>
     .dropdown {
@@ -825,8 +999,8 @@
 
 </style>
 <footer class="footer"
-        style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 10px 0; position: fixed; bottom: 0;  width: 100%; ">
-    © 2023 Your Website. All rights reserved.
+        style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 5px 0; position: fixed; bottom: 0;  width: 100%; ">
+    © 2025 Your Website. All rights reserved.
 </footer>
 
 </body>
