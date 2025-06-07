@@ -202,6 +202,7 @@
             background-color: #0077ff !important;
             color: #fff !important;
             /* border-radius: 8px; */
+            font-weight: 500 !important;
             transition: background-color 0.3s;
         }
         .sidebar .nav-link.active-sidebar i {
@@ -997,9 +998,10 @@
         var correct = btn.getAttribute('data-correct');
         var duration = btn.getAttribute('data-duration');
         var totalJawaban = btn.getAttribute('data-totaljawaban');
+        var jam = Math.floor(duration / 3600);
         var menit = Math.floor(duration / 60);
         var detik = duration % 60;
-        var durasiFormat = duration ? (('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+        var durasiFormat = duration ? (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
         var nilai = (totalJawaban > 0) ? Math.round((correct / totalJawaban) * 100 * 100) / 100 : 0;
 
         // Isi konten modal dengan card dan table
