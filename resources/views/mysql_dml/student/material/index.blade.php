@@ -217,6 +217,20 @@
             color: #fff !important;
         }
 
+        .custom-button-detail:hover,
+        .custom-button-detail:focus {
+            background-color: #007BFF;
+            color: #fff;
+        }
+
+        .custom-button-detail:hover i,
+        .custom-button-detail:focus i,
+        .button-text:hover i,
+        .button-text:focus i {
+            color: #fff !important;
+            transition: color 0.3s;
+        }
+
     </style>
 
     <title>Database Management System with MySQL</title>
@@ -416,11 +430,11 @@
                         </div>
                         <div>
                             <button type="button"
-                                    class="custom-button-detail button-text"
-                                    data-toggle="modal"
-                                    data-target="#exampleModal"
-                                    onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
-                                    style=" border: none; padding: 0; cursor: pointer;">
+                                class="custom-button-detail button-text"
+                                data-toggle="modal"
+                                data-target="#exampleModal"
+                                onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
+                                style="border: none; padding: 0; cursor: pointer;">
                                 <i class="fas fa-key" style="margin-right: 5px;"></i>
                                 Material Details
                             </button>
