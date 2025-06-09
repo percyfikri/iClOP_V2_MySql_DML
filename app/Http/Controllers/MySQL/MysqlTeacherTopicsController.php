@@ -55,11 +55,11 @@ class MysqlTeacherTopicsController extends Controller
             'sub_topic_jumlah_jawaban.*' => 'required|integer|min:1',
         ]);
 
-        $topic = MySqlTopics::create([
-            'title' => $request->topic_title,
-            'created_by' => $userId,
-            'countdown_seconds' => $request->countdown_minutes * 60, // <-- simpan dalam detik
-        ]);
+        $topic = new MySqlTopics();
+        $topic->title = $request->topic_title;
+        $topic->countdown_seconds = $request->countdown_minutes * 60; // <-- HARUS dari request!
+        $topic->created_by = auth()->id();
+        $topic->save();
 
         $files = [];
         if ($request->hasFile('sub_topic_file')) {
