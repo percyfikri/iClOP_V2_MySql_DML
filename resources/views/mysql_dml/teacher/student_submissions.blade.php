@@ -1,6 +1,6 @@
 {{-- filepath: /d:/Semester 8 (Skripsi)/Skripsi/Project/iClOP_V2_MySql_DML/resources/views/mysql_dml/teacher/student_submissions.blade.php --}}
 <div>
-    {{-- Judul dan tombol export (jika ingin, bisa dihapus jika tidak perlu) --}}
+    {{-- Judul dan tombol export --}}
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <h4 class="mb-3 fw-bold">Student Submissions</h4>
     </div>
@@ -12,16 +12,25 @@
             <i class="fas fa-file-pdf"></i> Export PDF
         </button>
     </div>
-    <div class="mb-3 d-flex gap-2">
-        <button id="filterTopicBtn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterTopicModal" style="border-radius: 18px; font-weight: 500;">
-            Filter by Topic
-        </button>
-        <button id="filterUserBtn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterUserModal" style="border-radius: 18px; font-weight: 500;">
-            Filter by Username
-        </button>
-        <button id="filterDateBtn" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterDateModal" style="border-radius: 18px; font-weight: 500;">
-            Filter by Date
-        </button>
+    <div class="mb-3 d-flex gap-3 align-items-center">
+        <div class="d-flex align-items-center">
+            <button id="filterTopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterTopicModal" type="button">
+                <span class="filter-label">Filter by Topic</span>
+            </button>
+            <span class="filter-clear d-none ms-2" id="clearTopic" style="margin-left: -4px;">&times;</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <button id="filterUserBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterUserModal" type="button">
+                <span class="filter-label">Filter by Username</span>
+            </button>
+            <span class="filter-clear d-none ms-2" id="clearUser" style="margin-left: -4px;">&times;</span>
+        </div>
+        <div class="d-flex align-items-center">
+            <button id="filterDateBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterDateModal" type="button">
+                <span class="filter-label">Filter by Date</span>
+            </button>
+            <span class="filter-clear d-none ms-2" id="clearDate" style="margin-left: -4px;">&times;</span>
+        </div>
         <button id="resetFilterBtn" class="btn btn-outline-secondary" style="border-radius: 18px; font-weight: 500;">
             Reset Filter
         </button>
@@ -152,7 +161,7 @@ $(document).ready(function () {
         date: ''
     };
 
-    // Render ulang tabel berdasarkan data yang diberikan
+    // Render tabel
     function renderTable(data) {
         let tbody = '';
         if (data.length === 0) {
@@ -181,27 +190,41 @@ $(document).ready(function () {
         $('.table tbody').html(tbody);
     }
 
-    // Mengatur status tombol filter (active) sesuai filter yang sedang digunakan
+    // Update label dan icon X pada tombol filter
     function updateFilterButtons() {
-        // Jika filter aktif, tambahkan class active, jika tidak, hapus
+        // Topic
         if (filterState.topic) {
+            $('#filterTopicBtn .filter-label').text(filterState.topic);
+            $('#clearTopic').removeClass('d-none');
             $('#filterTopicBtn').addClass('active');
         } else {
+            $('#filterTopicBtn .filter-label').text('Filter by Topic');
+            $('#clearTopic').addClass('d-none');
             $('#filterTopicBtn').removeClass('active');
         }
+        // Username
         if (filterState.username) {
+            $('#filterUserBtn .filter-label').text(filterState.username);
+            $('#clearUser').removeClass('d-none');
             $('#filterUserBtn').addClass('active');
         } else {
+            $('#filterUserBtn .filter-label').text('Filter by Username');
+            $('#clearUser').addClass('d-none');
             $('#filterUserBtn').removeClass('active');
         }
+        // Date
         if (filterState.date) {
+            $('#filterDateBtn .filter-label').text(filterState.date);
+            $('#clearDate').removeClass('d-none');
             $('#filterDateBtn').addClass('active');
         } else {
+            $('#filterDateBtn .filter-label').text('Filter by Date');
+            $('#clearDate').addClass('d-none');
             $('#filterDateBtn').removeClass('active');
         }
     }
 
-    // Melakukan filter data berdasarkan semua filter yang aktif
+    // Filter logic
     function applyFilters() {
         filteredSubmissions = allStudentSubmissions.filter(function(sub) {
             let matchTopic = !filterState.topic || sub.SubmissionTopic === filterState.topic;
@@ -214,13 +237,12 @@ $(document).ready(function () {
             return matchTopic && matchUser && matchDate;
         });
         renderTable(filteredSubmissions);
-        updateFilterButtons(); // Update status tombol filter
+        updateFilterButtons();
     }
 
-    // Render awal tabel
     renderTable(filteredSubmissions);
 
-    // Export data yang sedang difilter ke Excel
+    // Export Excel
     $('#exportAllExcelBtn').on('click', function() {
         let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score\n';
         filteredSubmissions.forEach(function(sub) {
@@ -242,7 +264,7 @@ $(document).ready(function () {
         window.URL.revokeObjectURL(url);
     });
 
-    // Export data yang sedang difilter ke PDF (menggunakan window.print)
+    // Export PDF
     $('#exportAllPdfBtn').on('click', function() {
         let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th></tr>';
         filteredSubmissions.forEach(function(sub) {
@@ -270,7 +292,7 @@ $(document).ready(function () {
         win.close();
     });
 
-    // Event submit filter by Topic
+    // Filter by Topic
     $('#filterTopicForm').on('submit', function(e) {
         e.preventDefault();
         filterState.topic = $('#filterTopicSelect').val();
@@ -278,7 +300,7 @@ $(document).ready(function () {
         $('#filterTopicModal').modal('hide');
     });
 
-    // Event submit filter by Username
+    // Filter by Username
     $('#filterUserForm').on('submit', function(e) {
         e.preventDefault();
         filterState.username = $('#filterUserSelect').val();
@@ -286,7 +308,7 @@ $(document).ready(function () {
         $('#filterUserModal').modal('hide');
     });
 
-    // Event submit filter by Date
+    // Filter by Date
     $('#filterDateForm').on('submit', function(e) {
         e.preventDefault();
         filterState.date = $('#filterDateInput').val();
@@ -294,7 +316,7 @@ $(document).ready(function () {
         $('#filterDateModal').modal('hide');
     });
 
-    // Event klik tombol reset filter
+    // Reset all filter
     $('#resetFilterBtn').on('click', function() {
         $('#filterTopicSelect').val('');
         $('#filterUserSelect').val('');
@@ -302,10 +324,97 @@ $(document).ready(function () {
         filterState = { topic: '', username: '', date: '' };
         applyFilters();
     });
+
+    // Klik icon X pada filter topic (tidak buka modal)
+    $('#filterTopicBtn .filter-clear').on('click', function(e) {
+        e.stopPropagation();
+        filterState.topic = '';
+        $('#filterTopicSelect').val('');
+        applyFilters();
+    });
+
+    // Klik icon X pada filter username (tidak buka modal)
+    $('#filterUserBtn .filter-clear').on('click', function(e) {
+        e.stopPropagation(); // Mencegah modal muncul
+        filterState.username = '';
+        $('#filterUserSelect').val('');
+        applyFilters();
+    });
+
+    // Klik icon X pada filter date (tidak buka modal)
+    $('#filterDateBtn .filter-clear').on('click', function(e) {
+        e.stopPropagation();
+        filterState.date = '';
+        $('#filterDateInput').val('');
+        applyFilters();
+    });
+
+    // Klik icon X pada filter topic (tidak buka modal)
+    $('#clearTopic').on('click', function(e) {
+        filterState.topic = '';
+        $('#filterTopicSelect').val('');
+        applyFilters();
+    });
+
+    // Klik icon X pada filter username (tidak buka modal)
+    $('#clearUser').on('click', function(e) {
+        filterState.username = '';
+        $('#filterUserSelect').val('');
+        applyFilters();
+    });
+
+    // Klik icon X pada filter date (tidak buka modal)
+    $('#clearDate').on('click', function(e) {
+        filterState.date = '';
+        $('#filterDateInput').val('');
+        applyFilters();
+    });
 });
 </script>
 
 <style>
+    .filter-btn {
+        border-radius: 18px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px; /* Jarak antara label dan X */
+        position: relative;
+    }
+    .filter-label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .filter-clear {
+        pointer-events: auto;
+        color: #000000;
+        font-weight: bold;
+        font-size: 1.1em;
+        background: transparent;
+        border: none;
+        padding: 0 4px;
+        line-height: 1;
+        transition: color 0.2s, background 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 22px;
+    }
+    .filter-btn.active {
+        background: #2563eb !important;
+        color: #fff !important;
+        border-color: #2563eb !important;
+    }
+    .filter-btn.active .filter-clear {
+        color: #fff;
+    }
+    .filter-clear:hover {
+        color: #333333;
+        background: #d6d6d686;
+        border-radius: 50%;
+        align-items: center;
+    }
     #exportAllExcelBtn {
         background-color: #e6f4ea !important;
         color: #198754 !important;
