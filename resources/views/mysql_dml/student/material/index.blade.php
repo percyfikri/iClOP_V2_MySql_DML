@@ -579,7 +579,7 @@
                                     $detik = $durasiDetik % 60;
                                     $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
                                 @endphp
-                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }}
+                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
                                 <b>Score:</b> 
                                 @php
                                     $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
