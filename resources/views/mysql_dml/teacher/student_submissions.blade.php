@@ -140,54 +140,25 @@
 </div>
 
 <script>
-    $(document).ready(function () {
-        // Ambil data dari blade ke JS
-        var allStudentSubmissions = @json($studentSubmissions);
-        var filteredSubmissions = allStudentSubmissions.slice();
+$(document).ready(function () {
+    // Ambil semua data submissions dari backend
+    var allStudentSubmissions = @json($studentSubmissions);
+    var filteredSubmissions = allStudentSubmissions.slice();
 
-        // Render Table
-        function renderTable(data) {
-            let tbody = '';
-            if (data.length === 0) {
-                tbody = `<tr><td colspan="8" class="text-center text-muted">No submissions found.</td></tr>`;
-            } else {
-                data.forEach(function(sub, idx) {
-                    let durasiDetik = sub.Durasi ?? 0;
-                    let jam = Math.floor(durasiDetik / 3600);
-                    let menit = Math.floor((durasiDetik % 3600) / 60);
-                    let detik = durasiDetik % 60;
-                    let durasiFormat = sub.Durasi !== null ? 
-                        (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                    let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
-                    tbody += `<tr class="text-center">
-                        <td>${idx + 1}</td>
-                        <td>${sub.UserName}</td>
-                        <td>${sub.SubmissionTopic}</td>
-                        <td>${sub.Time ? sub.Time.substring(0,16).replace('T',' ') : '-'}</td>
-                        <td>${sub.Salah}</td>
-                        <td>${sub.Benar}</td>
-                        <td>${durasiFormat}</td>
-                        <td>${nilai}</td>
-                    </tr>`;
-                });
-            }
-            $('.table tbody').html(tbody);
-        }
+    // State untuk menyimpan filter yang sedang aktif
+    var filterState = {
+        topic: '',
+        username: '',
+        date: ''
+    };
 
-        // Helper untuk reset semua tombol filter ke non-active
-        function resetFilterButtons() {
-            $('#filterTopicBtn').removeClass('active');
-            $('#filterUserBtn').removeClass('active');
-            $('#filterDateBtn').removeClass('active');
-        }
-
-        // Initial render
-        renderTable(filteredSubmissions);
-
-        // Export Filtered to Excel
-        $('#exportAllExcelBtn').on('click', function() {
-            let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score\n';
-            filteredSubmissions.forEach(function(sub) {
+    // Render ulang tabel berdasarkan data yang diberikan
+    function renderTable(data) {
+        let tbody = '';
+        if (data.length === 0) {
+            tbody = `<tr><td colspan="8" class="text-center text-muted">No submissions found.</td></tr>`;
+        } else {
+            data.forEach(function(sub, idx) {
                 let durasiDetik = sub.Durasi ?? 0;
                 let jam = Math.floor(durasiDetik / 3600);
                 let menit = Math.floor((durasiDetik % 3600) / 60);
@@ -195,96 +166,143 @@
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
                 let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
-                csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
-            });
-            var blob = new Blob([csv], { type: 'text/csv' });
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'filtered_student_submissions.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
-        });
-
-        // Export Filtered to PDF
-        $('#exportAllPdfBtn').on('click', function() {
-            let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th></tr>';
-            filteredSubmissions.forEach(function(sub) {
-                let durasiDetik = sub.Durasi ?? 0;
-                let jam = Math.floor(durasiDetik / 3600);
-                let menit = Math.floor((durasiDetik % 3600) / 60);
-                let detik = durasiDetik % 60;
-                let durasiFormat = sub.Durasi !== null ? 
-                    (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
-                html += `<tr>
+                tbody += `<tr class="text-center">
+                    <td>${idx + 1}</td>
                     <td>${sub.UserName}</td>
                     <td>${sub.SubmissionTopic}</td>
-                    <td>${sub.Time}</td>
+                    <td>${sub.Time ? sub.Time.substring(0,16).replace('T',' ') : '-'}</td>
                     <td>${sub.Salah}</td>
                     <td>${sub.Benar}</td>
                     <td>${durasiFormat}</td>
                     <td>${nilai}</td>
                 </tr>`;
             });
-            html += '</table>';
-            var win = window.open('', '', 'width=1000,height=700');
-            win.document.write(html);
-            win.print();
-            win.close();
-        });
+        }
+        $('.table tbody').html(tbody);
+    }
 
-        // Filter by Topic
-        $('#filterTopicForm').on('submit', function(e) {
-            e.preventDefault();
-            let topic = $('#filterTopicSelect').val();
-            filteredSubmissions = allStudentSubmissions.filter(function(sub) {
-                return topic === '' || sub.SubmissionTopic === topic;
-            });
-            renderTable(filteredSubmissions);
-            $('#filterTopicModal').modal('hide');
-            resetFilterButtons();
-            if (topic !== '') $('#filterTopicBtn').addClass('active');
-        });
+    // Mengatur status tombol filter (active) sesuai filter yang sedang digunakan
+    function updateFilterButtons() {
+        // Jika filter aktif, tambahkan class active, jika tidak, hapus
+        if (filterState.topic) {
+            $('#filterTopicBtn').addClass('active');
+        } else {
+            $('#filterTopicBtn').removeClass('active');
+        }
+        if (filterState.username) {
+            $('#filterUserBtn').addClass('active');
+        } else {
+            $('#filterUserBtn').removeClass('active');
+        }
+        if (filterState.date) {
+            $('#filterDateBtn').addClass('active');
+        } else {
+            $('#filterDateBtn').removeClass('active');
+        }
+    }
 
-        // Filter by Username
-        $('#filterUserForm').on('submit', function(e) {
-            e.preventDefault();
-            let username = $('#filterUserSelect').val();
-            filteredSubmissions = allStudentSubmissions.filter(function(sub) {
-                return username === '' || sub.UserName === username;
-            });
-            renderTable(filteredSubmissions);
-            $('#filterUserModal').modal('hide');
-            resetFilterButtons();
-            if (username !== '') $('#filterUserBtn').addClass('active');
-        });
-
-        // Filter by Date
-        $('#filterDateForm').on('submit', function(e) {
-            e.preventDefault();
-            let date = $('#filterDateInput').val();
-            filteredSubmissions = allStudentSubmissions.filter(function(sub) {
-                if (!date) return true;
+    // Melakukan filter data berdasarkan semua filter yang aktif
+    function applyFilters() {
+        filteredSubmissions = allStudentSubmissions.filter(function(sub) {
+            let matchTopic = !filterState.topic || sub.SubmissionTopic === filterState.topic;
+            let matchUser = !filterState.username || sub.UserName === filterState.username;
+            let matchDate = true;
+            if (filterState.date) {
                 let subDate = sub.Time ? sub.Time.substring(0,10) : '';
-                return subDate === date;
-            });
-            renderTable(filteredSubmissions);
-            $('#filterDateModal').modal('hide');
-            resetFilterButtons();
-            if (date !== '') $('#filterDateBtn').addClass('active');
+                matchDate = subDate === filterState.date;
+            }
+            return matchTopic && matchUser && matchDate;
         });
+        renderTable(filteredSubmissions);
+        updateFilterButtons(); // Update status tombol filter
+    }
 
-        // Reset Filter
-        $('#resetFilterBtn').on('click', function() {
-            $('#filterTopicSelect').val('');
-            $('#filterUserSelect').val('');
-            $('#filterDateInput').val('');
-            filteredSubmissions = allStudentSubmissions.slice();
-            renderTable(allStudentSubmissions);
-            resetFilterButtons();
+    // Render awal tabel
+    renderTable(filteredSubmissions);
+
+    // Export data yang sedang difilter ke Excel
+    $('#exportAllExcelBtn').on('click', function() {
+        let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score\n';
+        filteredSubmissions.forEach(function(sub) {
+            let durasiDetik = sub.Durasi ?? 0;
+            let jam = Math.floor(durasiDetik / 3600);
+            let menit = Math.floor((durasiDetik % 3600) / 60);
+            let detik = durasiDetik % 60;
+            let durasiFormat = sub.Durasi !== null ? 
+                (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+            let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+            csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
         });
+        var blob = new Blob([csv], { type: 'text/csv' });
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'filtered_student_submissions.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
     });
+
+    // Export data yang sedang difilter ke PDF (menggunakan window.print)
+    $('#exportAllPdfBtn').on('click', function() {
+        let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th></tr>';
+        filteredSubmissions.forEach(function(sub) {
+            let durasiDetik = sub.Durasi ?? 0;
+            let jam = Math.floor(durasiDetik / 3600);
+            let menit = Math.floor((durasiDetik % 3600) / 60);
+            let detik = durasiDetik % 60;
+            let durasiFormat = sub.Durasi !== null ? 
+                (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
+            let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+            html += `<tr>
+                <td>${sub.UserName}</td>
+                <td>${sub.SubmissionTopic}</td>
+                <td>${sub.Time}</td>
+                <td>${sub.Salah}</td>
+                <td>${sub.Benar}</td>
+                <td>${durasiFormat}</td>
+                <td>${nilai}</td>
+            </tr>`;
+        });
+        html += '</table>';
+        var win = window.open('', '', 'width=1000,height=700');
+        win.document.write(html);
+        win.print();
+        win.close();
+    });
+
+    // Event submit filter by Topic
+    $('#filterTopicForm').on('submit', function(e) {
+        e.preventDefault();
+        filterState.topic = $('#filterTopicSelect').val();
+        applyFilters();
+        $('#filterTopicModal').modal('hide');
+    });
+
+    // Event submit filter by Username
+    $('#filterUserForm').on('submit', function(e) {
+        e.preventDefault();
+        filterState.username = $('#filterUserSelect').val();
+        applyFilters();
+        $('#filterUserModal').modal('hide');
+    });
+
+    // Event submit filter by Date
+    $('#filterDateForm').on('submit', function(e) {
+        e.preventDefault();
+        filterState.date = $('#filterDateInput').val();
+        applyFilters();
+        $('#filterDateModal').modal('hide');
+    });
+
+    // Event klik tombol reset filter
+    $('#resetFilterBtn').on('click', function() {
+        $('#filterTopicSelect').val('');
+        $('#filterUserSelect').val('');
+        $('#filterDateInput').val('');
+        filterState = { topic: '', username: '', date: '' };
+        applyFilters();
+    });
+});
 </script>
 
 <style>
