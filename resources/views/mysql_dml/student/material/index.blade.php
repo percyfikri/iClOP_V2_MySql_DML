@@ -134,24 +134,35 @@
         .custom-button-detail {
             width: 180px;
             height: 45px;
-            border-radius: 10px;
-            background-color: #EAEAEA;
+            border-radius: 11px;
+            background-color: #007bff0c !important;
+            border: 1.5px solid #007BFF !important;
+            color: #007BFF !important; /* Teks hitam */
             display: flex;
             align-items: center;
             justify-content: center;
             margin-top: 15px;
             margin-left: auto;
-            color: #A0A0A0;
-            /* Warna teks saat tombol normal */
-            transition: background-color 0.3s, color 0.3s;
-            /* Efek transisi ketika hover */
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            /* Icon default hitam */
         }
 
-        .custom-button-detail:hover {
-            background-color: #007BFF;
-            /* Warna latar belakang saat tombol dihover */
-            color: white;
-            /* Warna teks saat tombol dihover menjadi putih */
+        .custom-button-detail i {
+            color: #007BFF !important;
+            transition: color 0.3s;
+        }
+
+        .custom-button-detail:hover,
+        .custom-button-detail:focus {
+            background-color: #007BFF !important;
+            color: #fff !important;
+            border-color: #007BFF !important;
+        }
+
+        .custom-button-detail:hover i,
+        .custom-button-detail:focus i {
+            color: #fff !important;
         }
 
         .button-text {
@@ -274,6 +285,38 @@
         #exportAllPdfBtn:hover .fa-file-pdf,
         #exportAllPdfBtn:focus .fa-file-pdf {
             color: #fff !important;
+        }
+
+        /* Efek tombol enroll: normal biru, hover outline biru */
+        .btn-enroll-material {
+            width: 180px;
+            height: 45px;
+            border-radius: 11px;
+            background-color: #007BFF !important;
+            border: 2px solid #007BFF !important;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            margin-left: auto;
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .btn-enroll-material i {
+            color: #fff !important;
+            transition: color 0.3s;
+        }
+        .btn-enroll-material:hover,
+        .btn-enroll-material:focus {
+            background-color: #fff !important;
+            color: #007BFF !important;
+            border: 2px solid #007BFF !important;
+        }
+        .btn-enroll-material:hover i,
+        .btn-enroll-material:focus i {
+            color: #007BFF !important;
         }
 
     </style>
@@ -512,6 +555,7 @@
 
 <!-- CONTENT -->
 <main id="main-content">
+    {{-- Start Learning --}}
     <div class="content" id="start-learning">
         <h4 class="mb-4 mx-2 fw-bold">Start Learning</h4>
         <div class="custom-card">
@@ -546,6 +590,7 @@
         </div>
     </div>
 
+    {{-- Student Submission --}}
     <div id="validation" class="content" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-3" style="width: 100%;">
             <h4 class="fw-bold ml-2">Student Submission</h4>
@@ -682,9 +727,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" style="margin-left: 10px; width: 160px;"
-                        onclick="materialDetailPage()">
-                    <i class="fas fa-key" style="margin-right: 5px;"></i>Enroll Material
+                <button type="button"
+                    class="btn-enroll-material"
+                    onclick="materialDetailPage()">
+                    <i class="fas fa-key" style="margin-right: 10px;"></i>Enroll Material
                 </button>
             </div>
         </div>
