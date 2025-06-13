@@ -430,7 +430,7 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+                let nilai = (sub.TotalSoal > 0) ? Math.round((sub.Benar / sub.TotalSoal) * 100 * 100) / 100 : 0;
                 csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
             });
             var blob = new Blob([csv], { type: 'text/csv' });
@@ -452,7 +452,7 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let nilai = (sub.TotalJawaban > 0) ? Math.round((sub.Benar / sub.TotalJawaban) * 100 * 100) / 100 : 0;
+                let nilai = (sub.TotalSoal > 0) ? Math.round((sub.Benar / sub.TotalSoal) * 100 * 100) / 100 : 0;
                 html += `<tr>
                     <td>${sub.UserName}</td>
                     <td>${sub.SubmissionTopic}</td>
@@ -627,7 +627,7 @@
                                 {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
                                 <b>Score:</b> 
                                 @php
-                                    $nilai = ($submission->TotalJawaban > 0) ? round(($submission->Benar / $submission->TotalJawaban) * 100, 2) : 0;
+                                    $nilai = ($submission->TotalSoal > 0) ? round(($submission->Benar / $submission->TotalSoal) * 100, 2) : 0;
                                 @endphp
                                 <b>{{ $nilai }}</b>
                             </div>
