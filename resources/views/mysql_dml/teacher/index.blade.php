@@ -541,7 +541,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold">Number of Answers</label>
-                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0" value="${sub.total_answer !== null && sub.total_answer !== undefined ? sub.total_answer : ''}">
+                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0" value="${sub.total_question !== null && sub.total_question !== undefined ? sub.total_question : ''}">
                             </div>
                         </div>
                     `;

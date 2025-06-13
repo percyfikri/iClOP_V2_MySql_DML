@@ -17,7 +17,7 @@ class MySqlTopicDetails extends Model
         'file_path',
         'file_name',
         'created_by',
-        'total_answer'
+        'total_question'
     ];
 
     // Relasi: Setiap topic detail milik satu topic

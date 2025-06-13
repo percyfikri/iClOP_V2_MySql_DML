@@ -10,7 +10,7 @@
                 ->where('topic_detail_id', $row->id)
                 ->where('status', 'true')
                 ->count();
-            $isComplete = ($correctCount >= $row->total_answer);
+            $isComplete = ($correctCount >= $row->total_question);
         @endphp
         <div class="row px-4 py-2">
             <div class="col" style="padding-bottom: 1rem;">

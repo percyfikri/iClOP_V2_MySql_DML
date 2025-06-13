@@ -644,7 +644,7 @@
                                 data-wrong="{{ $submission->Salah }}"
                                 data-correct="{{ $submission->Benar }}"
                                 data-duration="{{ $submission->Durasi }}"
-                                data-totaljawaban="{{ $submission->TotalJawaban }}"
+                                data-totalsoal="{{ $submission->TotalSoal }}"
                                 onclick="showSubmissionDetail(this)">
                                 <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
                                 Detail
@@ -1043,12 +1043,13 @@
         var wrong = btn.getAttribute('data-wrong');
         var correct = btn.getAttribute('data-correct');
         var duration = btn.getAttribute('data-duration');
-        var totalJawaban = btn.getAttribute('data-totaljawaban');
+        var totalSoal = btn.getAttribute('data-totalsoal'); // Ambil total soal dari atribut
         var jam = Math.floor(duration / 3600);
         var menit = Math.floor(duration / 60);
         var detik = duration % 60;
         var durasiFormat = duration ? (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-        var nilai = (totalJawaban > 0) ? Math.round((correct / totalJawaban) * 100 * 100) / 100 : 0;
+        var nilai = (totalSoal > 0) ? Math.round((correct / totalSoal) * 100 * 100) / 100 : 0;
+
 
         // Isi konten modal dengan card dan table
         document.getElementById('submission-detail-content').innerHTML = `

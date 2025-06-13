@@ -37,7 +37,7 @@ class MysqlController extends Controller
                 DB::raw("SUM(CASE WHEN mysql_student_submissions.status = 'false' THEN 1 ELSE 0 END) as Salah"),
                 DB::raw("COUNT(mysql_student_submissions.id) as TotalJawaban"),
                 'mysql_student_topic_times.duration_seconds as Durasi',
-                DB::raw('(SELECT SUM(total_answer) FROM mysql_topic_details WHERE topic_id = mysql_topics.id) as TotalSoal')
+                DB::raw('(SELECT SUM(total_question) FROM mysql_topic_details WHERE topic_id = mysql_topics.id) as TotalSoal')
             )
             ->where('mysql_student_submissions.user_id', $userId)
             ->groupBy('mysql_topics.title', 'users.name', 'mysql_student_topic_times.duration_seconds', 'mysql_topics.id')

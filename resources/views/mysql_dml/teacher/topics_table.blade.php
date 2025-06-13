@@ -93,7 +93,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Number of Answers</label>
+                            <label class="form-label fw-semibold">Number of Questions</label>
                             <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
                         </div>
                     </div>

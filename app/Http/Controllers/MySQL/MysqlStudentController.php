@@ -26,7 +26,7 @@ class MysqlStudentController extends Controller
         $detail = MySqlTopicDetails::findOrFail($start);
 
         $page = (int) $request->get('page', 1); // halaman aktif, default 1
-        $totalAnswer = $detail->total_answer;
+        $totalAnswer = $detail->total_question;
 
         // Ambil submission terakhir untuk nomor ke-(page)
         $submission = DB::table('mysql_student_submissions')
@@ -312,10 +312,10 @@ class MysqlStudentController extends Controller
             ->where('topic_id', $topicId)
             ->pluck('id');
 
-        // Hitung total expected answer (total_answer) pada semua subtopik
+        // Hitung total expected answer (total_question) pada semua subtopik
         $totalAnswer = DB::table('mysql_topic_details')
             ->where('topic_id', $topicId)
-            ->sum('total_answer');
+            ->sum('total_question');
 
         // Hitung jumlah submission status=true pada semua subtopik topik ini
         $correctSubmissions = DB::table('mysql_student_submissions')

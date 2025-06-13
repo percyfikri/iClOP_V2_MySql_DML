@@ -9,7 +9,7 @@
                 ->where('user_id', Auth::user()->id)
                 ->where('topic_detail_id', $subtopic->id)
                 ->where('status', 'true')
-                ->count() >= $subtopic->total_answer;
+                ->count() >= $subtopic->total_question;
         })->count();
     $allSubtopicsCompleted = ($totalSubtopics > 0 && $completedSubtopics == $totalSubtopics);
 
@@ -138,7 +138,7 @@
                                     ->where('user_id', Auth::user()->id)
                                     ->where('topic_detail_id', $detail->id)
                                     ->where('status', 'true')
-                                    ->count() >= $detail->total_answer;
+                                    ->count() >= $detail->total_question;
                             @endphp
                             @if($nextDetail)
                                 @if($allCorrect)

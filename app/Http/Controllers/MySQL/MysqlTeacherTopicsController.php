@@ -81,7 +81,7 @@ class MysqlTeacherTopicsController extends Controller
                 'file_name' => $fileName,
                 'file_path' => $filePath,
                 'created_by' => $userId,
-                'total_answer' => $request->sub_topic_jumlah_jawaban[$i] ?? null,
+                'total_question' => $request->sub_topic_jumlah_jawaban[$i] ?? null,
             ]);
         }
         // dd($request->all());
@@ -142,13 +142,13 @@ class MysqlTeacherTopicsController extends Controller
         foreach ($titles as $i => $title) {
             $fileName = null;
             $filePath = null;
-            $totalAnswer = isset($jumlahJawaban[$i]) ? $jumlahJawaban[$i] : null;
+            $total_question = isset($jumlahJawaban[$i]) ? $jumlahJawaban[$i] : null;
             if (!empty($ids[$i])) {
                 // Update existing
                 $sub = MySqlTopicDetails::find($ids[$i]);
                 if ($sub) {
                     $sub->title = $title;
-                    $sub->total_answer = $totalAnswer;
+                    $sub->total_question = $total_question;
                     // Jika ada file baru diupload
                     if (isset($files[$i]) && $files[$i]) {
                         // Hapus file lama jika ada
@@ -181,7 +181,7 @@ class MysqlTeacherTopicsController extends Controller
                     'file_name' => $fileName,
                     'file_path' => $filePath,
                     'created_by' => auth()->id(),
-                    'total_answer' => $totalAnswer,
+                    'total_question' => $total_question,
                 ]);
             }
         }
