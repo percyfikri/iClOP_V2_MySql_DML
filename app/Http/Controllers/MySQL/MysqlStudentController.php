@@ -132,6 +132,62 @@ class MysqlStudentController extends Controller
         ]);
     }
 
+    
+    public function enrollTopic(Request $request)
+    {
+        $userId = Auth::id();
+        $topicId = $request->input('mysqlid');
+        $now = now();
+
+        //Panggil setup database testing
+        $this->setupStudentTestingDatabase($userId);
+
+        $existing = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->first();
+
+        // Jangan buat sesi baru jika sudah selesai
+        if (!$existing) {
+            DB::table('mysql_student_topic_times')->insert([
+                'user_id' => $userId,
+                'topic_id' => $topicId,
+                'started_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'is_finished' => 0,
+            ]);
+        }
+        // Jika sudah selesai, tidak perlu insert apa-apa
+
+        return response()->json(['success' => true]);
+    }
+
+    private function setupStudentTestingDatabase($userId)
+    {
+        $dbName = "iclop_user_" . $userId;
+        $dbUser = env('DB_TESTING_USERNAME', 'root');
+        $dbPass = env('DB_TESTING_PASSWORD', '');
+        $dbHost = env('DB_TESTING_HOST', '127.0.0.1');
+        $dbPort = env('DB_TESTING_PORT', '3306');
+        $templatePath = base_path('database/iclopTemplate.sql');
+
+        // 1. Buat database jika belum ada
+        DB::statement("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+        // 2. Import template SQL jika tabel utama belum ada
+        $tables = DB::select("SHOW TABLES FROM `$dbName`");
+        if (count($tables) == 0) {
+            $importCmd = "mysql -h $dbHost -P $dbPort -u $dbUser " . ($dbPass ? "-p\"$dbPass\"" : "") . " $dbName < \"$templatePath\"";
+            shell_exec($importCmd);
+        }
+
+        // 3. Set koneksi dinamis ke database ini
+        config(['database.connections.mysql_testing.database' => $dbName]);
+        DB::purge('mysql_testing');
+        DB::reconnect('mysql_testing');
+    }
+
     public function submitUserInput(Request $request)
     {
         $request->validate([
@@ -236,26 +292,6 @@ class MysqlStudentController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
-        // HAPUS DATA KETIKA STATUS QUERY SALAH. HAL INI UNTUK MENGHINDARI KESALAHAN PADA DATABASE TESTING
-        // TETAPI KETIKA USER INPUT QUERY (NO 3) YANG SAMA DENGAN JAWABAN SEBELUMNYA (NO 2) AKAN TERJADI ERROR DUPLIKAT
-        // KEMUDIAN DATA OTOMATIS AKAN DIHAPUS, DIMANA HAL INI SAMA SAJA MENGHAPUS HASIL QUERY SEBELUMNYA (NO 2)
-
-        // Jika status salah, hapus data yang baru saja dimasukkan user di database testing
-        // if ($status === 'false') {
-        //     // Contoh: hapus data dari tabel mk dengan kode_mk yang baru saja di-insert user
-        //     // Anda bisa parsing $userInput untuk mendapatkan nilai yang di-insert, atau simpan nilai insert di session/variabel
-        //     try {
-        //         // Contoh sederhana untuk kasus INSERT INTO mk (kode_mk, nama_mk) VALUES ('02010', 'Basis Data');
-        //         // Anda bisa gunakan regex atau parser sederhana untuk mengambil nilai kode_mk
-        //         if (preg_match("/INSERT INTO mk.*VALUES\s*\(\s*'([^']+)'/", $userInput, $matches)) {
-        //             $kode_mk = $matches[1];
-        //             DB::connection('mysql_testing')->table('mk')->where('kode_mk', $kode_mk)->delete();
-        //         }
-        //     } catch (\Exception $e) {
-        //         Log::error('Gagal menghapus data mk dari database testing: ' . $e->getMessage());
-        //     }
-        // }
 
         return redirect()->route('showTopicDetail', [
             'mysqlid' => $request->input('mysqlid'),
@@ -512,6 +548,31 @@ class MysqlStudentController extends Controller
             'detailId'
         ))->render();
     }
+    
+    public function finishTopic(Request $request)
+    {
+        $userId = Auth::id();
+        $topicId = $request->input('mysqlid');
+        $now = now();
+
+        $topicTime = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->first();
+
+        if ($topicTime && $topicTime->started_at && !$topicTime->duration_seconds) {
+            $duration = $now->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
+            DB::table('mysql_student_topic_times')
+                ->where('id', $topicTime->id)
+                ->update([
+                    'duration_seconds' => $duration,
+                    'is_finished' => 1, // <-- Tandai selesai
+                    'updated_at' => $now
+                ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
 
     public function resetTestingDatabase(Request $request)
     {
@@ -545,85 +606,5 @@ class MysqlStudentController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Database testing berhasil dihapus!']);
-    }
-
-    public function enrollTopic(Request $request)
-    {
-        $userId = Auth::id();
-        $topicId = $request->input('mysqlid');
-        $now = now();
-
-        //Panggil setup database testing
-        $this->setupStudentTestingDatabase($userId);
-
-        $existing = DB::table('mysql_student_topic_times')
-            ->where('user_id', $userId)
-            ->where('topic_id', $topicId)
-            ->first();
-
-        // Jangan buat sesi baru jika sudah selesai
-        if (!$existing) {
-            DB::table('mysql_student_topic_times')->insert([
-                'user_id' => $userId,
-                'topic_id' => $topicId,
-                'started_at' => $now,
-                'created_at' => $now,
-                'updated_at' => $now,
-                'is_finished' => 0,
-            ]);
-        }
-        // Jika sudah selesai, tidak perlu insert apa-apa
-
-        return response()->json(['success' => true]);
-    }
-
-    public function finishTopic(Request $request)
-    {
-        $userId = Auth::id();
-        $topicId = $request->input('mysqlid');
-        $now = now();
-
-        $topicTime = DB::table('mysql_student_topic_times')
-            ->where('user_id', $userId)
-            ->where('topic_id', $topicId)
-            ->first();
-
-        if ($topicTime && $topicTime->started_at && !$topicTime->duration_seconds) {
-            $duration = $now->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
-            DB::table('mysql_student_topic_times')
-                ->where('id', $topicTime->id)
-                ->update([
-                    'duration_seconds' => $duration,
-                    'is_finished' => 1, // <-- Tandai selesai
-                    'updated_at' => $now
-                ]);
-        }
-
-        return response()->json(['success' => true]);
-    }
-
-    private function setupStudentTestingDatabase($userId)
-    {
-        $dbName = "iclop_user_" . $userId;
-        $dbUser = env('DB_TESTING_USERNAME', 'root');
-        $dbPass = env('DB_TESTING_PASSWORD', '');
-        $dbHost = env('DB_TESTING_HOST', '127.0.0.1');
-        $dbPort = env('DB_TESTING_PORT', '3306');
-        $templatePath = base_path('database/iclopTemplate.sql');
-
-        // 1. Buat database jika belum ada
-        DB::statement("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-
-        // 2. Import template SQL jika tabel utama belum ada
-        $tables = DB::select("SHOW TABLES FROM `$dbName`");
-        if (count($tables) == 0) {
-            $importCmd = "mysql -h $dbHost -P $dbPort -u $dbUser " . ($dbPass ? "-p\"$dbPass\"" : "") . " $dbName < \"$templatePath\"";
-            shell_exec($importCmd);
-        }
-
-        // 3. Set koneksi dinamis ke database ini
-        config(['database.connections.mysql_testing.database' => $dbName]);
-        DB::purge('mysql_testing');
-        DB::reconnect('mysql_testing');
     }
 }
