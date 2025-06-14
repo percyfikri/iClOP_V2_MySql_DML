@@ -513,24 +513,6 @@ class MysqlStudentController extends Controller
         ))->render();
     }
 
-    public function importSqlData(Request $request)
-    {
-        $userId = Auth::user()->id;
-        $this->setupStudentTestingDatabase($userId);
-
-        // Path file SQL (misal: database/iclop_v2_testing UPDATE.sql)
-        $sqlFile = base_path('database/iclop_v2_testing UPDATE.sql');
-        $sql = file_get_contents($sqlFile);
-
-        // Jalankan SQL ke database testing
-        try {
-            DB::connection('mysql_testing')->unprepared($sql);
-            return response()->json(['success' => true, 'message' => 'Data berhasil diimport!']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
-        }
-    }
-
     public function resetTestingDatabase(Request $request)
     {
         $userId = Auth::id();

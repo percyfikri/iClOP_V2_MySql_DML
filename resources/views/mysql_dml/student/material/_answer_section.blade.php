@@ -142,19 +142,11 @@
                             @endphp
                             @if($nextDetail)
                                 @if($allCorrect)
-                                    @if($isReset)
-                                        <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
-                                           id="import-next-btn"
-                                           class="btn btn-primary fw-semibold">
-                                            Next Sub-Topics &rarr;
-                                        </a>
-                                    @else
-                                        <button id="import-next-btn"
-                                                class="btn btn-primary fw-semibold"
-                                                data-next="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}">
-                                            Next Sub-Topics &rarr;
-                                        </button>
-                                    @endif
+                                    <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                                       id="import-next-btn"
+                                       class="btn btn-primary fw-semibold">
+                                        Next Sub-Topics &rarr;
+                                    </a>
                                 @else
                                     <button class="btn btn-primary fw-semibold" disabled>
                                         Next Sub-Topics &rarr;
@@ -201,30 +193,7 @@
     </div>
 
 <script>
-document.addEventListener('click', function(e) {
-    // Hanya untuk button, bukan <a>
-    if (e.target && e.target.id === 'import-next-btn' && e.target.tagName === 'BUTTON') {
-        const importBtn = e.target;
-        importBtn.disabled = true;
-        fetch('{{ route('student.import.sql') }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success){
-                window.location.href = importBtn.getAttribute('data-next');
-            } else {
-                alert('Import gagal: ' + data.message);
-                importBtn.disabled = false;
-                importBtn.textContent = 'Next Sub-Topics →';
-            }
-        });
-    }
-});
+
 
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'reset-testing-db-btn' && !e.target.disabled) {
