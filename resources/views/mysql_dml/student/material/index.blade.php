@@ -39,8 +39,7 @@
             bottom: 0;
             left: 0;
             width: calc(100% - var(--sidebar-width, 240px));
-            margin-left: var(--sidebar-width, 240px);
-            z-index: 101;
+            z-index: 1;
         }
 
         /* Highlight menu aktif */
@@ -735,8 +734,13 @@
             <div class="modal-footer">
                 <button type="button"
                     class="btn-enroll-material"
+                    id="enrollBtn"
                     onclick="materialDetailPage()">
-                    <i class="fas fa-key" style="margin-right: 10px;"></i>Enroll Material
+                    <span id="enrollBtnText"><i class="fas fa-key" style="margin-right: 10px;"></i>Enroll Material</span>
+                    <span id="enrollBtnSpinner" style="display:none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Loading...
+                    </span>
                 </button>
             </div>
         </div>
@@ -760,6 +764,12 @@
         let id = $("#id").val();
         let controller = $("#controller").val();
 
+        // Disable button dan tampilkan spinner
+        var btn = document.getElementById('enrollBtn');
+        btn.disabled = true;
+        document.getElementById('enrollBtnText').style.display = 'none';
+        document.getElementById('enrollBtnSpinner').style.display = 'inline-block';
+
         // Enroll via AJAX
         $.ajax({
             type: "POST",
@@ -774,10 +784,18 @@
                     window.location.href = "{{ route('showTopicDetail') }}?mysqlid=" + id + "&start=" + controller;
                 } else {
                     alert('Gagal enroll, silakan coba lagi.');
+                    // Enable kembali jika gagal
+                    btn.disabled = false;
+                    document.getElementById('enrollBtnText').style.display = 'inline-block';
+                    document.getElementById('enrollBtnSpinner').style.display = 'none';
                 }
             },
             error: function(xhr, status, error) {
                 alert('Gagal enroll: ' + error);
+                // Enable kembali jika gagal
+                btn.disabled = false;
+                document.getElementById('enrollBtnText').style.display = 'inline-block';
+                document.getElementById('enrollBtnSpinner').style.display = 'none';
             }
         });
     }
