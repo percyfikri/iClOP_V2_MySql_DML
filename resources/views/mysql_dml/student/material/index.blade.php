@@ -39,6 +39,7 @@
             bottom: 0;
             left: 0;
             width: calc(100% - var(--sidebar-width, 240px));
+            margin-left: var(--sidebar-width, 150px);
             z-index: 1;
         }
 
@@ -429,7 +430,8 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let nilai = (sub.TotalSoal > 0) ? Math.round((sub.Benar / sub.TotalSoal) * 100 * 100) / 100 : 0;
+                let totalPercobaan = (parseInt(sub.Benar) || 0) + (parseInt(sub.Salah) || 0);
+                let nilai = (totalPercobaan > 0) ? Math.floor((sub.Benar / totalPercobaan) * 100) : 0;
                 csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
             });
             var blob = new Blob([csv], { type: 'text/csv' });
@@ -451,7 +453,8 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let nilai = (sub.TotalSoal > 0) ? Math.round((sub.Benar / sub.TotalSoal) * 100 * 100) / 100 : 0;
+                let totalPercobaan = (parseInt(sub.Benar) || 0) + (parseInt(sub.Salah) || 0);
+                let nilai = (totalPercobaan > 0) ? Math.floor((sub.Benar / totalPercobaan) * 100) : 0;
                 html += `<tr>
                     <td>${sub.UserName}</td>
                     <td>${sub.SubmissionTopic}</td>
@@ -631,7 +634,8 @@
                                     {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
                                     <b>Score:</b> 
                                     @php
-                                        $nilai = ($submission->TotalSoal > 0) ? round(($submission->Benar / $submission->TotalSoal) * 100, 2) : 0;
+                                        $totalPercobaan = $submission->Benar + $submission->Salah;
+                                        $nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
                                     @endphp
                                     <b>{{ $nilai }}</b>
                                 </div>
@@ -1067,12 +1071,13 @@
         var wrong = btn.getAttribute('data-wrong');
         var correct = btn.getAttribute('data-correct');
         var duration = btn.getAttribute('data-duration');
-        var totalSoal = btn.getAttribute('data-totalsoal'); // Ambil total soal dari atribut
+        var totalSoal = btn.getAttribute('data-totalsoal');
         var jam = Math.floor(duration / 3600);
         var menit = Math.floor(duration / 60);
         var detik = duration % 60;
         var durasiFormat = duration ? (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-        var nilai = (totalSoal > 0) ? Math.round((correct / totalSoal) * 100 * 100) / 100 : 0;
+        var totalPercobaan = parseInt(wrong) + parseInt(correct);
+        var nilai = (totalPercobaan > 0) ? Math.floor((correct / totalPercobaan) * 100) : 0;
 
 
         // Isi konten modal dengan card dan table
@@ -1165,8 +1170,8 @@
     }
 
 </style>
-<footer class="footer"
-        style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 5px 0; position: fixed; bottom: 0;  width: 100%; ">
+<footer class="footer">
+        {{-- style="background-color: #EAEAEA; color: #636363; text-align: center; padding: 5px 0; position: fixed; bottom: 0;  width: 100%; "> --}}
     © 2025 Your Website. All rights reserved.
 </footer>
 
