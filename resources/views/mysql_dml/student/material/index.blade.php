@@ -604,54 +604,60 @@
             </div>
         </div>
         <div class="custom-card">
-            
             <div class="topic-list" style="width: 100%;">
-                @foreach($studentSubmissions as $submission)
-                    <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-                        <div>
-                            <div class="fw-semibold" style="font-size: 18px; color: #34364A;">
-                                {{ $submission->UserName }} - {{ $submission->SubmissionTopic }}
-                            </div>
-                            <div class="text-muted" style="font-size: 14px;">
-                                Date: {{ date('Y-m-d H:i', strtotime($submission->Time)) }} |
-                                Wrong: {{ $submission->Salah }} |
-                                Correct: {{ $submission->Benar }} |
-                                Duration: 
-                                @php
-                                    $durasiDetik = $submission->Durasi ?? 0;
-                                    $jam = floor($durasiDetik / 3600);
-                                    $menit = floor(($durasiDetik % 3600) / 60);
-                                    $detik = $durasiDetik % 60;
-                                    $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
-                                @endphp
-                                {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
-                                <b>Score:</b> 
-                                @php
-                                    $nilai = ($submission->TotalSoal > 0) ? round(($submission->Benar / $submission->TotalSoal) * 100, 2) : 0;
-                                @endphp
-                                <b>{{ $nilai }}</b>
-                            </div>
-                        </div>
-                        <div>
-                            <button type="button"
-                                class="custom-button-detail button-text"
-                                style="border: none; padding: 0; cursor: pointer;"
-                                data-toggle="modal"
-                                data-target="#submissionDetailModal"
-                                data-username="{{ $submission->UserName }}"
-                                data-topic="{{ $submission->SubmissionTopic }}"
-                                data-date="{{ date('Y-m-d H:i', strtotime($submission->Time)) }}"
-                                data-wrong="{{ $submission->Salah }}"
-                                data-correct="{{ $submission->Benar }}"
-                                data-duration="{{ $submission->Durasi }}"
-                                data-totalsoal="{{ $submission->TotalSoal }}"
-                                onclick="showSubmissionDetail(this)">
-                                <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
-                                Detail
-                            </button>
-                        </div>
+                @if(count($studentSubmissions) === 0)
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+                        No submissions have been made by you yet.
                     </div>
-                @endforeach
+                @else
+                    @foreach($studentSubmissions as $submission)
+                        <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+                            <div>
+                                <div class="fw-semibold" style="font-size: 18px; color: #34364A;">
+                                    {{ $submission->UserName }} - {{ $submission->SubmissionTopic }}
+                                </div>
+                                <div class="text-muted" style="font-size: 14px;">
+                                    Date: {{ date('Y-m-d H:i', strtotime($submission->Time)) }} |
+                                    Wrong: {{ $submission->Salah }} |
+                                    Correct: {{ $submission->Benar }} |
+                                    Duration: 
+                                    @php
+                                        $durasiDetik = $submission->Durasi ?? 0;
+                                        $jam = floor($durasiDetik / 3600);
+                                        $menit = floor(($durasiDetik % 3600) / 60);
+                                        $detik = $durasiDetik % 60;
+                                        $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
+                                    @endphp
+                                    {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
+                                    <b>Score:</b> 
+                                    @php
+                                        $nilai = ($submission->TotalSoal > 0) ? round(($submission->Benar / $submission->TotalSoal) * 100, 2) : 0;
+                                    @endphp
+                                    <b>{{ $nilai }}</b>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button"
+                                    class="custom-button-detail button-text"
+                                    style="border: none; padding: 0; cursor: pointer;"
+                                    data-toggle="modal"
+                                    data-target="#submissionDetailModal"
+                                    data-username="{{ $submission->UserName }}"
+                                    data-topic="{{ $submission->SubmissionTopic }}"
+                                    data-date="{{ date('Y-m-d H:i', strtotime($submission->Time)) }}"
+                                    data-wrong="{{ $submission->Salah }}"
+                                    data-correct="{{ $submission->Benar }}"
+                                    data-duration="{{ $submission->Durasi }}"
+                                    data-totalsoal="{{ $submission->TotalSoal }}"
+                                    onclick="showSubmissionDetail(this)">
+                                    <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
+                                    Detail
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         </div>
     </div>
