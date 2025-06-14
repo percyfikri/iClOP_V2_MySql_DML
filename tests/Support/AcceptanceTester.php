@@ -18,7 +18,7 @@ namespace Tests\Support;
  * @method void pause($vars = [])
  *
  * @SuppressWarnings(PHPMD)
-*/
+ */
 class AcceptanceTester extends \Codeception\Actor
 {
     use _generated\AcceptanceTesterActions;
@@ -26,4 +26,8 @@ class AcceptanceTester extends \Codeception\Actor
     /**
      * Define custom actions here
      */
+    public function fail($message = 'Failed by user')
+    {
+        \PHPUnit\Framework\Assert::fail($message);
+    }
 }

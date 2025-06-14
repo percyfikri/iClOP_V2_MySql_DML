@@ -4,8 +4,9 @@ class UserQueryCest
 
     public function testUserQuery(\Tests\Support\AcceptanceTester $I, \Codeception\Module\Db $db)
     {
-        // Tentukan nama file query yang akan dijalankan
-        $queryFile = codecept_root_dir() . 'tests/query_user.sql';
+        // $userId = getenv('USER_ID'); // atau QUERY_ID jika Anda ingin pakai query_id
+        $userId = trim(getenv('USER_ID'));
+        $queryFile = codecept_root_dir() . "query_user_{$userId}.sql";
 
         // Cek apakah file query_user.sql ada
         if (!file_exists($queryFile)) {

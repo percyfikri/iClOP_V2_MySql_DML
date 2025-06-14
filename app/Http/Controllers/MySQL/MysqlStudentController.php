@@ -146,8 +146,12 @@ class MysqlStudentController extends Controller
         $userId = Auth::user()->id;
         $answerNumber = $request->input('answer_number', 1);
 
+        $this->setupStudentTestingDatabase($userId);
+
         // Simpan query ke file
-        file_put_contents(base_path('tests/query_user.sql'), $userInput);
+        // file_put_contents(base_path('tests/query_user.sql'), $userInput);
+        $queryFile = base_path("tests/query_user_{$userId}.sql");
+        file_put_contents($queryFile, $userInput);
 
         // 1. Simpan query ke mysql_queries
         $queryId = DB::table('mysql_queries')->insertGetId([
@@ -158,9 +162,40 @@ class MysqlStudentController extends Controller
 
         // 2. Jalankan Codeception (pastikan query user bisa diakses oleh UserQueryCest)
         // Kirim query_id sebagai environment variable
+        $acceptanceConfig = file_get_contents(base_path('tests/Acceptance.suite.yml'));
+        $acceptanceConfig = str_replace(
+            "dbname=iclop_v2_testing",
+            "dbname=iclop_user_{$userId}",
+            $acceptanceConfig
+        );
+
+        // Tambahkan blok namespace dan support_namespace di bagian atas jika belum ada
+        if (strpos($acceptanceConfig, 'namespace: Tests') === false) {
+            $acceptanceConfig = "namespace: Tests\nsupport_namespace: Support\n\n" . $acceptanceConfig;
+        }
+
+        // Tambahkan blok paths absolut jika belum ada
+        $pathsBlock = <<<YML
+        paths:
+            tests: .
+            output: _output
+            data: Support/Data
+            support: Support
+            envs: _envs
+
+        YML;
+
+        if (strpos($acceptanceConfig, 'paths:') === false) {
+            $acceptanceConfig .= "\n" . $pathsBlock;
+        }
+
+        file_put_contents(base_path("tests/acceptance_user_{$userId}.suite.yml"), $acceptanceConfig);
+
         $projectPath = base_path();
         $codeceptPath = $projectPath . '\\vendor\\bin\\codecept.bat';
-        $command = "cd /d \"{$projectPath}\" && set QUERY_ID={$queryId} && \"{$codeceptPath}\" run acceptance UserQueryCest:testUserQuery --env testing 2>&1";
+        // $command = "cd /d \"{$projectPath}\\tests\" && set QUERY_ID={$queryId} && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
+        $command = "cd /d \"{$projectPath}\\tests\" && set USER_ID={$userId} && set QUERY_ID={$queryId} && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
+
         Log::info("Codeception command: " . $command);
         $testResult = shell_exec($command);
 
@@ -332,6 +367,9 @@ class MysqlStudentController extends Controller
 
     public function runUserSelectQuery(Request $request)
     {
+        $userId = Auth::user()->id;
+        $this->setupStudentTestingDatabase($userId);
+
         $request->validate([
             'userSelectQuery' => 'required|string|max:255',
         ]);
@@ -477,6 +515,9 @@ class MysqlStudentController extends Controller
 
     public function importSqlData(Request $request)
     {
+        $userId = Auth::user()->id;
+        $this->setupStudentTestingDatabase($userId);
+
         // Path file SQL (misal: database/iclop_v2_testing UPDATE.sql)
         $sqlFile = base_path('database/iclop_v2_testing UPDATE.sql');
         $sql = file_get_contents($sqlFile);
@@ -494,35 +535,34 @@ class MysqlStudentController extends Controller
     {
         $userId = Auth::id();
         $mysqlid = $request->get('mysqlid'); // pastikan dikirim dari AJAX
+        
+        // Nama database user
+        $dbName = "iclop_user_" . $userId;
 
-        $connection = DB::connection('mysql_testing');
-        $dbName = $connection->getDatabaseName();
-
-        // 1. Disable foreign key checks
-        $connection->statement('SET FOREIGN_KEY_CHECKS=0');
-
-        // 2. Drop all tables
-        $tables = $connection->select('SHOW TABLES');
-        foreach ($tables as $table) {
-            $tableName = array_values((array)$table)[0];
-            $connection->statement("DROP TABLE IF EXISTS `$tableName`");
+        // 1. Drop database user saja, tanpa create ulang atau import template
+        try {
+            DB::statement("DROP DATABASE IF EXISTS `$dbName`");
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal drop database: ' . $e->getMessage()]);
         }
 
-        // 3. Enable foreign key checks
-        $connection->statement('SET FOREIGN_KEY_CHECKS=1');
+        // 2. Hapus file acceptance_user dan query_user milik user
+        $suiteFile = base_path("tests/acceptance_user_{$userId}.suite.yml");
+        $queryFile = base_path("tests/query_user_{$userId}.sql");
+        if (file_exists($suiteFile)) {
+            @unlink($suiteFile);
+        }
+        if (file_exists($queryFile)) {
+            @unlink($queryFile);
+        }
 
-        // 4. Import default SQL
-        $sqlFile = base_path('database/v8_iclop_v2_testing.sql');
-        $sql = file_get_contents($sqlFile);
-        $connection->unprepared($sql);
-
-        // Simpan status reset
+        // 3. Simpan status reset
         DB::table('mysql_user_reset')->updateOrInsert(
             ['user_id' => $userId, 'topic_id' => $mysqlid],
             ['is_reset' => true]
         );
 
-        return response()->json(['success' => true, 'message' => 'Database testing berhasil direset!']);
+        return response()->json(['success' => true, 'message' => 'Database testing berhasil dihapus!']);
     }
 
     public function enrollTopic(Request $request)
@@ -530,6 +570,9 @@ class MysqlStudentController extends Controller
         $userId = Auth::id();
         $topicId = $request->input('mysqlid');
         $now = now();
+
+        //Panggil setup database testing
+        $this->setupStudentTestingDatabase($userId);
 
         $existing = DB::table('mysql_student_topic_times')
             ->where('user_id', $userId)
@@ -575,5 +618,30 @@ class MysqlStudentController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    private function setupStudentTestingDatabase($userId)
+    {
+        $dbName = "iclop_user_" . $userId;
+        $dbUser = env('DB_TESTING_USERNAME', 'root');
+        $dbPass = env('DB_TESTING_PASSWORD', '');
+        $dbHost = env('DB_TESTING_HOST', '127.0.0.1');
+        $dbPort = env('DB_TESTING_PORT', '3306');
+        $templatePath = base_path('database/iclopTemplate.sql');
+
+        // 1. Buat database jika belum ada
+        DB::statement("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+        // 2. Import template SQL jika tabel utama belum ada
+        $tables = DB::select("SHOW TABLES FROM `$dbName`");
+        if (count($tables) == 0) {
+            $importCmd = "mysql -h $dbHost -P $dbPort -u $dbUser " . ($dbPass ? "-p\"$dbPass\"" : "") . " $dbName < \"$templatePath\"";
+            shell_exec($importCmd);
+        }
+
+        // 3. Set koneksi dinamis ke database ini
+        config(['database.connections.mysql_testing.database' => $dbName]);
+        DB::purge('mysql_testing');
+        DB::reconnect('mysql_testing');
     }
 }
