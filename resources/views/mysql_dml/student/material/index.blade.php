@@ -430,8 +430,7 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let totalPercobaan = (parseInt(sub.Benar) || 0) + (parseInt(sub.Salah) || 0);
-                let nilai = (totalPercobaan > 0) ? Math.floor((sub.Benar / totalPercobaan) * 100) : 0;
+                let nilai = sub.Score;
                 csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
             });
             var blob = new Blob([csv], { type: 'text/csv' });
@@ -453,8 +452,7 @@
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let totalPercobaan = (parseInt(sub.Benar) || 0) + (parseInt(sub.Salah) || 0);
-                let nilai = (totalPercobaan > 0) ? Math.floor((sub.Benar / totalPercobaan) * 100) : 0;
+                let nilai = sub.Score;
                 html += `<tr>
                     <td>${sub.UserName}</td>
                     <td>${sub.SubmissionTopic}</td>
@@ -633,11 +631,7 @@
                                     @endphp
                                     {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
                                     <b>Score:</b> 
-                                    @php
-                                        $totalPercobaan = $submission->Benar + $submission->Salah;
-                                        $nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
-                                    @endphp
-                                    <b>{{ $nilai }}</b>
+                                    <b>{{ $submission->Score }}</b>
                                 </div>
                             </div>
                             <div>
@@ -653,6 +647,7 @@
                                     data-correct="{{ $submission->Benar }}"
                                     data-duration="{{ $submission->Durasi }}"
                                     data-totalsoal="{{ $submission->TotalSoal }}"
+                                    data-score="{{ $submission->Score }}"
                                     onclick="showSubmissionDetail(this)">
                                     <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
                                     Detail
@@ -1071,13 +1066,11 @@
         var wrong = btn.getAttribute('data-wrong');
         var correct = btn.getAttribute('data-correct');
         var duration = btn.getAttribute('data-duration');
-        var totalSoal = btn.getAttribute('data-totalsoal');
         var jam = Math.floor(duration / 3600);
-        var menit = Math.floor(duration / 60);
+        var menit = Math.floor((duration % 3600) / 60);
         var detik = duration % 60;
         var durasiFormat = duration ? (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-        var totalPercobaan = parseInt(wrong) + parseInt(correct);
-        var nilai = (totalPercobaan > 0) ? Math.floor((correct / totalPercobaan) * 100) : 0;
+        var score = btn.getAttribute('data-score'); // Ambil score dari atribut
 
 
         // Isi konten modal dengan card dan table
@@ -1109,7 +1102,7 @@
                             </tr>
                             <tr>
                                 <th><i class="fas fa-percentage"></i> Score</th>
-                                <td><span class="badge badge-primary" style="font-size:1rem">${nilai}</span></td>
+                                <td><span class="badge badge-primary" style="font-size:1rem">${score}</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1118,7 +1111,7 @@
         `;
 
         window.currentSubmissionDetail = {
-            username, topic, date, wrong, correct, durasiFormat, nilai
+            username, topic, date, wrong, correct, durasiFormat, score
         };
     }
 </script>

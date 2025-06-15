@@ -141,7 +141,7 @@
                                     ->count() >= $detail->total_question;
                             @endphp
                             @if($nextDetail)
-                                @if($allCorrect)
+                                {{-- @if($allCorrect)
                                     <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
                                        id="import-next-btn"
                                        class="btn btn-primary fw-semibold">
@@ -151,7 +151,12 @@
                                     <button class="btn btn-primary fw-semibold" disabled>
                                         Next Sub-Topics &rarr;
                                     </button>
-                                @endif
+                                @endif --}}
+                                <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                                    id="import-next-btn"
+                                    class="btn btn-primary fw-semibold">
+                                     Next Sub-Topics &rarr;
+                                 </a>
                             @else
                                 @if($page == $totalAnswer && !$nextDetail)
                                     @if($allSubtopicsCompleted)
