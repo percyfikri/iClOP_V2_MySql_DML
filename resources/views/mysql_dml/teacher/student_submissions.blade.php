@@ -58,8 +58,6 @@
                             $menit = floor(($durasiDetik % 3600) / 60);
                             $detik = $durasiDetik % 60;
                             $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
-                            $totalPercobaan = $submission->Benar + $submission->Salah;
-                            $nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
                         @endphp
                         <tr class="text-center">
                             <td>{{ $index + 1 }}</td>
@@ -69,7 +67,7 @@
                             <td>{{ $submission->Salah }}</td>
                             <td>{{ $submission->Benar }}</td>
                             <td>{{ $submission->Durasi !== null ? $durasiFormat : '-' }}</td>
-                            <td>{{ $nilai }}</td>
+                            <td>{{ $submission->Score }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -176,7 +174,7 @@ $(document).ready(function () {
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
                 let totalPercobaan = sub.Benar + sub.Salah;
-                let nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
+                let nilai = sub.Score;
                 tbody += `<tr class="text-center">
                     <td>${idx + 1}</td>
                     <td>${sub.UserName}</td>
@@ -255,7 +253,7 @@ $(document).ready(function () {
             let durasiFormat = sub.Durasi !== null ? 
                 (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
             let totalPercobaan = sub.Benar + sub.Salah;
-            let nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
+            let nilai = sub.Score;
             csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
         });
         var blob = new Blob([csv], { type: 'text/csv' });
@@ -278,7 +276,7 @@ $(document).ready(function () {
             let durasiFormat = sub.Durasi !== null ? 
                 (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
             let totalPercobaan = sub.Benar + sub.Salah;
-            let nilai = ($totalPercobaan > 0) ? floor(($submission->Benar / $totalPercobaan) * 100) : 0;
+            let nilai = sub.Score;
             html += `<tr>
                 <td>${sub.UserName}</td>
                 <td>${sub.SubmissionTopic}</td>

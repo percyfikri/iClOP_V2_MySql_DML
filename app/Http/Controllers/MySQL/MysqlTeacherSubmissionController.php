@@ -58,6 +58,11 @@ class MysqlTeacherSubmissionController extends Controller
             ->orderBy('Time', 'desc')
             ->get();
 
+        foreach ($studentSubmissions as $submission) {
+            $totalSoal = $submission->TotalSoal ?? 0;
+            $submission->Score = ($totalSoal > 0) ? floor(($submission->Benar / $totalSoal) * 100) : 0;
+        }
+
         $role = DB::select("select role from users where id = $userId");
 
         return view(
