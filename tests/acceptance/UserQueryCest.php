@@ -4,7 +4,6 @@ class UserQueryCest
 
     public function testUserQuery(\Tests\Support\AcceptanceTester $I, \Codeception\Module\Db $db)
     {
-        // $userId = getenv('USER_ID'); // atau QUERY_ID jika Anda ingin pakai query_id
         $userId = trim(getenv('USER_ID'));
         $queryFile = codecept_root_dir() . "query_user_{$userId}.sql";
 
@@ -45,3 +44,8 @@ class UserQueryCest
         $db->_getDbh()->exec($query);
     }
 }
+
+
+
+
+

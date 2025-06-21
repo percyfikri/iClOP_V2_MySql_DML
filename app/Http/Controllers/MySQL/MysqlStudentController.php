@@ -158,7 +158,6 @@ class MysqlStudentController extends Controller
                 'is_finished' => 0,
             ]);
         }
-        // Jika sudah selesai, tidak perlu insert apa-apa
 
         return response()->json(['success' => true]);
     }
@@ -202,10 +201,7 @@ class MysqlStudentController extends Controller
         $userId = Auth::user()->id;
         $answerNumber = $request->input('answer_number', 1);
 
-        $this->setupStudentTestingDatabase($userId);
-
         // Simpan query ke file
-        // file_put_contents(base_path('tests/query_user.sql'), $userInput);
         $queryFile = base_path("tests/query_user_{$userId}.sql");
         file_put_contents($queryFile, $userInput);
 
@@ -248,8 +244,6 @@ class MysqlStudentController extends Controller
         file_put_contents(base_path("tests/acceptance_user_{$userId}.suite.yml"), $acceptanceConfig);
 
         $projectPath = base_path();
-        $codeceptPath = $projectPath . '\\vendor\\bin\\codecept.bat';
-        // $command = "cd /d \"{$projectPath}\\tests\" && set QUERY_ID={$queryId} && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
         $command = "cd /d \"{$projectPath}\\tests\" && set USER_ID={$userId} && set QUERY_ID={$queryId} && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
 
         Log::info("Codeception command: " . $command);
