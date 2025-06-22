@@ -612,17 +612,23 @@
                     </div>
                 @else
                     @foreach($studentSubmissions as $i => $submission)
-                        <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-                            <div>
+                        <div class="topic-row d-flex align-items" style="border-bottom: 1px solid #f0f0f0; padding: 12px 0;">
+                            <!-- Nomor -->
+                            <div class="d-flex flex-column justify-content-center align-items-center" style="width: 60px;">
+                                <span class="badge badge-primary" style="font-size: 0.9rem; padding: 6px 12px;">#{{ count($studentSubmissions) - $i }}</span>
+                            </div>
+                            <!-- Konten Topik dan Detail -->
+                            <div class="flex-grow-1 d-flex flex-column justify-content-center" style="padding-left: 10px;">
+                                <!-- Topik -->
                                 <div class="fw-semibold" style="font-size: 18px; color: #34364A;">
-                                    <span class="badge badge-primary" style="margin-right:8px;">{{ count($studentSubmissions) - $i }}</span>
-                                    {{ $submission->UserName }} - {{ $submission->SubmissionTopic }}
+                                    {{ $submission->SubmissionTopic }}
                                 </div>
+                                <!-- Detail -->
                                 <div class="text-muted" style="font-size: 14px;">
                                     Date: {{ date('Y-m-d H:i', strtotime($submission->Time)) }} |
                                     Wrong: {{ $submission->Salah }} |
                                     Correct: {{ $submission->Benar }} |
-                                    Duration: 
+                                    Duration:
                                     @php
                                         $durasiDetik = $submission->Durasi ?? 0;
                                         $jam = floor($durasiDetik / 3600);
@@ -631,11 +637,12 @@
                                         $durasiFormat = sprintf('%02d:%02d:%02d', $jam, $menit, $detik);
                                     @endphp
                                     {{ $submission->Durasi !== null ? $durasiFormat : '-' }} |
-                                    <b>Score:</b> 
+                                    <b>Score:</b>
                                     <b>{{ $submission->Score }}</b>
                                 </div>
                             </div>
-                            <div>
+                            <!-- Tombol Detail -->
+                            <div class="d-flex align-items-center" style="padding-left: 10px;">
                                 <button type="button"
                                     class="custom-button-detail button-text"
                                     style="border: none; padding: 0; cursor: pointer;"
