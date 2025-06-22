@@ -611,10 +611,11 @@
                         No submissions have been made by you yet.
                     </div>
                 @else
-                    @foreach($studentSubmissions as $submission)
+                    @foreach($studentSubmissions as $i => $submission)
                         <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
                             <div>
                                 <div class="fw-semibold" style="font-size: 18px; color: #34364A;">
+                                    <span class="badge badge-primary" style="margin-right:8px;">{{ count($studentSubmissions) - $i }}</span>
                                     {{ $submission->UserName }} - {{ $submission->SubmissionTopic }}
                                 </div>
                                 <div class="text-muted" style="font-size: 14px;">

@@ -9,6 +9,7 @@
                 ->where('user_id', Auth::user()->id)
                 ->where('topic_detail_id', $row->id)
                 ->where('status', 'true')
+                ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
                 ->count();
             $isComplete = ($correctCount >= $row->total_question);
         @endphp

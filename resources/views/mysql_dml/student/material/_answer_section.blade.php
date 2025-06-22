@@ -1,14 +1,16 @@
 @php
+    $enrollId = $enrollId ?? null; // pastikan variabel tersedia
     // Hitung jumlah subtopik pada topik ini
     $totalSubtopics = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)->count();
     // Hitung jumlah subtopik yang sudah completed (semua jawaban benar)
     $completedSubtopics = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
         ->get()
-        ->filter(function($subtopic) {
+        ->filter(function($subtopic) use ($enrollId) {
             return \DB::table('mysql_student_submissions')
                 ->where('user_id', Auth::user()->id)
                 ->where('topic_detail_id', $subtopic->id)
                 ->where('status', 'true')
+                ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
                 ->count() >= $subtopic->total_question;
         })->count();
     $allSubtopicsCompleted = ($totalSubtopics > 0 && $completedSubtopics == $totalSubtopics);

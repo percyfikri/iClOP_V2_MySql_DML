@@ -22,17 +22,27 @@ class MysqlStudentController extends Controller
         $userId = Auth::user()->id;
         $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
 
+        // Ambil enroll aktif
+        $enroll = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $mysqlid)
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
+            ->first();
+        $enrollId = $enroll ? $enroll->id : null;
+
         // Ambil detail subtopik
         $detail = MySqlTopicDetails::findOrFail($start);
 
         $page = (int) $request->get('page', 1); // halaman aktif, default 1
         $totalAnswer = $detail->total_question;
 
-        // Ambil submission terakhir untuk nomor ke-(page)
+        // Ambil submission terakhir untuk nomor ke-(page) pada enroll aktif
         $submission = DB::table('mysql_student_submissions')
             ->where('user_id', $userId)
             ->where('topic_detail_id', $start)
-            ->where('answer_number', $page) // pastikan field answer_number ada dan diisi saat submit
+            ->where('answer_number', $page)
+            ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
             ->orderByDesc('id')
             ->first();
 
@@ -103,7 +113,8 @@ class MysqlStudentController extends Controller
                 'lastSubmission',
                 'progressPercent',
                 'totalAnswer',
-                'page'
+                'page',
+                'enrollId'
             ));
         }
 
@@ -129,27 +140,39 @@ class MysqlStudentController extends Controller
             'rows' => $rows,
             'countdownSeconds' => $sisaDetik,
             'isFinished' => $isFinished,
+            'enrollId' => $enrollId,
         ]);
     }
 
-    
+
     public function enrollTopic(Request $request)
     {
         $userId = Auth::id();
         $topicId = $request->input('mysqlid');
         $now = now();
 
-        //Panggil setup database testing
-        $this->setupStudentTestingDatabase($userId);
-
-        $existing = DB::table('mysql_student_topic_times')
+        // Cek sesi enroll aktif (belum selesai)
+        $activeEnroll = DB::table('mysql_student_topic_times')
             ->where('user_id', $userId)
             ->where('topic_id', $topicId)
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
             ->first();
 
-        // Jangan buat sesi baru jika sudah selesai
-        if (!$existing) {
-            DB::table('mysql_student_topic_times')->insert([
+        // Cek status reset
+        $userReset = DB::table('mysql_user_reset')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->value('is_reset');
+
+        if ($activeEnroll && !$userReset) {
+            // Sesi aktif, tidak perlu create database/enroll baru
+            return response()->json(['success' => true, 'enroll_id' => $activeEnroll->id]);
+        } else {
+            // Sesi tidak aktif, buat database testing baru & enroll baru
+            $this->setupStudentTestingDatabase($userId);
+
+            $enrollId = DB::table('mysql_student_topic_times')->insertGetId([
                 'user_id' => $userId,
                 'topic_id' => $topicId,
                 'started_at' => $now,
@@ -157,9 +180,15 @@ class MysqlStudentController extends Controller
                 'updated_at' => $now,
                 'is_finished' => 0,
             ]);
-        }
 
-        return response()->json(['success' => true]);
+            // Reset status user_reset
+            DB::table('mysql_user_reset')->updateOrInsert(
+                ['user_id' => $userId, 'topic_id' => $topicId],
+                ['is_reset' => 0]
+            );
+
+            return response()->json(['success' => true, 'enroll_id' => $enrollId]);
+        }
     }
 
     private function setupStudentTestingDatabase($userId)
@@ -200,6 +229,15 @@ class MysqlStudentController extends Controller
         $topicDetailId = $request->input('topic_detail_id');
         $userId = Auth::user()->id;
         $answerNumber = $request->input('answer_number', 1);
+
+        // Ambil enroll aktif
+        $enroll = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $request->input('mysqlid'))
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
+            ->first();
+        $enrollId = $enroll ? $enroll->id : null;
 
         // Simpan query ke file
         $queryFile = base_path("tests/query_user_{$userId}.sql");
@@ -278,6 +316,7 @@ class MysqlStudentController extends Controller
 
         DB::table('mysql_student_submissions')->insert([
             'user_id' => $userId,
+            'enroll_id' => $enrollId, // tambahkan ini!
             'topic_detail_id' => $topicDetailId,
             'query_id' => $queryId,
             'feedback_id' => $feedbackId,
@@ -372,6 +411,15 @@ class MysqlStudentController extends Controller
 
     public function getStudentProgressByTopic($userId, $topicId)
     {
+        // Ambil enroll aktif
+        $enroll = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
+            ->first();
+        $enrollId = $enroll ? $enroll->id : null;
+
         // Ambil semua id subtopik pada topik ini
         $subtopicIds = DB::table('mysql_topic_details')
             ->where('topic_id', $topicId)
@@ -382,11 +430,12 @@ class MysqlStudentController extends Controller
             ->where('topic_id', $topicId)
             ->sum('total_question');
 
-        // Hitung jumlah submission status=true pada semua subtopik topik ini
+        // Hitung jumlah submission status=true pada semua subtopik topik ini dan enroll aktif
         $correctSubmissions = DB::table('mysql_student_submissions')
             ->where('user_id', $userId)
             ->where('status', 'true')
             ->whereIn('topic_detail_id', $subtopicIds)
+            ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
             ->count();
 
         // Hitung persentase progress
@@ -523,11 +572,22 @@ class MysqlStudentController extends Controller
     {
         $mysqlid = $request->get('mysqlid');
         $detailId = $request->get('start');
-        $progressPercent = $this->getStudentProgressByTopic(Auth::id(), $mysqlid);
+        $userId = Auth::id();
+
+        // Ambil enroll aktif
+        $enroll = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $mysqlid)
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
+            ->first();
+        $enrollId = $enroll ? $enroll->id : null;
+
+        $progressPercent = $this->getStudentProgressByTopic($userId, $mysqlid);
         $detailCount = DB::table('mysql_topic_details')->where('topic_id', $mysqlid)->count();
         $detail = DB::table('mysql_topic_details')->where('id', $detailId)->first();
-        $pdf_reader = 0; // atau sesuai kebutuhan
-        $html_start = ''; // atau sesuai kebutuhan
+        $pdf_reader = 0;
+        $html_start = '';
 
         $rows = DB::table('mysql_topic_details')->where('topic_id', $mysqlid)->get();
 
@@ -539,19 +599,23 @@ class MysqlStudentController extends Controller
             'pdf_reader',
             'html_start',
             'rows',
-            'detailId'
+            'detailId',
+            'enrollId' // kirim enrollId ke view
         ))->render();
     }
-    
+
     public function finishTopic(Request $request)
     {
         $userId = Auth::id();
         $topicId = $request->input('mysqlid');
         $now = now();
 
+        // Ambil enroll aktif (belum selesai)
         $topicTime = DB::table('mysql_student_topic_times')
             ->where('user_id', $userId)
             ->where('topic_id', $topicId)
+            ->where('is_finished', 0) // tambahkan filter ini!
+            ->orderByDesc('id')
             ->first();
 
         if ($topicTime && $topicTime->started_at && !$topicTime->duration_seconds) {
@@ -572,7 +636,7 @@ class MysqlStudentController extends Controller
     {
         $userId = Auth::id();
         $mysqlid = $request->get('mysqlid'); // pastikan dikirim dari AJAX
-        
+
         // Nama database user
         $dbName = "iclop_user_" . $userId;
 
