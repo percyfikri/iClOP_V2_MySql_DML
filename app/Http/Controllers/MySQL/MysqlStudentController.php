@@ -627,6 +627,12 @@ class MysqlStudentController extends Controller
                     'is_finished' => 1, // <-- Tandai selesai
                     'updated_at' => $now
                 ]);
+
+            // Tambahkan update is_reset di sini
+            DB::table('mysql_user_reset')->updateOrInsert(
+                ['user_id' => $userId, 'topic_id' => $topicId],
+                ['is_reset' => true]
+            );
         }
 
         return response()->json(['success' => true]);
