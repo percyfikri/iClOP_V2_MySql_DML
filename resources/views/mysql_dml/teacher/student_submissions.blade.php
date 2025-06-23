@@ -47,6 +47,7 @@
                         <th>Wrong</th>
                         <th>Correct</th>
                         <th>Duration</th>
+                        <th>Percobaan</th> <!-- Tambahkan jika ingin -->
                         <th>Score</th>
                     </tr>
                 </thead>
@@ -67,11 +68,12 @@
                             <td>{{ $submission->Salah }}</td>
                             <td>{{ $submission->Benar }}</td>
                             <td>{{ $submission->Durasi !== null ? $durasiFormat : '-' }}</td>
+                            <td>{{ $submission->enroll_id }}</td> <!-- Tampilkan enroll_id -->
                             <td>{{ $submission->Score }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">No submissions found.</td>
+                            <td colspan="9" class="text-center text-muted">No submissions found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -164,17 +166,43 @@ $(document).ready(function () {
     function renderTable(data) {
         let tbody = '';
         if (data.length === 0) {
-            tbody = `<tr><td colspan="8" class="text-center text-muted">No submissions found.</td></tr>`;
+            tbody = `<tr><td colspan="9" class="text-center text-muted">No submissions found.</td></tr>`;
         } else {
-            data.forEach(function(sub, idx) {
+            // 1. Penomoran percobaan: urutkan ASC enroll_id untuk setiap user+topik
+            let percobaanMap = {};
+            let percobaanNoByEnroll = {};
+
+            // Urutkan ASC untuk penomoran percobaan
+            let forPenomoran = data.slice().sort((a, b) => {
+                if (a.UserName !== b.UserName) return a.UserName.localeCompare(b.UserName);
+                if (a.SubmissionTopic !== b.SubmissionTopic) return a.SubmissionTopic.localeCompare(b.SubmissionTopic);
+                return a.enroll_id - b.enroll_id;
+            });
+
+            forPenomoran.forEach(function(sub) {
+                let key = sub.UserName + '|' + sub.SubmissionTopic;
+                if (!percobaanMap[key]) percobaanMap[key] = 1;
+                else percobaanMap[key]++;
+                percobaanNoByEnroll[sub.enroll_id] = percobaanMap[key];
+            });
+
+            // 2. Urutkan data untuk tampilan: terbaru di atas (Time DESC)
+            let sorted = data.slice().sort((a, b) => {
+                if (a.Time > b.Time) return -1;
+                if (a.Time < b.Time) return 1;
+                return b.enroll_id - a.enroll_id;
+            });
+
+            // 3. Render tabel
+            sorted.forEach(function(sub, idx) {
                 let durasiDetik = sub.Durasi ?? 0;
                 let jam = Math.floor(durasiDetik / 3600);
                 let menit = Math.floor((durasiDetik % 3600) / 60);
                 let detik = durasiDetik % 60;
                 let durasiFormat = sub.Durasi !== null ? 
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-                let totalPercobaan = sub.Benar + sub.Salah;
                 let nilai = sub.Score;
+                let percobaanKe = percobaanNoByEnroll[sub.enroll_id] || '-';
                 tbody += `<tr class="text-center">
                     <td>${idx + 1}</td>
                     <td>${sub.UserName}</td>
@@ -183,6 +211,7 @@ $(document).ready(function () {
                     <td>${sub.Salah}</td>
                     <td>${sub.Benar}</td>
                     <td>${durasiFormat}</td>
+                    <td>Ke-${percobaanKe}</td>
                     <td>${nilai}</td>
                 </tr>`;
             });
@@ -244,7 +273,7 @@ $(document).ready(function () {
 
     // Export Excel
     $('#exportAllExcelBtn').on('click', function() {
-        let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score\n';
+        let csv = 'Name,Topic,Date,Wrong,Correct,Duration,Score,Enroll ID\n';
         filteredSubmissions.forEach(function(sub) {
             let durasiDetik = sub.Durasi ?? 0;
             let jam = Math.floor(durasiDetik / 3600);
@@ -254,7 +283,7 @@ $(document).ready(function () {
                 (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
             let totalPercobaan = sub.Benar + sub.Salah;
             let nilai = sub.Score;
-            csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}"\n`;
+            csv += `"${sub.UserName}","${sub.SubmissionTopic}","${sub.Time}","${sub.Salah}","${sub.Benar}","${durasiFormat}","${nilai}","${sub.enroll_id}"\n`;
         });
         var blob = new Blob([csv], { type: 'text/csv' });
         var url = window.URL.createObjectURL(blob);
@@ -267,7 +296,7 @@ $(document).ready(function () {
 
     // Export PDF
     $('#exportAllPdfBtn').on('click', function() {
-        let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th></tr>';
+        let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th><th>Enroll ID</th></tr>';
         filteredSubmissions.forEach(function(sub) {
             let durasiDetik = sub.Durasi ?? 0;
             let jam = Math.floor(durasiDetik / 3600);
@@ -285,6 +314,7 @@ $(document).ready(function () {
                 <td>${sub.Benar}</td>
                 <td>${durasiFormat}</td>
                 <td>${nilai}</td>
+                <td>${sub.enroll_id}</td>
             </tr>`;
         });
         html += '</table>';
