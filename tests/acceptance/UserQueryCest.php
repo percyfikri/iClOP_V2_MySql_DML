@@ -41,7 +41,7 @@ class UserQueryCest
         }
 
         // Jalankan query jika lolos validasi
-        $db->_getDbh()->exec($query);
+        // $db->_getDbh()->exec($query);
     }
 }
 

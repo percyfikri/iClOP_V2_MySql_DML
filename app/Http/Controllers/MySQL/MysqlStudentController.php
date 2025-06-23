@@ -230,6 +230,9 @@ class MysqlStudentController extends Controller
         $userId = Auth::user()->id;
         $answerNumber = $request->input('answer_number', 1);
 
+        // Panggil setup database user sebelum transaksi
+        $this->setupStudentTestingDatabase($userId);
+
         // Ambil enroll aktif
         $enroll = DB::table('mysql_student_topic_times')
             ->where('user_id', $userId)
@@ -312,6 +315,56 @@ class MysqlStudentController extends Controller
             stripos($testResult, 'SQLSTATE') === false // tambahkan pengecekan SQLSTATE
         ) {
             $status = 'true';
+        }
+
+        if ($status === 'true') {
+            $expected = DB::table('mysql_expected_queries')
+                ->where('topic_detail_id', $topicDetailId)
+                ->where('answer_number', $answerNumber)
+                ->first();
+        
+            if ($expected) {
+                try {
+                    // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
+                    DB::connection('mysql_testing')->beginTransaction();
+                    DB::connection('mysql_testing')->statement($userInput);
+                    $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
+                    DB::connection('mysql_testing')->rollBack();
+        
+                    // --- 2. Jalankan query expected dalam transaksi, ambil hasil, rollback ---
+                    DB::connection('mysql_testing')->beginTransaction();
+                    DB::connection('mysql_testing')->statement($expected->expected_query);
+                    $expectedResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
+                    DB::connection('mysql_testing')->rollBack();
+        
+                    // --- 3. Normalisasi hasil ---
+                    function normalizeResult($result) {
+                        $arr = array_map(function ($row) {
+                            return (array) $row;
+                        }, $result);
+                        usort($arr, function ($a, $b) {
+                            return strcmp($a['kode_mk'], $b['kode_mk']);
+                        });
+                        return $arr;
+                    }
+                    $studentResultNorm = normalizeResult($studentResult);
+                    $expectedResultNorm = normalizeResult($expectedResult);
+        
+                    // --- 4. Bandingkan hasil ---
+                    if ($studentResultNorm == $expectedResultNorm) {
+                        // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
+                        DB::connection('mysql_testing')->beginTransaction();
+                        DB::connection('mysql_testing')->statement($userInput);
+                        DB::connection('mysql_testing')->commit();
+                        $status = 'true';
+                    } else {
+                        $status = 'false';
+                    }
+                } catch (\Exception $e) {
+                    DB::connection('mysql_testing')->rollBack();
+                    $status = 'false';
+                }
+            }
         }
 
         DB::table('mysql_student_submissions')->insert([

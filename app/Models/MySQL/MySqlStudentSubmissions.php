@@ -13,8 +13,10 @@ class MySqlStudentSubmissions extends Model
     protected $table = 'mysql_student_submissions';
 
     protected $fillable = [
+        'enroll_id',
         'user_id',
         'topic_detail_id',
+        'answer_number',
         'query_id',
         'feedback_id',
         'status',
