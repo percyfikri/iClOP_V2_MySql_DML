@@ -290,6 +290,8 @@ class MysqlStudentController extends Controller
         Log::info("Codeception command: " . $command);
         $testResult = shell_exec($command);
 
+        Log::info("Codeception output: " . $testResult);
+
         // Debug: log atau tampilkan hasil
         if ($testResult === null || trim($testResult) === '') {
             return back()->with('answer_status', "Codeception tidak berjalan. Cek perintah: $command");
@@ -322,7 +324,7 @@ class MysqlStudentController extends Controller
                 ->where('topic_detail_id', $topicDetailId)
                 ->where('answer_number', $answerNumber)
                 ->first();
-        
+
             if ($expected) {
                 try {
                     // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
@@ -330,15 +332,16 @@ class MysqlStudentController extends Controller
                     DB::connection('mysql_testing')->statement($userInput);
                     $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
                     DB::connection('mysql_testing')->rollBack();
-        
+
                     // --- 2. Jalankan query expected dalam transaksi, ambil hasil, rollback ---
                     DB::connection('mysql_testing')->beginTransaction();
                     DB::connection('mysql_testing')->statement($expected->expected_query);
                     $expectedResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
                     DB::connection('mysql_testing')->rollBack();
-        
+
                     // --- 3. Normalisasi hasil ---
-                    function normalizeResult($result) {
+                    function normalizeResult($result)
+                    {
                         $arr = array_map(function ($row) {
                             return (array) $row;
                         }, $result);
@@ -349,7 +352,7 @@ class MysqlStudentController extends Controller
                     }
                     $studentResultNorm = normalizeResult($studentResult);
                     $expectedResultNorm = normalizeResult($expectedResult);
-        
+
                     // --- 4. Bandingkan hasil ---
                     if ($studentResultNorm == $expectedResultNorm) {
                         // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
@@ -362,6 +365,19 @@ class MysqlStudentController extends Controller
                     }
                 } catch (\Exception $e) {
                     DB::connection('mysql_testing')->rollBack();
+                    $status = 'false';
+                }
+            }
+        }
+
+        if (stripos($userInput, 'CREATE TABLE') !== false) {
+            $expectedTable = $expected->expected_table ?? null;
+
+            if ($expectedTable) {
+                $tables = DB::connection('mysql_testing')->select("SHOW TABLES LIKE '$expectedTable'");
+                if (!empty($tables)) {
+                    $status = 'true';
+                } else {
                     $status = 'false';
                 }
             }

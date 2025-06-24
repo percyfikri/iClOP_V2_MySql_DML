@@ -40,12 +40,17 @@ class UserQueryCest
             }
         }
 
+        // Validasi INSERT tanpa penamaan kolom
+        if (preg_match('/^\s*INSERT\s+INTO\s+(\w+)\s*VALUES\s*\(([^)]+)\)/i', $query, $matches)) {
+            // Anda bisa tentukan jumlah kolom tabel mk secara hardcode atau dinamis (misal: 2 kolom)
+            $expectedColumnCount = 2; // contoh untuk tabel mk
+            $values = array_map('trim', explode(',', $matches[2]));
+            if (count($values) !== $expectedColumnCount) {
+                throw new \Exception('The number of values in the INSERT statement must match the number of columns in the table');
+            }
+        }
+
         // Jalankan query jika lolos validasi
         // $db->_getDbh()->exec($query);
     }
 }
-
-
-
-
-
