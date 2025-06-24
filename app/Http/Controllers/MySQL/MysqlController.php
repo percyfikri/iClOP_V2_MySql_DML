@@ -30,7 +30,8 @@ class MysqlController extends Controller
         $studentSubmissions = collect();
 
         foreach ($allEnrolls as $enroll) {
-            $submission = DB::table('mysql_student_submissions')
+            // Cek apakah ada data di mysql_student_submissions untuk enroll_id ini
+            $submissionData = DB::table('mysql_student_submissions')
                 ->join('users', 'users.id', '=', 'mysql_student_submissions.user_id')
                 ->join('mysql_topic_details', 'mysql_topic_details.id', '=', 'mysql_student_submissions.topic_detail_id')
                 ->join('mysql_topics', 'mysql_topics.id', '=', 'mysql_topic_details.topic_id')
@@ -58,12 +59,28 @@ class MysqlController extends Controller
                 ->orderBy('Time', 'desc')
                 ->first();
 
-            if ($submission) {
-                $totalSoal = $submission->TotalSoal ?? 0;
-                $submission->Score = ($totalSoal > 0) ? floor(($submission->Benar / $totalSoal) * 100) : 0;
-                $submission->EnrollId = $enroll->id;
-                $submission->EnrollStart = $enroll->started_at;
-                $studentSubmissions->push($submission);
+            if ($submissionData) {
+                // Jika ada data di mysql_student_submissions, tambahkan data asli
+                $totalSoal = $submissionData->TotalSoal ?? 0;
+                $submissionData->Score = ($totalSoal > 0) ? floor(($submissionData->Benar / $totalSoal) * 100) : 0;
+                $submissionData->EnrollId = $enroll->id;
+                $submissionData->EnrollStart = $enroll->started_at;
+                $studentSubmissions->push($submissionData);
+            } else {
+                // Jika tidak ada data di mysql_student_submissions, tambahkan data dummy
+                $studentSubmissions->push((object)[
+                    'SubmissionTopic' => DB::table('mysql_topics')->where('id', $enroll->topic_id)->value('title'),
+                    'Time' => $enroll->started_at,
+                    'UserName' => Auth::user()->name,
+                    'Benar' => 0,
+                    'Salah' => 0,
+                    'TotalJawaban' => 0,
+                    'Durasi' => null,
+                    'TotalSoal' => DB::table('mysql_topic_details')->where('topic_id', $enroll->topic_id)->sum('total_question'),
+                    'Score' => 0,
+                    'EnrollId' => $enroll->id,
+                    'EnrollStart' => $enroll->started_at,
+                ]);
             }
         }
 
