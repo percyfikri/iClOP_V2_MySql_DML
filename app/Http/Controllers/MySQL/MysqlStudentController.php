@@ -81,13 +81,14 @@ class MysqlStudentController extends Controller
         $topicTime = DB::table('mysql_student_topic_times')
             ->where('user_id', $userId)
             ->where('topic_id', $mysqlid)
+            ->where('is_finished', 0) // Pastikan hanya sesi aktif yang diambil
             ->first();
 
         if ($topicTime && $topicTime->started_at) {
             $elapsed = now()->diffInSeconds(\Carbon\Carbon::parse($topicTime->started_at));
             $sisaDetik = max(0, $countdownSeconds - $elapsed);
         } else {
-            $sisaDetik = $countdownSeconds;
+            $sisaDetik = $countdownSeconds; // Default jika tidak ada data
         }
 
         $isFinished = $topicTime && $topicTime->is_finished == 1;
@@ -478,41 +479,6 @@ class MysqlStudentController extends Controller
         return implode('<br>', $allFeedback);
     }
 
-    public function getStudentProgressByTopic($userId, $topicId)
-    {
-        // Ambil enroll aktif
-        $enroll = DB::table('mysql_student_topic_times')
-            ->where('user_id', $userId)
-            ->where('topic_id', $topicId)
-            ->where('is_finished', 0)
-            ->orderByDesc('id')
-            ->first();
-        $enrollId = $enroll ? $enroll->id : null;
-
-        // Ambil semua id subtopik pada topik ini
-        $subtopicIds = DB::table('mysql_topic_details')
-            ->where('topic_id', $topicId)
-            ->pluck('id');
-
-        // Hitung total expected answer (total_question) pada semua subtopik
-        $totalAnswer = DB::table('mysql_topic_details')
-            ->where('topic_id', $topicId)
-            ->sum('total_question');
-
-        // Hitung jumlah submission status=true pada semua subtopik topik ini dan enroll aktif
-        $correctSubmissions = DB::table('mysql_student_submissions')
-            ->where('user_id', $userId)
-            ->where('status', 'true')
-            ->whereIn('topic_detail_id', $subtopicIds)
-            ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
-            ->count();
-
-        // Hitung persentase progress
-        $progressPercent = $totalAnswer > 0 ? round(($correctSubmissions / $totalAnswer) * 100) : 0;
-
-        return $progressPercent;
-    }
-
     public function runUserSelectQuery(Request $request)
     {
         $userId = Auth::user()->id;
@@ -626,6 +592,41 @@ class MysqlStudentController extends Controller
             return response()->json(['html' => $html]);
         }
         return back()->with('query_result', $html)->withInput();
+    }
+
+    public function getStudentProgressByTopic($userId, $topicId)
+    {
+        // Ambil enroll aktif
+        $enroll = DB::table('mysql_student_topic_times')
+            ->where('user_id', $userId)
+            ->where('topic_id', $topicId)
+            ->where('is_finished', 0)
+            ->orderByDesc('id')
+            ->first();
+        $enrollId = $enroll ? $enroll->id : null;
+
+        // Ambil semua id subtopik pada topik ini
+        $subtopicIds = DB::table('mysql_topic_details')
+            ->where('topic_id', $topicId)
+            ->pluck('id');
+
+        // Hitung total expected answer (total_question) pada semua subtopik
+        $totalAnswer = DB::table('mysql_topic_details')
+            ->where('topic_id', $topicId)
+            ->sum('total_question');
+
+        // Hitung jumlah submission status=true pada semua subtopik topik ini dan enroll aktif
+        $correctSubmissions = DB::table('mysql_student_submissions')
+            ->where('user_id', $userId)
+            ->where('status', 'true')
+            ->whereIn('topic_detail_id', $subtopicIds)
+            ->where('enroll_id', $enrollId) // tambahkan filter enroll_id
+            ->count();
+
+        // Hitung persentase progress
+        $progressPercent = $totalAnswer > 0 ? round(($correctSubmissions / $totalAnswer) * 100) : 0;
+
+        return $progressPercent;
     }
 
     public function getStudentProgressAjax(Request $request)
