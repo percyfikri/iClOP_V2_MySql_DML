@@ -71,11 +71,11 @@
 
                     @if($lastStatus == 'true')
                         <div class="mb-4">
-                                <div class="fw-bold mb-2" style="background-color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
-                                    <div class="text-white">
-                                        Your Query Is Correct!
-                                    </div>
+                            <div class="fw-bold mb-2" style="background-color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
+                                <div class="text-white">
+                                    Your Query Is Correct!
                                 </div>
+                            </div>
                             @if($feedback)
                                 @php
                                     $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
@@ -83,22 +83,30 @@
                                 @endphp
                                 <div class="fw-semibold" style="color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
                             @endif
-                        </div>
-                    @elseif($lastStatus == 'false')
-                            <div class="fw-bold mb-2" style="background-color: #ff0000; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
-                                <div class="text-white">
-                                    Your Query Is Wrong!
+                            @if($feedback && $feedback->validation_error)
+                                <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">
+                                    {{ $feedback->validation_error }}
                                 </div>
-                            </div>
-                            @if($feedback)
-                                @php
-                                    // Gabungkan semua baris feedback jadi satu string dengan <br>
-                                    $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
-                                    $feedbackText = implode('<br>', array_map('trim', $lines));
-                                @endphp
-                                <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
                             @endif
                         </div>
+                    @elseif($lastStatus == 'false')
+                        <div class="fw-bold mb-2" style="background-color: #ff0000; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
+                            <div class="text-white">
+                                Your Query Is Wrong!
+                            </div>
+                        </div>
+                        @if($feedback)
+                            @php
+                                $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
+                                $feedbackText = implode('<br>', array_map('trim', $lines));
+                            @endphp
+                            <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
+                        @endif
+                        @if($feedback && $feedback->validation_error)
+                            <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">
+                                {{ $feedback->validation_error }}
+                            </div>
+                        @endif
                     @endif
                 </div>
 

@@ -301,10 +301,12 @@ class MysqlStudentController extends Controller
         Log::info("Codeception output: " . $testResult);
 
         // 3. Simpan feedback ke mysql_feedbacks
+        $validationError = null;
         $shortFeedback = $this->getShortFeedback($testResult);
         $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
             'query_id' => $queryId,
             'feedback' => $shortFeedback,
+            'validation_error' => $validationError,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -330,9 +332,46 @@ class MysqlStudentController extends Controller
                 try {
                     // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
                     DB::connection('mysql_testing')->beginTransaction();
-                    DB::connection('mysql_testing')->statement($userInput);
-                    $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
-                    DB::connection('mysql_testing')->rollBack();
+                    try {
+                        DB::connection('mysql_testing')->statement($userInput);
+                        $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
+                        DB::connection('mysql_testing')->rollBack();
+                        $validationError = null;
+                    } catch (\Exception $e) {
+                        DB::connection('mysql_testing')->rollBack();
+                        $status = 'false';
+                        $validationError = $e->getMessage(); // Simpan pesan error MySQL di sini!
+                    }
+
+                    // Jika terjadi error pada eksekusi query user, langsung simpan feedback dan return
+                    if ($status === 'false') {
+                        // Simpan feedback ke mysql_feedbacks
+                        $shortFeedback = $this->getShortFeedback($testResult);
+                        $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
+                            'query_id' => $queryId,
+                            'feedback' => $shortFeedback,
+                            'validation_error' => $validationError,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        // Simpan ke mysql_student_submissions
+                        DB::table('mysql_student_submissions')->insert([
+                            'user_id' => $userId,
+                            'enroll_id' => $enrollId,
+                            'topic_detail_id' => $topicDetailId,
+                            'query_id' => $queryId,
+                            'feedback_id' => $feedbackId,
+                            'status' => $status,
+                            'answer_number' => $answerNumber,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        return redirect()->route('showTopicDetail', [
+                            'mysqlid' => $request->input('mysqlid'),
+                            'start' => $request->input('start'),
+                            'page' => $request->input('answer_number', 1)
+                        ])->with('answer_status', $shortFeedback);
+                    }
 
                     // --- 2. Jalankan query expected dalam transaksi, ambil hasil, rollback ---
                     DB::connection('mysql_testing')->beginTransaction();
@@ -358,15 +397,24 @@ class MysqlStudentController extends Controller
                     if ($studentResultNorm == $expectedResultNorm) {
                         // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
                         DB::connection('mysql_testing')->beginTransaction();
-                        DB::connection('mysql_testing')->statement($userInput);
-                        DB::connection('mysql_testing')->commit();
-                        $status = 'true';
+                        try {
+                            DB::connection('mysql_testing')->statement($userInput);
+                            DB::connection('mysql_testing')->commit();
+                            $status = 'true';
+                            $validationError = null;
+                        } catch (\Exception $e) {
+                            DB::connection('mysql_testing')->rollBack();
+                            $status = 'false';
+                            $validationError = $e->getMessage(); // Simpan pesan error MySQL
+                        }
                     } else {
                         $status = 'false';
+                        $validationError = null;
                     }
                 } catch (\Exception $e) {
                     DB::connection('mysql_testing')->rollBack();
                     $status = 'false';
+                    $validationError = $e->getMessage(); // Simpan pesan error MySQL
                 }
             }
         }
