@@ -47,7 +47,7 @@
                         <th>Wrong</th>
                         <th>Correct</th>
                         <th>Duration</th>
-                        <th>Percobaan</th> <!-- Tambahkan jika ingin -->
+                        <th>Attempt</th> <!-- Tambahkan jika ingin -->
                         <th>Score</th>
                     </tr>
                 </thead>
@@ -203,16 +203,16 @@ $(document).ready(function () {
                     (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
                 let nilai = sub.Score;
                 let percobaanKe = percobaanNoByEnroll[sub.enroll_id] || '-';
-                tbody += `<tr class="text-center">
-                    <td>${idx + 1}</td>
+                tbody += `<tr>
+                    <td class="text-center">${idx + 1}</td>
                     <td>${sub.UserName}</td>
                     <td>${sub.SubmissionTopic}</td>
                     <td>${sub.Time ? sub.Time.substring(0,16).replace('T',' ') : '-'}</td>
-                    <td>${sub.Salah}</td>
-                    <td>${sub.Benar}</td>
-                    <td>${durasiFormat}</td>
-                    <td>Ke-${percobaanKe}</td>
-                    <td>${nilai}</td>
+                    <td class="text-center">${sub.Salah}</td>
+                    <td class="text-center">${sub.Benar}</td>
+                    <td class="text-center">${durasiFormat}</td>
+                    <td class="text-center">${percobaanKe}</td>
+                    <td class="text-center">${nilai}</td>
                 </tr>`;
             });
         }
