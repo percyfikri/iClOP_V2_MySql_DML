@@ -371,15 +371,23 @@ class MysqlStudentController extends Controller
             }
         }
 
-        if (stripos($userInput, 'CREATE TABLE') !== false) {
-            $expectedTable = $expected->expected_table ?? null;
-
-            if ($expectedTable) {
-                $tables = DB::connection('mysql_testing')->select("SHOW TABLES LIKE '$expectedTable'");
-                if (!empty($tables)) {
-                    $status = 'true';
-                } else {
-                    $status = 'false';
+        // Tambahan validasi: hanya izinkan CREATE TABLE pada nomor yang memang DDL
+        if (
+            stripos($userInput, 'CREATE TABLE') !== false
+        ) {
+            // Hanya soal nomor 6 yang boleh CREATE TABLE
+            if (!($answerNumber == 6 && isset($expected) && stripos($expected->expected_query, 'CREATE TABLE') !== false)) {
+                $status = 'false';
+            } else {
+                // Jika memang soal DDL, cek apakah tabel berhasil dibuat
+                $expectedTable = $expected->expected_table ?? null;
+                if ($expectedTable) {
+                    $tables = DB::connection('mysql_testing')->select("SHOW TABLES LIKE '$expectedTable'");
+                    if (!empty($tables)) {
+                        $status = 'true';
+                    } else {
+                        $status = 'false';
+                    }
                 }
             }
         }
