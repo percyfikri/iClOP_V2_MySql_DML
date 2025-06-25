@@ -464,75 +464,40 @@ class MysqlStudentController extends Controller
         // Hilangkan karakter escape ANSI (warna terminal dsb)
         $testResult = preg_replace('/\e\[[\d;]*m/', '', $testResult);
 
-        // Jika benar, ambil baris mengandung "OK (1 test"
+        // Jika benar, tampilkan hanya "OK (1 test)"
         if (strpos($testResult, 'OK (1 test') !== false) {
-            if (preg_match('/OK \(1 test, 0 assertions\)/', $testResult, $okMatch)) {
-                return $okMatch[0];
-            }
-            return 'OK (1 test, 0 assertions)';
+            return 'OK (1 test)';
         }
 
+        // Jika salah, ambil error tanpa "Assertions"
         $lines = explode("\n", $testResult);
-        $extraFeedback = [];
-        $hasWhereError = false;
-
+        $feedbackLines = [];
         foreach ($lines as $line) {
             $line = trim($line);
-
-            // Tambahkan filter untuk pesan error baru (EN)
-            if (stripos($line, 'The WHERE condition must have a clear comparison operator or condition') !== false) {
-                $hasWhereError = true;
-                $extraFeedback[] = $line;
+            // Hilangkan baris yang mengandung "Assertions"
+            if (stripos($line, 'Assertions') !== false) {
+                continue;
             }
-            // Tambahkan filter untuk pesan error lain jika perlu
+            // Ambil baris error penting
             if (
-                stripos($line, 'The number of columns and values in the INSERT statement must be the same') !== false ||
-                stripos($line, 'Call to undefined method') !== false ||
-                stripos($line, 'Undefined variable') !== false
+                stripos($line, 'error') !== false ||
+                stripos($line, 'Exception') !== false ||
+                stripos($line, 'SQLSTATE') !== false ||
+                stripos($line, 'syntax error') !== false
             ) {
-                $extraFeedback[] = $line;
+                $feedbackLines[] = $line;
             }
         }
-        // --- END Tambahan ---
-
-        // Jika salah, ambil hanya pesan error SQLSTATE yang penting dan Summary
-        $errorMsg = '';
-        $summary = '';
-        foreach ($lines as $line) {
-            // Cari baris yang mengandung SQLSTATE
-            if (preg_match('/SQLSTATE\[[^\]]+\]:.*$/', $line, $matches)) {
-                $errorMsg = trim($matches[0]);
-            }
-            // Cari baris summary
-            if (preg_match('/Tests:\s*\d+,\s*Assertions:\s*\d+,\s*Errors:\s*\d+\./', $line, $sumMatch)) {
-                $summary = $sumMatch[0];
-            }
-            if ($errorMsg && $summary) break;
-        }
-
-        // Jika tidak ketemu, fallback ke pesan error lain yang mengandung "syntax error"
-        if (!$errorMsg) {
+        // Jika tidak ada error khusus, tampilkan baris non-kosong selain assertions
+        if (empty($feedbackLines)) {
             foreach ($lines as $line) {
-                if (stripos($line, 'syntax error') !== false) {
-                    $errorMsg = trim($line);
-                    break;
+                $line = trim($line);
+                if ($line !== '' && stripos($line, 'Assertions') === false) {
+                    $feedbackLines[] = $line;
                 }
             }
         }
-
-        // Gabungkan feedback tambahan dan feedback lama
-        $allFeedback = [];
-        if (!empty($extraFeedback)) {
-            $allFeedback[] = implode('<br>', $extraFeedback);
-        }
-        if ($errorMsg) {
-            $allFeedback[] = $errorMsg;
-        }
-        if ($summary) {
-            $allFeedback[] = $summary;
-        }
-
-        return implode('<br>', $allFeedback);
+        return implode('<br>', $feedbackLines);
     }
 
     public function runUserSelectQuery(Request $request)
