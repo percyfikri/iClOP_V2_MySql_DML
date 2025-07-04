@@ -37,11 +37,7 @@
                                 <h4>{{ $page }}. Your Answer (SQL Query)</h4>
                             </label>
                             @if($lastAnswer)
-                                @if($lastStatus == 'true')
-                                    <textarea name="userInput" id="userInput" class="form-control" rows="4" disabled style="background-color: #f1f1f1; color: #525252;">{{ $lastAnswer }}</textarea>
-                                @else
-                                    <textarea name="userInput" id="userInput" class="form-control" rows="4" required>{{ $lastAnswer }}</textarea>
-                                @endif
+                                <textarea name="userInput" id="userInput" class="form-control" rows="4" required>{{ $lastAnswer }}</textarea>
                             @else
                                 <textarea name="userInput" id="userInput" class="form-control" rows="4" placeholder="Input your query in here" required></textarea>
                             @endif
@@ -51,7 +47,7 @@
                                 class="btn btn-primary d-flex align-items-center justify-content-center"
                                 id="submit-btn"
                                 style="width: max-content; min-width: 90px; min-height: 40px; padding: 0 22px; position: relative;"
-                                @if($lastStatus == 'true' || $isReset) disabled @endif>
+                                @if($isReset) disabled @endif>
                                 <span id="submit-btn-text" style="width:100%; text-align:center; font-weight: 600;">Submit</span>
                                 <span id="submit-spinner"
                                     class="spinner-border spinner-border-sm"
