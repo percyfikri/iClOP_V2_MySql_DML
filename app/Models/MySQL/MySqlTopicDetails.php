@@ -37,5 +37,10 @@ class MySqlTopicDetails extends Model
     {
         return $this->hasMany(MySqlStudentSubmissions::class, 'topic_detail_id');
     }
-}
 
+    // Relasi: Setiap topic detail memiliki banyak expected queries
+    public function expectedQueries()
+    {
+        return $this->hasMany(MysqlExpectedQuery::class, 'topic_detail_id');
+    }
+}

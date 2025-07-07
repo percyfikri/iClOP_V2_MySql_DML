@@ -780,6 +780,22 @@
     </script>
     {{----------------------------------------------------------------------------------------------}}
 
+    {{-- Answer Key Management --}}
+    <script>
+        // Ketika menu Answer Key diklik, load table answer key via AJAX tanpa reload halaman
+        $(document).on('click', '#show-answer-key-management', function(e) {
+            e.preventDefault();
+            $.get("{{ route('teacher.answerkey.table') }}", function(data) {
+                $('#main-table-content').html(data);
+                // Panggil inisialisasi JS setelah konten dimuat
+                if (typeof initAnswerKeyPage === 'function') {
+                    initAnswerKeyPage();
+                }
+            });
+        });
+    </script>
+    {{----------------------------------------------------------------------------------------------}}
+    
 </head>
 <body>
     <!-- NAVBAR -->
@@ -847,6 +863,15 @@
                                style="color: #34364A; white-space: nowrap; font-size: 16px;">
                                 <i class="fas fa-book" style="margin-right: 12px;"></i>
                                 Topics Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center"
+                               href="#"
+                               id="show-answer-key-management"
+                               style="color: #34364A; white-space: nowrap; font-size: 16px;">
+                                <i class="fas fa-lock" style="margin-right: 12px;"></i>
+                                Answer Key Management
                             </a>
                         </li>
                         <li class="nav-item">

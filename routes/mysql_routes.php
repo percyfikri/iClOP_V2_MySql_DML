@@ -1,20 +1,13 @@
 <?php
-
-use App\Http\Controllers\React\ReactController;
-use App\Http\Controllers\React\ReactDosenController;
-use App\Http\Controllers\React\Student\ReactLogicalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MySQL\MysqlController;
 use App\Http\Controllers\MySQL\MysqlStudentController;
+use App\Http\Controllers\MySQL\MysqlTeacherAnswerKeyController;
 use App\Http\Controllers\MySQL\MysqlTeacherSubmissionController;
 use App\Http\Controllers\MySQL\MysqlTeacherTopicsController;
 use App\Http\Controllers\MySQL\TopicDetailController;
-use App\Http\Controllers\PHP\PHPController;
-use App\Http\Controllers\PHP\PHPDosenController;
-use App\Http\Controllers\PHP\Student\DashboardUnitControllers;
-use App\Http\Controllers\PHP\Student\StudikasusController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +17,6 @@ use Illuminate\Support\Facades\Storage;
 
 Route::group(['middleware' => ['auth']], function () {
     Route::prefix('mysql')->group(function () {
-        //-----------------CHANGED-----------------
         Route::get('/start', [MysqlController::class, 'index'])->name('mysql_welcome');
         Route::get('/detail-topics', [MysqlStudentController::class, 'showTopicDetail'])->name('showTopicDetail');
         Route::post('/submit', [MysqlStudentController::class, 'submitUserInput'])->name('submitUserInput');
@@ -35,13 +27,11 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/student/reset-testing-db', [MysqlStudentController::class, 'resetTestingDatabase'])->name('student.reset.testing.db');
         Route::post('/student/enroll-topic', [MysqlStudentController::class, 'enrollTopic'])->name('student.enroll.topic');
         Route::post('/student/finish-topic', [MysqlStudentController::class, 'finishTopic'])->name('student.finish.topic');
-        //-----------------CHANGED-----------------
     });
 });
 
 Route::group(['middleware' => ['auth', 'teacher']], function () {
     Route::prefix('mysql')->group(function () {
-        //-----------------CHANGED-----------------
         Route::get('/teacher/materials', [MysqlTeacherTopicsController::class, 'index'])->name('mysql_teacher');
         Route::get('/teacher/topics-table', [MysqlTeacherTopicsController::class, 'topicsTable'])->name('teacher.topics.table');
         Route::post('/teacher/topics/add-topic-subtopic', [MysqlTeacherTopicsController::class, 'addTopicSubtopic'])->name('teacher.topics.addTopicSubtopic');
@@ -52,6 +42,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::delete('/teacher/subtopics/{id}/delete', [MysqlTeacherTopicsController::class, 'deleteSubtopic'])->name('teacher.subtopics.delete');
         // Route baru untuk hasil submission mahasiswa
         Route::get('/teacher/submissions', [MysqlTeacherSubmissionController::class, 'index'])->name('teacher.student.submissions');
-        //-----------------CHANGED-----------------
+
+        Route::get('/teacher/answer-key-table', [MysqlTeacherAnswerKeyController::class, 'answerKeyTable'])->name('teacher.answerkey.table');
     });
 });
