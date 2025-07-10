@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
@@ -45,5 +46,7 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
 
         Route::get('/teacher/answer-key-table', [MysqlTeacherAnswerKeyController::class, 'answerKeyTable'])->name('teacher.answerkey.table');
         Route::post('/teacher/answer-key/save', [MysqlTeacherAnswerKeyController::class, 'saveAnswerKey'])->name('teacher.answerkey.save');
+        Route::get('/teacher/answer-key/list', [MysqlTeacherAnswerKeyController::class, 'getAnswerKeyList']); //auto reload after save changes
+        Route::delete('/teacher/answer-key/delete/{id}', [MysqlTeacherAnswerKeyController::class, 'deleteAnswerKey']);
     });
 });

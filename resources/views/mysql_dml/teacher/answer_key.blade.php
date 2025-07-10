@@ -140,7 +140,6 @@ $.ajaxSetup({
 
 function initAnswerKeyPage() {
     // Data dari backend
-    const allAnswerKeys = window.allAnswerKeys;
     const topics = window.topics;
     const subtopics = window.subtopics;
 
@@ -150,13 +149,11 @@ function initAnswerKeyPage() {
         subtopic: null
     };
 
-    // Inisialisasi subtopic default
     if (filterState.topic) {
         const relatedSubtopics = subtopics.filter(st => st.topic_id == filterState.topic);
         filterState.subtopic = relatedSubtopics.length > 0 ? relatedSubtopics[0].id : null;
     }
 
-    // Render subtopic select options
     function renderSubtopicOptions(topicId) {
         const related = subtopics.filter(st => st.topic_id == topicId);
         let html = '';
@@ -166,9 +163,8 @@ function initAnswerKeyPage() {
         $('#filterSubtopicSelect').html(html);
     }
 
-    // Render table
+    // GUNAKAN window.allAnswerKeys AGAR DATA TERUPDATE
     function renderTable() {
-        // Temukan subtopic yang aktif
         let subtopic = subtopics.find(st => st.id == filterState.subtopic);
         let totalQuestion = subtopic ? subtopic.total_question : 0;
         let tbody = '';
@@ -177,7 +173,7 @@ function initAnswerKeyPage() {
             tbody = `<tr><td colspan="4" class="text-center text-muted">No questions found for this subtopic.</td></tr>`;
         } else {
             for (let i = 1; i <= totalQuestion; i++) {
-                let answer = allAnswerKeys.find(a =>
+                let answer = window.allAnswerKeys.find(a =>
                     a.topic_detail_id == subtopic.id && a.answer_number == i
                 );
                 tbody += `<tr>
@@ -213,7 +209,7 @@ function initAnswerKeyPage() {
     renderTable();
     updateFilterLabels();
 
-        // Event handler
+    // Event handler
     $('#filterTopicForm').off('submit').on('submit', function(e) {
         e.preventDefault();
         filterState.topic = $('#filterTopicSelect').val();
@@ -295,15 +291,56 @@ $('#answerKeyForm').off('submit').on('submit', function(e) {
     e.preventDefault();
     const formData = $(this).serialize();
     $.ajax({
-        url: '/mysql/teacher/answer-key/save', // Ganti dengan route baru
+        url: '/mysql/teacher/answer-key/save',
         method: 'POST',
         data: formData,
         success: function(res) {
             $('#answerKeyModal').modal('hide');
-            location.reload(); // Atau renderTable() jika ingin tanpa reload
+            // Ambil data terbaru dari server, update window.allAnswerKeys, lalu renderTable
+            $.get('/mysql/teacher/answer-key/list', function(data) {
+                window.allAnswerKeys = data;
+                // Panggil ulang renderTable (harus di scope global atau window)
+                if (typeof renderTable === 'function') {
+                    renderTable();
+                } else if (typeof initAnswerKeyPage === 'function') {
+                    // Jika renderTable hanya di dalam init, panggil init ulang
+                    initAnswerKeyPage();
+                }
+            });
         },
         error: function() {
             alert('Failed to save answer key.');
+        }
+    });
+});
+
+// Handler tombol delete
+$(document).on('click', '.delete-answer-key-btn', function() {
+    if (!confirm('Are you sure you want to delete this answer key?')) return;
+    const id = $(this).data('id');
+    $.ajax({
+        url: '/mysql/teacher/answer-key/delete/' + id,
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(res) {
+            if (res.success) {
+                // Ambil data terbaru dari server, update window.allAnswerKeys, lalu renderTable
+                $.get('/mysql/teacher/answer-key/list', function(data) {
+                    window.allAnswerKeys = data;
+                    if (typeof renderTable === 'function') {
+                        renderTable();
+                    } else if (typeof initAnswerKeyPage === 'function') {
+                        initAnswerKeyPage();
+                    }
+                });
+            } else {
+                alert('Failed to delete answer key.');
+            }
+        },
+        error: function() {
+            alert('Failed to delete answer key.');
         }
     });
 });

@@ -47,4 +47,15 @@ class MysqlTeacherAnswerKeyController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function getAnswerKeyList()
+    {
+        return MysqlExpectedQuery::all();
+    }
+
+    public function deleteAnswerKey($id)
+    {
+        $deleted = MysqlExpectedQuery::where('id', $id)->delete();
+        return response()->json(['success' => $deleted]);
+    }
 }
