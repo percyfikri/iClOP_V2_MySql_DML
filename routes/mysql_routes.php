@@ -44,5 +44,6 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         Route::get('/teacher/submissions', [MysqlTeacherSubmissionController::class, 'index'])->name('teacher.student.submissions');
 
         Route::get('/teacher/answer-key-table', [MysqlTeacherAnswerKeyController::class, 'answerKeyTable'])->name('teacher.answerkey.table');
+        Route::post('/teacher/answer-key/save', [MysqlTeacherAnswerKeyController::class, 'saveAnswerKey'])->name('teacher.answerkey.save');
     });
 });
