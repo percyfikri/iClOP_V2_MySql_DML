@@ -781,9 +781,9 @@
     </script>
     {{----------------------------------------------------------------------------------------------}}
 
-    {{-- Answer Key Management --}}
+    {{-- Questions Management --}}
     <script>
-        // Ketika menu Answer Key diklik, load table answer key via AJAX tanpa reload halaman
+        // Ketika menu Questions diklik, load table Questions via AJAX tanpa reload halaman
         $(document).on('click', '#show-answer-key-management', function(e) {
             e.preventDefault();
             $.get("{{ route('teacher.answerkey.table') }}", function(data) {
@@ -872,7 +872,7 @@
                                id="show-answer-key-management"
                                style="color: #34364A; white-space: nowrap; font-size: 16px;">
                                 <i class="fas fa-lock" style="margin-right: 12px;"></i>
-                                Answer Key Management
+                                Questions Management
                             </a>
                         </li>
                         <li class="nav-item">

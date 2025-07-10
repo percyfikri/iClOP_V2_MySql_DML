@@ -1,24 +1,31 @@
 {{-- filepath: /d:/Semester 8 (Skripsi)/Skripsi/Project/iClOP_V2_MySql_DML/resources/views/mysql_dml/teacher/answer_key.blade.php --}}
 <div>
     <div class="mb-0 d-flex justify-content-between align-items-center">
-        <h4 class="mb-5 fw-bold">Answer Key Management</h4>
+        <h4 class="mb-5 fw-bold">Questions Management</h4>
     </div>
-    <div class="mb-3 d-flex gap-3 align-items-center">
-        <div class="d-flex align-items-center">
-            <button id="filterTopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterTopicModal" type="button">
-                <span class="filter-label" id="filterTopicLabel">Filter by Topic</span>
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex gap-3 align-items-center">
+            <div class="d-flex align-items-center">
+                <button id="filterTopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterTopicModal" type="button">
+                    <span class="filter-label" id="filterTopicLabel">Filter by Topic</span>
+                </button>
+                {{-- <span class="filter-clear d-none ms-2" id="clearTopic">&times;</span> --}}
+            </div>
+            <div class="d-flex align-items-center">
+                <button id="filterSubtopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterSubtopicModal" type="button">
+                    <span class="filter-label" id="filterSubtopicLabel">Filter by Subtopic</span>
+                </button>
+                {{-- <span class="filter-clear d-none ms-2" id="clearSubtopic">&times;</span> --}}
+            </div>
+            <button id="resetFilterBtn" class="btn btn-outline-secondary" style="border-radius: 18px; font-weight: 500;">
+                Reset Filter
             </button>
-            {{-- <span class="filter-clear d-none ms-2" id="clearTopic">&times;</span> --}}
         </div>
-        <div class="d-flex align-items-center">
-            <button id="filterSubtopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterSubtopicModal" type="button">
-                <span class="filter-label" id="filterSubtopicLabel">Filter by Subtopic</span>
+        <div>
+            <button class="btn btn-primary fw-bold" id="addQuestionBtn" style="border-radius: 0.5rem;">
+                <i class="fas fa-plus"></i> Add Question
             </button>
-            {{-- <span class="filter-clear d-none ms-2" id="clearSubtopic">&times;</span> --}}
         </div>
-        <button id="resetFilterBtn" class="btn btn-outline-secondary" style="border-radius: 18px; font-weight: 500;">
-            Reset Filter
-        </button>
     </div>
     <div class="card shadow-sm p-4 mb-4" style="border-radius: 18px;">
         <table class="table table-bordered table-hover mb-0">
@@ -122,6 +129,53 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Answer Key</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Add Question -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <form id="addQuestionForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addQuestionModalLabel">Add Question</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <div class="col-md-8 mb-3">
+            <div id="addModulePreview" style="border:1px solid #eee; border-radius:8px; padding:10px; min-height:120px; background:#f9f9f9;">
+                <span class="text-muted">Select subtopic to preview module...</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Subtopic</label>
+                <select class="form-select" name="topic_detail_id" id="addSubtopicSelect" required>
+                    <option value="">-- Select Subtopic --</option>
+                    @foreach($subtopics as $subtopic)
+                        <option value="{{ $subtopic->id }}">{{ $subtopic->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Question Number</label>
+                <input type="text" class="form-control" id="addQuestionNumberInput" disabled>
+                <input type="hidden" name="answer_number" id="addQuestionNumberHidden">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Answer Key (SQL Query)</label>
+                <textarea class="form-control" name="expected_query" id="addExpectedQueryInput" rows="6" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Expected Table</label>
+                <input type="text" class="form-control" name="expected_table" id="addExpectedTableInput">
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Question</button>
       </div>
     </form>
   </div>
@@ -341,6 +395,64 @@ $(document).on('click', '.delete-answer-key-btn', function() {
         },
         error: function() {
             alert('Failed to delete answer key.');
+        }
+    });
+});
+
+// Show modal Add Question
+$('#addQuestionBtn').on('click', function() {
+    $('#addQuestionForm')[0].reset();
+    $('#addModulePreview').html('<span class="text-muted">Select subtopic to preview module...</span>');
+    $('#addQuestionNumberInput').val('');
+    $('#addQuestionNumberHidden').val('');
+    $('#addQuestionModal').modal('show');
+});
+
+// Saat subtopic dipilih, hitung nomor soal berikutnya
+$('#addSubtopicSelect').on('change', function() {
+    const subtopicId = $(this).val();
+    const subtopic = window.subtopics.find(st => st.id == subtopicId);
+    let nextNumber = 1;
+    if (subtopic) {
+        nextNumber = (subtopic.total_question || 0) + 1;
+    }
+    $('#addQuestionNumberInput').val(nextNumber);
+    $('#addQuestionNumberHidden').val(nextNumber);
+
+    // Preview modul
+    if (subtopic && subtopic.file_path && subtopic.file_name) {
+        $('#addModulePreview').html(
+            `<iframe src="/${subtopic.file_path}${subtopic.file_name}" style="width:100%;height:350px;border:none;border-radius:6px;"></iframe>`
+        );
+    } else if (subtopic && subtopic.title) {
+        $('#addModulePreview').html(`<div class="fw-bold">${subtopic.title}</div>`);
+    } else {
+        $('#addModulePreview').html('<span class="text-muted">No module available.</span>');
+    }
+});
+
+// Submit Add Question
+$('#addQuestionForm').off('submit').on('submit', function(e) {
+    e.preventDefault();
+    const formData = $(this).serialize();
+    $.ajax({
+        url: '/mysql/teacher/answer-key/save',
+        method: 'POST',
+        data: formData,
+        success: function(res) {
+            $('#addQuestionModal').modal('hide');
+            // Ambil data terbaru dan render ulang
+            $.get('/mysql/teacher/answer-key/list', function(data) {
+                window.allAnswerKeys = data;
+                if (typeof renderTable === 'function') {
+                    renderTable();
+                }
+            });
+            // Optional: reload subtopics (total_question) jika ingin update dropdown tanpa reload page
+            // location.reload(); // jika ingin update total_question di dropdown
+        },
+        error: function() {
+            alert('Failed to add question.');
         }
     });
 });

@@ -34,6 +34,7 @@ class MysqlTeacherAnswerKeyController extends Controller
             'expected_table' => 'nullable|string',
         ]);
 
+        // Simpan atau update answer key
         MysqlExpectedQuery::updateOrCreate(
             [
                 'topic_detail_id' => $validated['topic_detail_id'],
@@ -44,6 +45,13 @@ class MysqlTeacherAnswerKeyController extends Controller
                 'expected_table' => $validated['expected_table'],
             ]
         );
+
+        // Update kolom total_question jika perlu
+        $subtopic = \App\Models\MySQL\MySqlTopicDetails::find($validated['topic_detail_id']);
+        if ($subtopic && $validated['answer_number'] > $subtopic->total_question) {
+            $subtopic->total_question = $validated['answer_number'];
+            $subtopic->save();
+        }
 
         return response()->json(['success' => true]);
     }
