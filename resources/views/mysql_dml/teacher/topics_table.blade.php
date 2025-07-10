@@ -92,10 +92,6 @@
                                 <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Number of Questions</label>
-                            <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
-                        </div>
                     </div>
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-sm fw-bold btn-add-subtopic-hover"

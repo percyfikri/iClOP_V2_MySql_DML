@@ -9,6 +9,7 @@ use App\Http\Controllers\MySQL\MysqlTeacherAnswerKeyController;
 use App\Http\Controllers\MySQL\MysqlTeacherSubmissionController;
 use App\Http\Controllers\MySQL\MysqlTeacherTopicsController;
 use App\Http\Controllers\MySQL\TopicDetailController;
+use App\Http\Controllers\MySQL\MysqlTeacherQuestionController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,9 +45,10 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
         // Route baru untuk hasil submission mahasiswa
         Route::get('/teacher/submissions', [MysqlTeacherSubmissionController::class, 'index'])->name('teacher.student.submissions');
 
-        Route::get('/teacher/answer-key-table', [MysqlTeacherAnswerKeyController::class, 'answerKeyTable'])->name('teacher.answerkey.table');
-        Route::post('/teacher/answer-key/save', [MysqlTeacherAnswerKeyController::class, 'saveAnswerKey'])->name('teacher.answerkey.save');
-        Route::get('/teacher/answer-key/list', [MysqlTeacherAnswerKeyController::class, 'getAnswerKeyList']); //auto reload after save changes
-        Route::delete('/teacher/answer-key/delete/{id}', [MysqlTeacherAnswerKeyController::class, 'deleteAnswerKey']);
+        Route::get('/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
+        Route::post('/teacher/questions/save', [MysqlTeacherQuestionController::class, 'saveQuestion'])->name('teacher.questions.save');
+        Route::get('/teacher/questions/list', [MysqlTeacherQuestionController::class, 'getQuestionList']);
+        Route::delete('/teacher/questions/delete/{id}', [MysqlTeacherQuestionController::class, 'deleteQuestion']);
+        Route::get('/teacher/subtopics/list', [MysqlTeacherQuestionController::class, 'getSubtopicList']);
     });
 });

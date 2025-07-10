@@ -460,10 +460,6 @@
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Number of Questions</label>
-                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
-                            </div>
                     `;
                     container.appendChild(newGroup);
         
@@ -540,10 +536,6 @@
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Number of Questions</label>
-                                <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0" value="${sub.total_question !== null && sub.total_question !== undefined ? sub.total_question : ''}">
-                            </div>
                         </div>
                     `;
                 });
@@ -579,10 +571,6 @@
                         <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
                             <i class="fas fa-minus"></i>
                         </button>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold">Number of Questions</label>
-                        <input type="number" class="form-control" name="sub_topic_jumlah_jawaban[]" min="1" required placeholder="0">
                     </div>
                 </div>
             `);
@@ -784,13 +772,13 @@
     {{-- Questions Management --}}
     <script>
         // Ketika menu Questions diklik, load table Questions via AJAX tanpa reload halaman
-        $(document).on('click', '#show-answer-key-management', function(e) {
+        $(document).on('click', '#show-questions-management', function(e) {
             e.preventDefault();
-            $.get("{{ route('teacher.answerkey.table') }}", function(data) {
+            $.get("{{ route('teacher.questions.table') }}", function(data) {
                 $('#main-table-content').html(data);
                 // Panggil inisialisasi JS setelah konten dimuat
-                if (typeof initAnswerKeyPage === 'function') {
-                    initAnswerKeyPage();
+                if (typeof initQuestionsPage === 'function') {
+                    initQuestionsPage();
                 }
             });
         });
@@ -869,9 +857,9 @@
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center"
                                href="#"
-                               id="show-answer-key-management"
+                               id="show-questions-management"
                                style="color: #34364A; white-space: nowrap; font-size: 16px;">
-                                <i class="fas fa-lock" style="margin-right: 12px;"></i>
+                                <i class="fas fa-question-circle" style="margin-right: 12px;"></i>
                                 Questions Management
                             </a>
                         </li>
