@@ -153,7 +153,7 @@
                 <input type="text" class="form-control" id="modalQuestionNumber" readonly>
             </div>
             <div class="mb-3">
-                <label class="form-label fw-bold">SQL Query</label>
+                <label class="form-label fw-bold">Answer Key (SQL Query)</label>
                 <textarea class="form-control" name="expected_query" id="questionQueryInput" rows="6" required></textarea>
             </div>
             <div class="mb-3">
