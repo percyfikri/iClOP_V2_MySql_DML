@@ -296,32 +296,84 @@ $(document).ready(function () {
 
     // Export PDF
     $('#exportAllPdfBtn').on('click', function() {
-        let html = '<h2>Student Submissions</h2><table border="1" cellpadding="5" cellspacing="0"><tr><th>Name</th><th>Topic</th><th>Date</th><th>Wrong</th><th>Correct</th><th>Duration</th><th>Score</th><th>Enroll ID</th></tr>';
-        filteredSubmissions.forEach(function(sub) {
+        var body = [
+            [
+                {text: 'No', bold: true, alignment: 'center'},
+                {text: 'Username', bold: true},
+                {text: 'Topic', bold: true},
+                {text: 'Date', bold: true},
+                {text: 'Wrong', bold: true, alignment: 'center'},
+                {text: 'Correct', bold: true, alignment: 'center'},
+                {text: 'Duration', bold: true, alignment: 'center'},
+                {text: 'Attempt', bold: true, alignment: 'center'},
+                {text: 'Score', bold: true, alignment: 'center'}
+            ]
+        ];
+
+        // Penomoran percobaan (Attempt) sama seperti renderTable
+        let percobaanMap = {};
+        let percobaanNoByEnroll = {};
+        let forPenomoran = filteredSubmissions.slice().sort((a, b) => {
+            if (a.UserName !== b.UserName) return a.UserName.localeCompare(b.UserName);
+            if (a.SubmissionTopic !== b.SubmissionTopic) return a.SubmissionTopic.localeCompare(b.SubmissionTopic);
+            return a.enroll_id - b.enroll_id;
+        });
+        forPenomoran.forEach(function(sub) {
+            let key = sub.UserName + '|' + sub.SubmissionTopic;
+            if (!percobaanMap[key]) percobaanMap[key] = 1;
+            else percobaanMap[key]++;
+            percobaanNoByEnroll[sub.enroll_id] = percobaanMap[key];
+        });
+
+        // Urutkan data untuk tampilan: terbaru di atas (Time DESC)
+        let sorted = filteredSubmissions.slice().sort((a, b) => {
+            if (a.Time > b.Time) return -1;
+            if (a.Time < b.Time) return 1;
+            return b.enroll_id - a.enroll_id;
+        });
+
+        sorted.forEach(function(sub, idx) {
             let durasiDetik = sub.Durasi ?? 0;
             let jam = Math.floor(durasiDetik / 3600);
             let menit = Math.floor((durasiDetik % 3600) / 60);
             let detik = durasiDetik % 60;
             let durasiFormat = sub.Durasi !== null ? 
                 (('0'+jam).slice(-2) + ':' + ('0'+menit).slice(-2) + ':' + ('0'+detik).slice(-2)) : '-';
-            let totalPercobaan = sub.Benar + sub.Salah;
-            let nilai = sub.Score;
-            html += `<tr>
-                <td>${sub.UserName}</td>
-                <td>${sub.SubmissionTopic}</td>
-                <td>${sub.Time}</td>
-                <td>${sub.Salah}</td>
-                <td>${sub.Benar}</td>
-                <td>${durasiFormat}</td>
-                <td>${nilai}</td>
-                <td>${sub.enroll_id}</td>
-            </tr>`;
+            let percobaanKe = percobaanNoByEnroll[sub.enroll_id] || '-';
+            body.push([
+                {text: (idx + 1).toString(), alignment: 'center'},
+                sub.UserName,
+                sub.SubmissionTopic,
+                sub.Time ? sub.Time.substring(0,16).replace('T',' ') : '-',
+                {text: sub.Salah.toString(), alignment: 'center'},
+                {text: sub.Benar.toString(), alignment: 'center'},
+                {text: durasiFormat, alignment: 'center'},
+                {text: percobaanKe.toString(), alignment: 'center'},
+                {text: sub.Score.toString(), alignment: 'center', bold: true}
+            ]);
         });
-        html += '</table>';
-        var win = window.open('', '', 'width=1000,height=700');
-        win.document.write(html);
-        win.print();
-        win.close();
+
+        var docDefinition = {
+            content: [
+                {text: 'Student Submissions', style: 'header'},
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [24, '*', '*', 70, 35, 40, 55, 40, 40],
+                        body: body
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 16,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                }
+            }
+        };
+
+        pdfMake.createPdf(docDefinition).download('filtered_student_submissions.pdf');
     });
 
     // Filter by Topic
