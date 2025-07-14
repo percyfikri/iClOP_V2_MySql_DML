@@ -22,11 +22,10 @@
 
         .content {
             padding: 20px;
-            padding-left: 32px; /* Tambahkan ini agar ada jarak dari sidebar */
+            margin-left: var(--sidebar-width, 240px); /* Gunakan margin kiri dinamis */
             margin-bottom: 10rem;
-            min-height: 200px; /* opsional, agar konten tetap proporsional */
+            min-height: 200px;
             margin-top: 2rem;
-            margin-left: 240px; /* Tambahkan/maksimalkan ini sesuai lebar sidebar */
         }
 
         .footer {
@@ -407,6 +406,11 @@
                 if (sidebarLink) {
                     sidebarLink.classList.add('active-sidebar');
                 }
+            }
+
+            // Tambahkan ini agar margin selalu benar
+            if (typeof adjustContentMargin === 'function') {
+                adjustContentMargin();
             }
         }
     </script>
@@ -880,6 +884,11 @@
             if (sidebarLink) {
                 sidebarLink.classList.add('active-sidebar');
             }
+        }
+
+        // Tambahkan ini agar margin selalu benar
+        if (typeof adjustContentMargin === 'function') {
+            adjustContentMargin();
         }
     }
 
