@@ -410,7 +410,7 @@ $('#addQuestionBtn').off('click').on('click', function() {
 
     if (subtopic && subtopic.file_path && subtopic.file_name) {
         $('#addModulePreview').html(
-            `<iframe src="/${subtopic.file_path}${subtopic.file_name}" style="width:100%;height:350px;border:none;border-radius:6px;"></iframe>`
+            `<iframe src="/${subtopic.file_path}${subtopic.file_name}"></iframe>`
         );
     } else if (subtopic && subtopic.title) {
         $('#addModulePreview').html(`<div class="fw-bold">${subtopic.title}</div>`);
@@ -450,7 +450,7 @@ window.editQuestion = function(questionId, topicDetailId, answerNumber) {
 
     if (subtopic && subtopic.file_path && subtopic.file_name) {
         $('#modulePreview').html(
-            `<iframe src="/${subtopic.file_path}${subtopic.file_name}" style="width:100%;height:350px;border:none;border-radius:6px;"></iframe>`
+            `<iframe src="/${subtopic.file_path}${subtopic.file_name}"></iframe>`
         );
     } else if (subtopic && subtopic.title) {
         $('#modulePreview').html(`<div class="fw-bold">${subtopic.title}</div>`);
@@ -509,5 +509,84 @@ $(function() {
         background: #d6d6d686;
         border-radius: 50%;
         align-items: center;
+    }
+
+    /* Responsive modal dialog */
+    #questionModal .modal-dialog,
+    #addQuestionModal .modal-dialog {
+        max-width: 98vw;
+        width: 100%;
+    }
+
+    #questionModal .modal-body,
+    #addQuestionModal .modal-body {
+        height: 70vh;
+        min-height: 350px;
+        display: flex;
+        flex-direction: row;
+        gap: 0;
+        flex-wrap: wrap;
+        overflow: hidden;
+    }
+
+    #modulePreview,
+    #addModulePreview {
+        height: 100%;
+        min-height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: stretch;
+        padding: 0;
+        background: #f9f9f9;
+        overflow: auto;
+    }
+
+    /* Tambahkan ini untuk kolom form agar bisa scroll */
+    #questionModal .col-md-4.mb-3,
+    #addQuestionModal .col-md-4.mb-3 {
+        height: 100%;
+        max-height: 100%;
+        overflow-y: auto;
+        overflow-x: visible;
+        padding-right: 8px;
+        box-sizing: border-box;
+    }
+
+    /* Pastikan iframe tetap responsif */
+    #modulePreview iframe,
+    #addModulePreview iframe {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        max-height: 65vh;
+        border: none;
+        border-radius: 8px;
+        flex: 1 1 auto;
+        background: #fff;
+    }
+
+    @media (max-width: 900px) {
+        #questionModal .modal-body,
+        #addQuestionModal .modal-body {
+            flex-direction: column;
+            height: auto;
+        }
+        #modulePreview,
+        #addModulePreview {
+            min-height: 200px;
+            max-height: 40vh;
+        }
+        #modulePreview iframe,
+        #addModulePreview iframe {
+            min-height: 200px;
+            max-height: 40vh;
+        }
+        /* Kolom form juga scroll pada mode kolom */
+        #questionModal .col-md-4.mb-3,
+        #addQuestionModal .col-md-4.mb-3 {
+            max-height: 200px;
+            overflow-y: auto;
+        }
     }
 </style>
