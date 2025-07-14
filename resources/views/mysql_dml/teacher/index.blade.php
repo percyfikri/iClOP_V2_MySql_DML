@@ -395,6 +395,7 @@
             e.preventDefault();
             $.get("{{ route('teacher.topics.table') }}", function(data) {
                 $('#main-table-content').html(data);
+                adjustContentMargin();
             });
         });
     </script>
@@ -410,6 +411,7 @@
             e.preventDefault();
             $.get("{{ route('teacher.topics.table') }}", function(data) {
                 $('#main-table-content').html(data);
+                adjustContentMargin();
             });
         });
     </script>
@@ -764,6 +766,7 @@
             e.preventDefault();
             $.get("/mysql/teacher/submissions", function(data) {
                 $('#main-table-content').html(data);
+                adjustContentMargin();
             });
         });
     </script>
@@ -776,6 +779,7 @@
             e.preventDefault();
             $.get("{{ route('teacher.questions.table') }}", function(data) {
                 $('#main-table-content').html(data);
+                adjustContentMargin();
                 // Setelah konten dimuat, ambil ulang data terbaru dari backend
                 if (typeof reloadAllQuestionsData === 'function') {
                     reloadAllQuestionsData(function() {
