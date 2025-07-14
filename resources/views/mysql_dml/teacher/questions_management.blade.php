@@ -324,6 +324,20 @@ function reloadSubtopics(callback) {
     });
 }
 
+// Fungsi untuk reload semua data (untuk Sidebar Menu Utama di Index)
+function reloadAllQuestionsData(callback) {
+    $.when(
+        $.get('/mysql/teacher/topics/list'),
+        $.get('/mysql/teacher/subtopics/list'),
+        $.get('/mysql/teacher/questions/list')
+    ).done(function(topicsRes, subtopicsRes, questionsRes) {
+        window.topics = Array.isArray(topicsRes[0]) ? topicsRes[0] : (topicsRes[0].data || []);
+        window.subtopics = Array.isArray(subtopicsRes[0]) ? subtopicsRes[0] : (subtopicsRes[0].data || []);
+        window.allQuestions = Array.isArray(questionsRes[0]) ? questionsRes[0] : (questionsRes[0].data || []);
+        if (typeof callback === 'function') callback();
+    });
+}
+
 // Handler submit add question
 $('#addQuestionForm').off('submit').on('submit', function(e) {
     e.preventDefault();

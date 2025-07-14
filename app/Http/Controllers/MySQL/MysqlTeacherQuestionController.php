@@ -60,7 +60,12 @@ class MysqlTeacherQuestionController extends Controller
 
     public function getSubtopicList()
     {
-        return \App\Models\MySQL\MySqlTopicDetails::all();
+        return MySqlTopicDetails::all();
+    }
+
+    public function getTopicList()
+    {
+        return MySqlTopics::all();
     }
 
     public function deleteQuestion($id)
@@ -79,7 +84,7 @@ class MysqlTeacherQuestionController extends Controller
 
         // Hitung ulang total_question untuk subtopic terkait
         $maxAnswerNumber = MysqlExpectedQuery::where('topic_detail_id', $topicDetailId)->max('answer_number');
-        $subtopic = \App\Models\MySQL\MySqlTopicDetails::find($topicDetailId);
+        $subtopic = MySqlTopicDetails::find($topicDetailId);
         if ($subtopic) {
             $subtopic->total_question = $maxAnswerNumber ? $maxAnswerNumber : 0;
             $subtopic->save();

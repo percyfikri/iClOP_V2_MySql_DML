@@ -776,8 +776,14 @@
             e.preventDefault();
             $.get("{{ route('teacher.questions.table') }}", function(data) {
                 $('#main-table-content').html(data);
-                // Panggil inisialisasi JS setelah konten dimuat
-                if (typeof initQuestionsPage === 'function') {
+                // Setelah konten dimuat, ambil ulang data terbaru dari backend
+                if (typeof reloadAllQuestionsData === 'function') {
+                    reloadAllQuestionsData(function() {
+                        if (typeof initQuestionsPage === 'function') {
+                            initQuestionsPage();
+                        }
+                    });
+                } else if (typeof initQuestionsPage === 'function') {
                     initQuestionsPage();
                 }
             });

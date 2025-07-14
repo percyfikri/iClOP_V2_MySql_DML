@@ -47,8 +47,9 @@ Route::group(['middleware' => ['auth', 'teacher']], function () {
 
         Route::get('/teacher/questions/table', [MysqlTeacherQuestionController::class, 'questionsTable'])->name('teacher.questions.table');
         Route::post('/teacher/questions/save', [MysqlTeacherQuestionController::class, 'saveQuestion'])->name('teacher.questions.save');
-        Route::get('/teacher/questions/list', [MysqlTeacherQuestionController::class, 'getQuestionList']);
         Route::delete('/teacher/questions/delete/{id}', [MysqlTeacherQuestionController::class, 'deleteQuestion']);
+        Route::get('/teacher/questions/list', [MysqlTeacherQuestionController::class, 'getQuestionList']);
         Route::get('/teacher/subtopics/list', [MysqlTeacherQuestionController::class, 'getSubtopicList']);
+        Route::get('/teacher/topics/list', [MysqlTeacherQuestionController::class, 'getTopicList']);
     });
 });
