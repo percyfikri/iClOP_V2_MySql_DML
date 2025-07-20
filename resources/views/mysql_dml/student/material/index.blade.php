@@ -379,6 +379,12 @@
         }
         window.addEventListener('DOMContentLoaded', adjustContentMargin);
         window.addEventListener('resize', adjustContentMargin);
+        window.addEventListener('load', adjustContentMargin);
+
+        // Jika sidebar ada gambar/logo
+        document.querySelectorAll('.sidebar img').forEach(function(img) {
+            img.addEventListener('load', adjustContentMargin);
+        });
     </script>
 
     <script>
