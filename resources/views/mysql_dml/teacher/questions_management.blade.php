@@ -251,8 +251,23 @@ function initQuestionsPage() {
     function updateFilterLabels() {
         let topic = topics.find(t => t.id == filterState.topic);
         let subtopic = subtopics.find(st => st.id == filterState.subtopic);
+        const relatedSubtopics = subtopics.filter(st => st.topic_id == filterState.topic);
+
         $('#filterTopicLabel').text(topic ? topic.title : 'Filter by Topic');
-        $('#filterSubtopicLabel').text(subtopic ? subtopic.title : 'Filter by Subtopic');
+
+        if (relatedSubtopics.length === 0) {
+            $('#filterSubtopicBtn')
+                .removeClass('btn-outline-primary')
+                .addClass('btn-danger active')
+                // .prop('disabled', true);
+            $('#filterSubtopicLabel').text('No Subtopic');
+        } else {
+            $('#filterSubtopicBtn')
+                .removeClass('btn-danger active')
+                .addClass('btn-outline-primary')
+                // .prop('disabled', false);
+            $('#filterSubtopicLabel').text(subtopic ? subtopic.title : 'Filter by Subtopic');
+        }
     }
 
     renderSubtopicOptions(filterState.topic);
@@ -260,6 +275,7 @@ function initQuestionsPage() {
 
     renderTable();
     updateFilterLabels();
+    updateAddQuestionBtnState();
 
     $('#filterTopicForm').off('submit').on('submit', function(e) {
         e.preventDefault();
@@ -270,6 +286,7 @@ function initQuestionsPage() {
         $('#filterSubtopicSelect').val(filterState.subtopic);
         renderTable();
         updateFilterLabels();
+        updateAddQuestionBtnState();
         $('#filterTopicModal').modal('hide');
     });
 
@@ -278,6 +295,7 @@ function initQuestionsPage() {
         filterState.subtopic = $('#filterSubtopicSelect').val();
         renderTable();
         updateFilterLabels();
+        updateAddQuestionBtnState();
         $('#filterSubtopicModal').modal('hide');
     });
 
@@ -289,6 +307,7 @@ function initQuestionsPage() {
         $('#filterSubtopicSelect').val(filterState.subtopic);
         renderTable();
         updateFilterLabels();
+        updateAddQuestionBtnState();
     });
 
     $('#filterTopicSelect').off('change').on('change', function() {
@@ -401,6 +420,13 @@ $(document).off('click', '.delete-question-btn').on('click', '.delete-question-b
 
 // Handler add question button click
 $('#addQuestionBtn').off('click').on('click', function() {
+    const topicId = window.filterState && window.filterState.topic ? window.filterState.topic : (window.topics[0] ? window.topics[0].id : null);
+    const relatedSubtopics = window.subtopics.filter(st => String(st.topic_id) === String(topicId));
+    if (relatedSubtopics.length === 0) {
+        // Tidak ada subtopik, jangan tampilkan modal
+        return;
+    }
+
     $('#addQuestionForm')[0].reset();
     $('#addModulePreview').html('<span class="text-muted">Loading module...</span>');
     $('#addQuestionNumberInput').val('');
@@ -409,10 +435,8 @@ $('#addQuestionBtn').off('click').on('click', function() {
     $('#addSubtopicTitleInput').val('');
     $('#addSubtopicIdHidden').val('');
 
-    const topicId = window.filterState && window.filterState.topic ? window.filterState.topic : (window.topics[0] ? window.topics[0].id : null);
-    const subtopicId = window.filterState && window.filterState.subtopic ? window.filterState.subtopic : (window.subtopics[0] ? window.subtopics[0].id : null);
+    const subtopic = relatedSubtopics[0];
     const topic = window.topics.find(t => String(t.id) === String(topicId));
-    const subtopic = window.subtopics.find(st => String(st.id) === String(subtopicId));
 
     $('#addTopicTitleInput').val(topic ? topic.title : '-');
     $('#addSubtopicTitleInput').val(subtopic ? subtopic.title : '-');
@@ -426,10 +450,8 @@ $('#addQuestionBtn').off('click').on('click', function() {
         $('#addModulePreview').html(
             `<iframe src="/${subtopic.file_path}${subtopic.file_name}"></iframe>`
         );
-    } else if (subtopic && subtopic.title) {
-        $('#addModulePreview').html(`<div class="fw-bold">${subtopic.title}</div>`);
     } else {
-        $('#addModulePreview').html('<span class="text-muted">No module available.</span>');
+        $('#addModulePreview').html('<div class="text-danger text-center d-flex align-items-center justify-content-center" style="height: 100%;"><span class="fst-italic">No module (PDF) available.</span></div>');
     }
 
     $('#addQuestionModal').modal('show');
@@ -466,14 +488,22 @@ window.editQuestion = function(questionId, topicDetailId, answerNumber) {
         $('#modulePreview').html(
             `<iframe src="/${subtopic.file_path}${subtopic.file_name}"></iframe>`
         );
-    } else if (subtopic && subtopic.title) {
-        $('#modulePreview').html(`<div class="fw-bold">${subtopic.title}</div>`);
     } else {
-        $('#modulePreview').html('<span class="text-muted">No module available.</span>');
+        $('#modulePreview').html('<div class="text-danger text-center d-flex align-items-center justify-content-center" style="height: 100%;"><span class="fst-italic">No module (PDF) available.</span></div>');
     }
 
     $('#questionModal').modal('show');
 };
+
+function updateAddQuestionBtnState() {
+    const topicId = window.filterState && window.filterState.topic ? window.filterState.topic : (window.topics[0] ? window.topics[0].id : null);
+    const relatedSubtopics = window.subtopics.filter(st => String(st.topic_id) === String(topicId));
+    if (relatedSubtopics.length === 0) {
+        $('#addQuestionBtn').prop('disabled', true).attr('title', 'Please add a subtopic first');
+    } else {
+        $('#addQuestionBtn').prop('disabled', false).removeAttr('title');
+    }
+}
 
 // Inisialisasi halaman
 $(function() {
@@ -602,5 +632,22 @@ $(function() {
             max-height: 200px;
             overflow-y: auto;
         }
+    }
+
+    /* Tambahkan di style block Anda */
+    #filterSubtopicBtn.btn-danger {
+        background-color: #fdeaea !important;
+        color: #dc3545 !important;
+        border: 1.5px solid #dc3545 !important;
+        border-radius: 18px !important;
+        font-weight: 500;
+    }
+    #filterSubtopicBtn.btn-danger.active,
+    #filterSubtopicBtn.btn-danger:active,
+    #filterSubtopicBtn.btn-danger:focus,
+    #filterSubtopicBtn.btn-danger:hover {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+        border-color: #dc3545 !important;
     }
 </style>
