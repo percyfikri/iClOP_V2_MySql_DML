@@ -51,14 +51,15 @@ class MysqlTeacherTopicsController extends Controller
             'sub_topic_title' => 'required|array|min:1',
             'sub_topic_title.*' => 'required|string|max:255',
             'sub_topic_file.*' => 'nullable|file|mimes:pdf|max:20480',
-            'schema_file' => 'nullable|file|mimes:sql|max:20480',
+            'schema_file' => 'required|file|mimes:sql,txt|max:20480',
         ]);
 
         $topic = new MySqlTopics();
         $topic->title = $request->topic_title;
-        $topic->countdown_seconds = $request->countdown_minutes * 60; // <-- HARUS dari request!
-        $topic->created_by = auth()->id();
+        $topic->countdown_seconds = $request->countdown_minutes * 60;
+        $topic->created_by = $userId;
 
+        // Upload file schema
         if ($request->hasFile('schema_file')) {
             $file = $request->file('schema_file');
             $schemaFileName = time() . '_' . $file->getClientOriginalName();
@@ -67,6 +68,7 @@ class MysqlTeacherTopicsController extends Controller
             $topic->schema_file_name = $schemaFileName;
             $topic->schema_file_path = $schemaFilePath;
         }
+
         $topic->save();
 
         $files = [];

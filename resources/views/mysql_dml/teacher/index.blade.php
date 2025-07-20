@@ -455,7 +455,7 @@
                                         <input type="file" class="custom-file-input" name="sub_topic_file[]" id="modul-input" accept=".pdf">
                                     </label>
                                 </div>
-                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                                <div class="text-danger" style="font-size: 12px; margin-left: 0.2rem;">Please upload a file with .pdf extension.</div>
                             </div>
                             <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
                                 <button type="button" class="btn btn-minus-red remove-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
@@ -544,7 +544,7 @@
                                         <input type="file" class="custom-file-input" name="edit_sub_topic_file[]" accept=".pdf">
                                     </label>
                                 </div>
-                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                                <div class="text-danger" style="font-size: 12px; margin-left: 0.2rem;">Please upload a file with .pdf extension.</div>
                             </div>
                             <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
                                 <button type="button" class="btn btn-minus-red remove-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
@@ -585,7 +585,7 @@
                                 <input type="file" class="custom-file-input" name="edit_sub_topic_file[]" accept=".pdf">
                             </label>
                         </div>
-                        <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                        <div class="text-danger" style="font-size: 12px; margin-left: 0.2rem;">Please upload a file with .pdf extension.</div>
                     </div>
                     <div class="col-md-1 d-flex justify-content-center align-items-center" style="height: 100%; margin-top: 2rem;">
                         <button type="button" class="btn btn-minus-red remove-edit-subtopic-btn d-flex align-items-center justify-content-center" style="height: 38px; width: 38px;">
@@ -698,7 +698,7 @@
                                         <input type="file" class="custom-file-input" name="sub_topic_file[]" accept=".pdf">
                                     </label>
                                 </div>
-                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                                <div class="text-danger" style="font-size: 12px; margin-left: 0.2rem;">Please upload a file with .pdf extension.</div>
                             </div>
                             <div class="col-md-2 d-flex align-items-end" style="margin-top: 30px;">
                                 <button type="button" class="btn btn-minus-red remove-subtopic-btn" style="height: 38px;">
@@ -913,4 +913,11 @@
     <footer class="footer">
         © 2025 Your Website. All rights reserved.
     </footer>   
+
+    <script>
+        // Script untuk menampilkan nama file .sql pada modal Add Topic
+        $(document).on('change', '#add_schema_file', function() {
+            $('#add_schema_filename').val(this.files.length ? this.files[0].name : 'No file chosen');
+        });
+    </script>
 </body>

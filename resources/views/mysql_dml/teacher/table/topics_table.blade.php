@@ -68,16 +68,27 @@
                             <label for="topicTitle" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
                         </div>
-                        <div class="col-md-6" style="max-width: 180px;">
-                            <label for="countdown_minutes" class="form-label fw-bold">Timer (minutes)</label>
-                            <input style="border: 1px solid #fa6767; width: 100px; background-color: #fce3e3;" type="number" class="form-control fw-semibold" id="countdown_minutes" name="countdown_minutes" value="{{ old('countdown_minutes', isset($topic) ? ($topic->countdown_seconds ?? 3600) / 60 : 60) }}" min="1" step="1">
-                            <small class="form-text text-muted">Ex : 60 minutes</small>
-                        </div>
+                        
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Upload Database Schema (.sql)</label>
-                        <input type="file" class="form-control" name="schema_file" accept=".sql">
-                        <div class="text-danger" style="font-size: 12px">*Optional. File .sql untuk template database.</div>
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Upload Testing Database</label>
+                            <div class="input-group" style="width: 100%;">
+                                <label class="input-group-text btn btn-outline-primary mb-0" for="add_schema_file" style="border-radius: 0.5rem 0 0 0.5rem; cursor:pointer; min-width:120px;">
+                                    Choose File
+                                    <input type="file" class="d-none" name="schema_file" id="add_schema_file" accept=".sql">
+                                </label>
+                                <input type="text" class="form-control" id="add_schema_filename" placeholder="No file chosen" readonly style="border-radius: 0 0.5rem 0.5rem 0;">
+                            </div>
+                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">*Please upload the .sql file as the Test Database. </div>
+                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">*Required | max 20 MB</div>                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-6" style="max-width: 180px;">
+                                <label for="countdown_minutes" class="form-label fw-semibold">Timer (minutes)</label>
+                                <input style="border: 1px solid #fa6767; width: 100px; background-color: #fce3e3;" type="number" class="form-control fw-semibold" id="countdown_minutes" name="countdown_minutes" value="{{ old('countdown_minutes', isset($topic) ? ($topic->countdown_seconds ?? 3600) / 60 : 60) }}" min="1" step="1">
+                                <small class="form-text text-muted">Ex : 60 minutes</small>
+                            </div>
+                        </div>
                     </div>
                     <div id="subtopics-container">
                         <div class="row mb-3 subtopic-group align-items-center" style="border-top: 1px solid #ccc">
@@ -94,7 +105,7 @@
                                         <input type="file" class="custom-file-input" name="sub_topic_file[]" accept=".pdf">
                                     </label>
                                 </div>
-                                <div class="text-danger" style="font-size: 12px">*Please upload a file with .pdf extension.</div>
+                                <div class="text-danger" style="font-size: 12px; margin-left: 0.2rem;">Please upload a file with .pdf extension.</div>
                             </div>
                         </div>
                     </div>
@@ -144,7 +155,7 @@
                                     <input type="file" class="custom-file-input" name="edit_schema_file" id="edit_schema_file" accept=".sql">
                                 </label>
                             </div>
-                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">Please upload the .sql file as the Test Database. </div>
+                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">*Please upload the .sql file as the Test Database. </div>
                             <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">*Required | max 20 MB</div>
                         </div>
                         <div class="col-md-6" style="max-width: 180px;">
