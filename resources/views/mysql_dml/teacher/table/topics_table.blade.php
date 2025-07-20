@@ -74,6 +74,11 @@
                             <small class="form-text text-muted">Ex : 60 minutes</small>
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Upload Database Schema (.sql)</label>
+                        <input type="file" class="form-control" name="schema_file" accept=".sql">
+                        <div class="text-danger" style="font-size: 12px">*Optional. File .sql untuk template database.</div>
+                    </div>
                     <div id="subtopics-container">
                         <div class="row mb-3 subtopic-group align-items-center" style="border-top: 1px solid #ccc">
                             <div class="col-md-6">
@@ -127,8 +132,23 @@
                             <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
                         </div>
+                        
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Upload Testing Database</label>
+                            <div class="custom-file-group">
+                                <input type="text" class="form-control custom-file-label" id="edit_schema_filename" placeholder="No file chosen" readonly>
+                                <label class="custom-file-btn mb-0">
+                                    Choose File
+                                    <input type="file" class="custom-file-input" name="edit_schema_file" id="edit_schema_file" accept=".sql">
+                                </label>
+                            </div>
+                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">Please upload the .sql file as the Test Database. </div>
+                            <div class="text-danger" style="font-size: 12px; margin-left: 0.1rem;">*Required | max 20 MB</div>
+                        </div>
                         <div class="col-md-6" style="max-width: 180px;">
-                            <label for="edit_countdown_minutes" class="form-label fw-bold">Timer (minutes)</label>
+                            <label for="edit_countdown_minutes" class="form-label fw-semibold">Timer</label>
                             <input style="border: 1px solid #fa6767; width: 100px; background-color: #fce3e3;" type="number" class="form-control fw-semibold" id="edit_countdown_minutes" name="countdown_minutes" min="1" step="1" style="width: 100px;" placeholder="-">
                             <small class="form-text text-muted">Ex : 60 minutes.</small>
                         </div>

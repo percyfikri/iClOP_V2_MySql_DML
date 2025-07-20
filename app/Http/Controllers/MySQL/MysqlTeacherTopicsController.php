@@ -51,12 +51,22 @@ class MysqlTeacherTopicsController extends Controller
             'sub_topic_title' => 'required|array|min:1',
             'sub_topic_title.*' => 'required|string|max:255',
             'sub_topic_file.*' => 'nullable|file|mimes:pdf|max:20480',
+            'schema_file' => 'nullable|file|mimes:sql|max:20480',
         ]);
 
         $topic = new MySqlTopics();
         $topic->title = $request->topic_title;
         $topic->countdown_seconds = $request->countdown_minutes * 60; // <-- HARUS dari request!
         $topic->created_by = auth()->id();
+
+        if ($request->hasFile('schema_file')) {
+            $file = $request->file('schema_file');
+            $schemaFileName = time() . '_' . $file->getClientOriginalName();
+            $schemaFilePath = 'mysql/schema/';
+            $file->move(public_path($schemaFilePath), $schemaFileName);
+            $topic->schema_file_name = $schemaFileName;
+            $topic->schema_file_path = $schemaFilePath;
+        }
         $topic->save();
 
         $files = [];
@@ -108,11 +118,30 @@ class MysqlTeacherTopicsController extends Controller
         $request->validate([
             'topic_title' => 'required|string|max:255',
             'countdown_minutes' => 'required|integer|min:1',
+            'edit_schema_file' => 'nullable|file|mimes:sql,txt|max:20480',
             // validasi lain jika perlu
         ]);
 
         $topic->title = $request->topic_title;
-        $topic->countdown_seconds = $request->countdown_minutes * 60; // <-- simpan dalam detik
+        $topic->countdown_seconds = $request->countdown_minutes * 60;
+
+        // Update file schema jika ada file baru
+        if ($request->hasFile('edit_schema_file')) {
+            // Hapus file lama jika ada
+            if ($topic->schema_file_name && $topic->schema_file_path) {
+                $oldFile = public_path($topic->schema_file_path . $topic->schema_file_name);
+                if (file_exists($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+            $file = $request->file('edit_schema_file');
+            $schemaFileName = time() . '_' . $file->getClientOriginalName();
+            $schemaFilePath = 'mysql/schema/';
+            $file->move(public_path($schemaFilePath), $schemaFileName);
+            $topic->schema_file_name = $schemaFileName;
+            $topic->schema_file_path = $schemaFilePath;
+        }
+
         $topic->save();
 
         // Update subtopics
@@ -185,6 +214,14 @@ class MysqlTeacherTopicsController extends Controller
     public function deleteTopic($id)
     {
         $topic = MySqlTopics::findOrFail($id);
+
+        // Hapus file .sql schema jika ada
+        if ($topic->schema_file_name && $topic->schema_file_path) {
+            $schemaPath = public_path(rtrim($topic->schema_file_path, '/\\') . DIRECTORY_SEPARATOR . $topic->schema_file_name);
+            if (file_exists($schemaPath)) {
+                @unlink($schemaPath);
+            }
+        }
 
         // Hapus file PDF pada setiap subtopic
         foreach ($topic->topicDetails as $subtopic) {

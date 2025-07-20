@@ -511,7 +511,20 @@
                 } else {
                     $('#edit_countdown_minutes').val('');
                 }
-        
+
+                // Tampilkan nama file schema jika ada
+                if (data.topic.schema_file_name) {
+                    $('#edit_schema_filename').val(data.topic.schema_file_name);
+                } else {
+                    $('#edit_schema_filename').val('No file chosen');
+                }
+                $('#edit_schema_file').val('');
+
+                // Saat user pilih file baru, update kolom nama file
+                $('#edit_schema_file').off('change').on('change', function() {
+                    $('#edit_schema_filename').val(this.files.length ? this.files[0].name : 'No file chosen');
+                });
+
                 // Render subtopics
                 let subtopicsHtml = '';
                 data.subtopics.forEach(function(sub, idx) {
@@ -548,6 +561,11 @@
                 editModal.show();
             });
         }
+
+        // Tampilkan nama file baru saat dipilih
+        $(document).on('change', '#edit_schema_file', function() {
+            $('#edit_schema_filename').val(this.files.length ? this.files[0].name : '');
+        });
         
         // Tambah subtopic baru di modal edit
         $(document).on('click', '#add-edit-subtopic-btn', function() {
@@ -701,7 +719,7 @@
     <script>
         $(document).on('click', '.delete-topic-btn', function() {
             var id = $(this).data('id');
-            if (confirm('Delete this topic beserta seluruh sub-topik?')) {
+            if (confirm('Delete this topic along with all sub-topics?')) {
                 $.ajax({
                     url: '/mysql/teacher/topics/' + id + '/delete',
                     method: 'POST',
