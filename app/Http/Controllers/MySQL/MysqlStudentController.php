@@ -287,13 +287,18 @@ class MysqlStudentController extends Controller
         $topicId = request()->input('mysqlid');
         $topic = MySqlTopics::find($topicId);
 
-        // Ambil path dari database, fallback jika tidak ada
+        // Hanya gunakan file schema dari dosen (yang sudah diupload)
         if ($topic && $topic->schema_file_name && $topic->schema_file_path) {
-            // Jika path diawali 'public/', gunakan public_path, jika tidak gunakan base_path
-            if (str_starts_with($topic->schema_file_path, 'public/')) {
-                $templatePath = public_path($topic->schema_file_path . $topic->schema_file_name);
+            // Jika path diawali 'public/' atau 'mysql/schema/', gunakan public_path
+            if (
+                str_starts_with($topic->schema_file_path, 'public/') ||
+                str_starts_with($topic->schema_file_path, 'mysql/schema/')
+            ) {
+                $relativePath = ltrim(str_replace('public/', '', $topic->schema_file_path), '/\\');
+                $templatePath = public_path($relativePath . $topic->schema_file_name);
             } else {
-                $templatePath = base_path($topic->schema_file_path . $topic->schema_file_name);
+                // Jika path tidak valid, tolak
+                throw new Exception('Invalid schema file path for this topic.');
             }
         } else {
             // Tidak ada schema, hentikan proses atau lempar error
