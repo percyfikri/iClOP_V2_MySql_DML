@@ -5,6 +5,7 @@ namespace App\Http\Controllers\MySQL;
 use App\Http\Controllers\Controller;
 use App\Models\MySQL\MySqlTopicDetails;
 use App\Models\MySQL\MySqlTopics;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,10 @@ class MysqlStudentController extends Controller
         $page = (int) $request->get('page', 1);
         $totalAnswer = $detail->total_question;
 
-        $topics = MySqlTopics::all();
+        $topics = MySqlTopics::all()->map(function ($topic) {
+            $topic->has_schema = $topic->schema_file_name && $topic->schema_file_path ? true : false;
+            return $topic;
+        });
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
         $countdownSeconds = $topicsNavbar->countdown_seconds ?? 3600;
 
@@ -280,7 +284,21 @@ class MysqlStudentController extends Controller
         $dbPass = env('DB_TESTING_PASSWORD', '');
         $dbHost = env('DB_TESTING_HOST', '127.0.0.1');
         $dbPort = env('DB_TESTING_PORT', '3306');
-        $templatePath = base_path('database/iclopTemplate.sql');
+        $topicId = request()->input('mysqlid');
+        $topic = MySqlTopics::find($topicId);
+
+        // Ambil path dari database, fallback jika tidak ada
+        if ($topic && $topic->schema_file_name && $topic->schema_file_path) {
+            // Jika path diawali 'public/', gunakan public_path, jika tidak gunakan base_path
+            if (str_starts_with($topic->schema_file_path, 'public/')) {
+                $templatePath = public_path($topic->schema_file_path . $topic->schema_file_name);
+            } else {
+                $templatePath = base_path($topic->schema_file_path . $topic->schema_file_name);
+            }
+        } else {
+            // Tidak ada schema, hentikan proses atau lempar error
+            throw new Exception('Schema database untuk topik ini belum tersedia.');
+        }
 
         // 1. Buat database jika belum ada
         DB::statement("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");

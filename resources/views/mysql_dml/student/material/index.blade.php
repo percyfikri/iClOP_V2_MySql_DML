@@ -613,6 +613,7 @@
                             ->orderBy('id', 'asc')
                             ->first();
                         $rows = $row ? $row->id : null;
+                        $disableEnroll = !$topic->has_schema;
                     @endphp
                     <div class="topic-row" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
                         <div class="topic-title fw-semibold" style="font-size: 18px; color: #34364A;">
@@ -620,14 +621,23 @@
                         </div>
                         <div>
                             <button type="button"
-                                class="custom-button-detail button-text"
+                                class="custom-button-detail button-text {{ $disableEnroll ? 'disabled' : '' }}"
                                 data-toggle="modal"
                                 data-target="#exampleModal"
-                                onclick="materialModal('{{ $topic->id }}','{{ $topic->title }}','{{ $rows }}')"
-                                style="border: none; padding: 0; cursor: pointer;">
+                                onclick="{{ $disableEnroll ? 'return false;' : "materialModal('{$topic->id}','{$topic->title}','{$rows}')" }}"
+                                style="border: none; padding: 0; cursor: {{ $disableEnroll ? 'not-allowed' : 'pointer' }};"
+                                {{ $disableEnroll ? 'disabled' : '' }}>
                                 <i class="fas fa-key" style="margin-right: 5px;"></i>
                                 Material Details
                             </button>
+                            @if($disableEnroll)
+                                <div class="text-danger mt-1 text-center" style="font-size:13px;">Testing Database isn't available</div>
+                            @endif
+                            {{-- debug apakah sudah ada file .sql untuk topik terkait --}}
+                                {{-- <div class="text-muted mt-1" style="font-size:13px;">
+                                    {{ is_string($topic->schema_file_name) ? $topic->schema_file_name : json_encode($topic->schema_file_name) }}
+                                </div> --}}
+                            {{--------------}}
                         </div>
                     </div>
                 @endforeach

@@ -15,6 +15,9 @@ class MySqlTopics extends Model
     protected $fillable = [
         'title',
         'created_by',
+        'countdown_seconds',
+        'schema_file_name',
+        'schema_file_path',
     ];
 
     // Relasi HasMany dengan TopicDetail

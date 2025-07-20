@@ -15,7 +15,11 @@ class MysqlController extends Controller
 {
     public function index()
     {
-        $topics = MySqlTopics::all();
+        $topics = MySqlTopics::all()->map(function($topic) {
+            $topic->has_schema = $topic->schema_file_name && $topic->schema_file_path ? true : false;
+            return $topic;
+        });
+
         $topicDetails = MySqlTopicDetails::all();
         $topicsCount = count($topics);
 
