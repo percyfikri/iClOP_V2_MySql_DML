@@ -38,7 +38,7 @@ class MysqlTeacherTopicsController extends Controller
         $data1 = \App\Models\MySQL\MySqlTopics::with(['topicDetails', 'createdBy'])->get();
         // Jika ingin menampilkan file_name/folder_path di subtopic, gunakan eager loading relasi questions
         // $data1 = MySqlTopics::with(['topicDetails.questions'])->get();
-        return view('mysql_dml.teacher.topics_table', compact('data1'));
+        return view('mysql_dml.teacher.table.topics_table', compact('data1'));
     }
 
     public function addTopicSubtopic(Request $request)

@@ -27,7 +27,7 @@
     </div>
     <div class="card shadow-sm p-4 mb-4" style="border-radius: 18px;">
         <div id="questions-table-container">
-            @include('mysql_dml.teacher.questions_table')
+            @include('mysql_dml.teacher.table.questions_table')
         </div>
     </div>
 </div>
