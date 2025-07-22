@@ -80,7 +80,7 @@
                         <div class="col-md-6 mt-2">
                             <label class="form-label fw-semibold" for="isSequentialSwitch">Sequential Mode</label>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="isSequentialSwitch" name="is_sequential" value="1">
+                                <input class="form-check-input" type="checkbox" id="isSequentialSwitch" name="is_sequential" value="1" checked>
                                 <label class="form-check-label" for="isSequentialSwitch">
                                     Students must answer questions sequentially
                                 </label>
@@ -163,7 +163,7 @@
                         <div class="col-md-6 mt-2">
                             <label class="form-label fw-semibold" for="edit_isSequentialSwitch">Sequential Mode</label>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="edit_isSequentialSwitch" name="is_sequential" value="1">
+                                <input class="form-check-input" type="checkbox" id="edit_isSequentialSwitch" name="is_sequential" value="1" checked>
                                 <label class="form-check-label" for="edit_isSequentialSwitch">
                                     Students must answer questions sequentially
                                 </label>
