@@ -914,13 +914,6 @@
             <!-- CONTENT -->
             <div class="col content px-4" id="main-table-content" style="margin-left: 240px;">
                 {{-- Tabel topik akan dimuat di sini via AJAX --}}
-                <div class="form-check form-switch mb-3">
-                    <input class="form-check-input" type="checkbox" id="isSequentialSwitch" name="is_sequential" value="1"
-                        {{ old('is_sequential', $topic->is_sequential ?? 0) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="isSequentialSwitch">
-                        Wajib Kerjakan Soal Secara Berurutan
-                    </label>
-                </div>
             </div>
         </div>
     </div>
