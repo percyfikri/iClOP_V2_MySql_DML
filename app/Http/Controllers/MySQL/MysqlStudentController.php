@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PhpMyAdmin\SqlParser\Parser;
+use PhpMyAdmin\SqlParser\Statements\DeleteStatement;
+use PhpMyAdmin\SqlParser\Statements\InsertStatement;
+use PhpMyAdmin\SqlParser\Statements\UpdateStatement;
 
 class MysqlStudentController extends Controller
 {
@@ -433,92 +437,98 @@ class MysqlStudentController extends Controller
                 ->first();
 
             if ($expected) {
-                try {
-                    // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
-                    DB::connection('mysql_testing')->beginTransaction();
+                // --- Tambahan validasi struktur query ---
+                if (!$this->isQueryStructureEquivalent($userInput, $expected->expected_query)) {
+                    $status = 'false';
+                    $validationError = 'Struktur query Anda tidak sesuai dengan kunci jawaban.';
+                } else {
                     try {
-                        DB::connection('mysql_testing')->statement($userInput);
-                        $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
-                        DB::connection('mysql_testing')->rollBack();
-                        $validationError = null;
-                    } catch (\Exception $e) {
-                        DB::connection('mysql_testing')->rollBack();
-                        $status = 'false';
-                        $validationError = $e->getMessage(); // Simpan pesan error MySQL di sini!
-                    }
-
-                    // Jika terjadi error pada eksekusi query user, langsung simpan feedback dan return
-                    if ($status === 'false') {
-                        // Simpan feedback ke mysql_feedbacks
-                        $shortFeedback = $this->getShortFeedback($testResult);
-                        $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
-                            'query_id' => $queryId,
-                            'feedback' => $shortFeedback,
-                            'validation_error' => $validationError,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                        // Simpan ke mysql_student_submissions
-                        DB::table('mysql_student_submissions')->insert([
-                            'user_id' => $userId,
-                            'enroll_id' => $enrollId,
-                            'topic_detail_id' => $topicDetailId,
-                            'query_id' => $queryId,
-                            'feedback_id' => $feedbackId,
-                            'status' => $status,
-                            'answer_number' => $answerNumber,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                        return redirect()->route('showTopicDetail', [
-                            'mysqlid' => $request->input('mysqlid'),
-                            'start' => $request->input('start'),
-                            'page' => $request->input('answer_number', 1)
-                        ])->with('answer_status', $shortFeedback);
-                    }
-
-                    // --- 2. Jalankan query expected dalam transaksi, ambil hasil, rollback ---
-                    DB::connection('mysql_testing')->beginTransaction();
-                    DB::connection('mysql_testing')->statement($expected->expected_query);
-                    $expectedResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
-                    DB::connection('mysql_testing')->rollBack();
-
-                    // --- 3. Normalisasi hasil ---
-                    function normalizeResult($result)
-                    {
-                        $arr = array_map(function ($row) {
-                            return (array) $row;
-                        }, $result);
-                        usort($arr, function ($a, $b) {
-                            return strcmp($a['kode_mk'], $b['kode_mk']);
-                        });
-                        return $arr;
-                    }
-                    $studentResultNorm = normalizeResult($studentResult);
-                    $expectedResultNorm = normalizeResult($expectedResult);
-
-                    // --- 4. Bandingkan hasil ---
-                    if ($studentResultNorm == $expectedResultNorm) {
-                        // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
+                        // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
                         DB::connection('mysql_testing')->beginTransaction();
                         try {
                             DB::connection('mysql_testing')->statement($userInput);
-                            DB::connection('mysql_testing')->commit();
-                            $status = 'true';
+                            $studentResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
+                            DB::connection('mysql_testing')->rollBack();
                             $validationError = null;
                         } catch (\Exception $e) {
                             DB::connection('mysql_testing')->rollBack();
                             $status = 'false';
-                            $validationError = $e->getMessage(); // Simpan pesan error MySQL
+                            $validationError = $e->getMessage(); // Simpan pesan error MySQL di sini!
                         }
-                    } else {
+
+                        // Jika terjadi error pada eksekusi query user, langsung simpan feedback dan return
+                        if ($status === 'false') {
+                            // Simpan feedback ke mysql_feedbacks
+                            $shortFeedback = $this->getShortFeedback($testResult);
+                            $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
+                                'query_id' => $queryId,
+                                'feedback' => $shortFeedback,
+                                'validation_error' => $validationError,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                            // Simpan ke mysql_student_submissions
+                            DB::table('mysql_student_submissions')->insert([
+                                'user_id' => $userId,
+                                'enroll_id' => $enrollId,
+                                'topic_detail_id' => $topicDetailId,
+                                'query_id' => $queryId,
+                                'feedback_id' => $feedbackId,
+                                'status' => $status,
+                                'answer_number' => $answerNumber,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                            return redirect()->route('showTopicDetail', [
+                                'mysqlid' => $request->input('mysqlid'),
+                                'start' => $request->input('start'),
+                                'page' => $request->input('answer_number', 1)
+                            ])->with('answer_status', $shortFeedback);
+                        }
+
+                        // --- 2. Jalankan query expected dalam transaksi, ambil hasil, rollback ---
+                        DB::connection('mysql_testing')->beginTransaction();
+                        DB::connection('mysql_testing')->statement($expected->expected_query);
+                        $expectedResult = DB::connection('mysql_testing')->select("SELECT * FROM {$expected->expected_table}");
+                        DB::connection('mysql_testing')->rollBack();
+
+                        // --- 3. Normalisasi hasil ---
+                        function normalizeResult($result)
+                        {
+                            $arr = array_map(function ($row) {
+                                return (array) $row;
+                            }, $result);
+                            usort($arr, function ($a, $b) {
+                                return strcmp($a['kode_mk'], $b['kode_mk']);
+                            });
+                            return $arr;
+                        }
+                        $studentResultNorm = normalizeResult($studentResult);
+                        $expectedResultNorm = normalizeResult($expectedResult);
+
+                        // --- 4. Bandingkan hasil ---
+                        if ($studentResultNorm == $expectedResultNorm) {
+                            // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
+                            DB::connection('mysql_testing')->beginTransaction();
+                            try {
+                                DB::connection('mysql_testing')->statement($userInput);
+                                DB::connection('mysql_testing')->commit();
+                                $status = 'true';
+                                $validationError = null;
+                            } catch (\Exception $e) {
+                                DB::connection('mysql_testing')->rollBack();
+                                $status = 'false';
+                                $validationError = $e->getMessage(); // Simpan pesan error MySQL
+                            }
+                        } else {
+                            $status = 'false';
+                            $validationError = null;
+                        }
+                    } catch (\Exception $e) {
+                        DB::connection('mysql_testing')->rollBack();
                         $status = 'false';
-                        $validationError = null;
+                        $validationError = $e->getMessage(); // Simpan pesan error MySQL
                     }
-                } catch (\Exception $e) {
-                    DB::connection('mysql_testing')->rollBack();
-                    $status = 'false';
-                    $validationError = $e->getMessage(); // Simpan pesan error MySQL
                 }
             }
         }
@@ -873,5 +883,70 @@ class MysqlStudentController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Database testing berhasil dihapus!']);
+    }
+
+    private function isQueryStructureEquivalent($userQuery, $expectedQuery)
+    {
+        try {
+            $userParser = new Parser($userQuery);
+            $expectedParser = new Parser($expectedQuery);
+
+            $userStmt = $userParser->statements[0];
+            $expectedStmt = $expectedParser->statements[0];
+
+            // Contoh: Untuk DELETE, cek tabel dan ada/tidaknya WHERE
+            if ($userStmt instanceof DeleteStatement && $expectedStmt instanceof DeleteStatement) {
+                // Cek nama tabel
+                if ($userStmt->from[0]->table !== $expectedStmt->from[0]->table) {
+                    return false;
+                }
+                // Cek ada/tidaknya WHERE
+                $userHasWhere = !empty($userStmt->where);
+                $expectedHasWhere = !empty($expectedStmt->where);
+                if ($userHasWhere !== $expectedHasWhere) {
+                    return false;
+                }
+                // Bisa tambahkan cek isi WHERE jika ingin lebih ketat
+                // return true jika sudah cukup
+                return true;
+            }
+
+            // Contoh: Untuk INSERT, cek tabel dan kolom
+            if ($userStmt instanceof InsertStatement && $expectedStmt instanceof InsertStatement) {
+                if ($userStmt->into->table !== $expectedStmt->into->table) {
+                    return false;
+                }
+                // Cek kolom (urutan boleh berbeda)
+                $userCols = array_map('strtolower', $userStmt->columns);
+                $expectedCols = array_map('strtolower', $expectedStmt->columns);
+                sort($userCols);
+                sort($expectedCols);
+                if ($userCols !== $expectedCols) {
+                    return false;
+                }
+                return true;
+            }
+
+            // Contoh: Untuk UPDATE, cek tabel dan ada/tidaknya WHERE
+            if ($userStmt instanceof UpdateStatement && $expectedStmt instanceof UpdateStatement) {
+                if ($userStmt->table->table !== $expectedStmt->table->table) {
+                    return false;
+                }
+                $userHasWhere = !empty($userStmt->where);
+                $expectedHasWhere = !empty($expectedStmt->where);
+                if ($userHasWhere !== $expectedHasWhere) {
+                    return false;
+                }
+                return true;
+            }
+
+            // Untuk jenis query lain, bisa tambahkan sesuai kebutuhan
+
+            // Default: fallback ke false
+            return false;
+        } catch (\Exception $e) {
+            // Jika parsing gagal, anggap tidak sama
+            return false;
+        }
     }
 }
