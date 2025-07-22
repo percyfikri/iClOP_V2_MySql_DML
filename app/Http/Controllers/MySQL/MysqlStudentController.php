@@ -493,18 +493,11 @@ class MysqlStudentController extends Controller
                         DB::connection('mysql_testing')->rollBack();
 
                         // --- 3. Normalisasi hasil ---
-                        function normalizeResult($result)
-                        {
-                            $arr = array_map(function ($row) {
-                                return (array) $row;
-                            }, $result);
-                            usort($arr, function ($a, $b) {
-                                return strcmp($a['kode_mk'], $b['kode_mk']);
-                            });
-                            return $arr;
-                        }
-                        $studentResultNorm = normalizeResult($studentResult);
-                        $expectedResultNorm = normalizeResult($expectedResult);
+                        $studentResultNorm = $this->normalizeResult($studentResult);
+                        $expectedResultNorm = $this->normalizeResult($expectedResult);
+
+                        Log::info('DEBUG: studentResultNorm: ' . json_encode($studentResultNorm));
+                        Log::info('DEBUG: expectedResultNorm: ' . json_encode($expectedResultNorm));
 
                         // --- 4. Bandingkan hasil ---
                         if ($studentResultNorm == $expectedResultNorm) {
@@ -913,12 +906,36 @@ class MysqlStudentController extends Controller
 
             // Contoh: Untuk INSERT, cek tabel dan kolom
             if ($userStmt instanceof InsertStatement && $expectedStmt instanceof InsertStatement) {
-                if ($userStmt->into->table !== $expectedStmt->into->table) {
+                $userTable = (isset($userStmt->into->dest) && isset($userStmt->into->dest->table))
+                    ? $userStmt->into->dest->table
+                    : null;
+                $expectedTable = (isset($expectedStmt->into->dest) && isset($expectedStmt->into->dest->table))
+                    ? $expectedStmt->into->dest->table
+                    : null;
+
+                if ($userTable === null || $expectedTable === null) {
                     return false;
                 }
+                if ($userTable !== $expectedTable) {
+                    return false;
+                }
+
                 // Cek kolom (urutan boleh berbeda)
                 $userCols = array_map('strtolower', $userStmt->columns);
                 $expectedCols = array_map('strtolower', $expectedStmt->columns);
+
+                // Fallback jika parser gagal ambil kolom
+                if (empty($userCols)) {
+                    if (preg_match('/insert\s+into\s+\w+\s*\(([^)]+)\)/i', $userQuery, $matches)) {
+                        $userCols = array_map('trim', explode(',', strtolower($matches[1])));
+                    }
+                }
+                if (empty($expectedCols)) {
+                    if (preg_match('/insert\s+into\s+\w+\s*\(([^)]+)\)/i', $expectedQuery, $matches)) {
+                        $expectedCols = array_map('trim', explode(',', strtolower($matches[1])));
+                    }
+                }
+
                 sort($userCols);
                 sort($expectedCols);
                 if ($userCols !== $expectedCols) {
@@ -929,7 +946,7 @@ class MysqlStudentController extends Controller
 
             // Contoh: Untuk UPDATE, cek tabel dan ada/tidaknya WHERE
             if ($userStmt instanceof UpdateStatement && $expectedStmt instanceof UpdateStatement) {
-                if ($userStmt->table->table !== $expectedStmt->table->table) {
+                if ($userStmt->tables[0]->table !== $expectedStmt->tables[0]->table) {
                     return false;
                 }
                 $userHasWhere = !empty($userStmt->where);
@@ -948,5 +965,18 @@ class MysqlStudentController extends Controller
             // Jika parsing gagal, anggap tidak sama
             return false;
         }
+    }
+
+    private function normalizeResult($result)
+    {
+        $arr = array_map(function ($row) {
+            $rowArr = (array) $row;
+            ksort($rowArr); // sort semua kolom
+            return $rowArr;
+        }, $result);
+        usort($arr, function ($a, $b) {
+            return strcmp(json_encode($a), json_encode($b));
+        });
+        return $arr;
     }
 }
