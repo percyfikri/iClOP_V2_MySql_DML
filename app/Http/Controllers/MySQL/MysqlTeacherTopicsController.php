@@ -16,18 +16,14 @@ class MysqlTeacherTopicsController extends Controller
     {
         $data = DB::table('mysql_topics as t')
             ->join('mysql_topic_details as td', 'td.topic_id', '=', 't.id')
-            ->join('mysql_questions as q', 'q.topic_detail_id', '=', 'td.id')
             ->select(
                 't.title as topic_title',
                 'td.title as sub_topic_title',
                 'td.file_name as module',      // ambil dari topic_details
                 'td.file_path',                // ambil dari topic_details
-                'q.question',
-                'q.answer_key'
             )
             ->orderBy('t.id', 'asc')
             ->orderBy('td.id', 'asc')
-            ->orderBy('q.id', 'asc')
             ->get();
 
         return view('mysql_dml.teacher.index', compact('data'));
@@ -58,6 +54,7 @@ class MysqlTeacherTopicsController extends Controller
         $topic->title = $request->topic_title;
         $topic->countdown_seconds = $request->countdown_minutes * 60;
         $topic->created_by = $userId;
+        $topic->is_sequential = $request->has('is_sequential') ? 1 : 0;
 
         // Upload file schema
         if ($request->hasFile('schema_file')) {
@@ -126,6 +123,7 @@ class MysqlTeacherTopicsController extends Controller
 
         $topic->title = $request->topic_title;
         $topic->countdown_seconds = $request->countdown_minutes * 60;
+        $topic->is_sequential = $request->has('is_sequential') ? 1 : 0;
 
         // Update file schema jika ada file baru
         if ($request->hasFile('edit_schema_file')) {

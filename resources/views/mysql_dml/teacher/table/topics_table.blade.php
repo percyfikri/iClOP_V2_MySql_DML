@@ -16,6 +16,7 @@
                     <th style="width: 45px;">No</th>
                     <th>Topic</th>
                     <th>Sub-Topics</th>
+                    <th>Sequential</th>
                     <th>Created By</th>
                     <th>Actions</th>
                 </tr>
@@ -34,6 +35,14 @@
                                 </ul>
                             @else
                                 <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            {{-- Show badge according to sequential status --}}
+                            @if($data->is_sequential)
+                                <span class="badge bg-primary">Sequential</span>
+                            @else
+                                <span class="badge bg-secondary">Non-Sequential</span>
                             @endif
                         </td>
                         <td class="text-center">{{ $data->createdBy->name ?? '-' }}</td>
@@ -68,7 +77,15 @@
                             <label for="topicTitle" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="topicTitle" name="topic_title" autocomplete="off" required>
                         </div>
-                        
+                        <div class="col-md-6 mt-2">
+                            <label class="form-label fw-semibold" for="isSequentialSwitch">Sequential Mode</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="isSequentialSwitch" name="is_sequential" value="1">
+                                <label class="form-check-label" for="isSequentialSwitch">
+                                    Students must answer questions sequentially
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3 row">
                         <div class="col-md-6">
@@ -143,7 +160,15 @@
                             <label for="edit_topic_title" class="form-label fw-bold">Topic</label>
                             <input type="text" class="form-control" id="edit_topic_title" name="topic_title" required>
                         </div>
-                        
+                        <div class="col-md-6 mt-2">
+                            <label class="form-label fw-semibold" for="edit_isSequentialSwitch">Sequential Mode</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="edit_isSequentialSwitch" name="is_sequential" value="1">
+                                <label class="form-check-label" for="edit_isSequentialSwitch">
+                                    Students must answer questions sequentially
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3 row">
                         <div class="col-md-6">

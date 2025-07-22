@@ -18,6 +18,7 @@ class MySqlTopics extends Model
         'countdown_seconds',
         'schema_file_name',
         'schema_file_path',
+        'is_sequential',
     ];
 
     // Relasi HasMany dengan TopicDetail
