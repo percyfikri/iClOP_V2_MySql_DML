@@ -31,6 +31,23 @@ class MysqlStudentController extends Controller
         });
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
         $countdownSeconds = $topicsNavbar->countdown_seconds ?? 3600;
+        $isSequential = $topicsNavbar->is_sequential ?? 0;
+
+        // Ambil semua subtopik pada topik ini, urutkan
+        $subtopics = MySqlTopicDetails::where('topic_id', $mysqlid)->orderBy('id')->get();
+        $globalQuestions = [];
+        foreach ($subtopics as $subtopic) {
+            for ($i = 1; $i <= $subtopic->total_question; $i++) {
+                $globalQuestions[] = [
+                    'topic_detail_id' => $subtopic->id,
+                    'answer_number' => $i,
+                ];
+            }
+        }
+        // Cari index soal saat ini di urutan global
+        $currentIndex = collect($globalQuestions)->search(function ($q) use ($detail, $page) {
+            return $q['topic_detail_id'] == $detail->id && $q['answer_number'] == $page;
+        });
 
         // 1. Ambil sesi enroll aktif
         $topicTime = DB::table('mysql_student_topic_times')
@@ -115,6 +132,20 @@ class MysqlStudentController extends Controller
             ->first();
         $enrollId = $enroll ? $enroll->id : null;
 
+        // --- Pindahkan logika ini ke sini ---
+        $canAnswer = true;
+        if ($isSequential && $currentIndex > 0) {
+            $prevQ = $globalQuestions[$currentIndex - 1];
+            $prevSubmission = DB::table('mysql_student_submissions')
+                ->where('user_id', $userId)
+                ->where('topic_detail_id', $prevQ['topic_detail_id'])
+                ->where('answer_number', $prevQ['answer_number'])
+                ->where('enroll_id', $enrollId)
+                ->where('status', 'true')
+                ->first();
+            $canAnswer = $prevSubmission ? true : false;
+        }
+
         // 5. Ambil progress dan jawaban dari enrollId terbaru
         $progressPercent = $this->getStudentProgressByEnroll($userId, $mysqlid, $enrollId);
 
@@ -175,7 +206,8 @@ class MysqlStudentController extends Controller
                 'progressPercent',
                 'totalAnswer',
                 'page',
-                'enrollId'
+                'enrollId',
+                'canAnswer'
             ));
         }
 
@@ -202,6 +234,8 @@ class MysqlStudentController extends Controller
             'countdownSeconds' => $sisaDetik,
             'isFinished' => $isFinished,
             'enrollId' => $enrollId,
+            'isSequential' => $isSequential,
+            'canAnswer' => $canAnswer,
         ]);
     }
 
