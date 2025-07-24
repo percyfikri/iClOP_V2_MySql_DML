@@ -601,14 +601,68 @@ class MysqlStudentController extends Controller
             if (!($answerNumber == 6 && isset($expected) && stripos($expected->expected_query, 'CREATE TABLE') !== false)) {
                 $status = 'false';
             } else {
-                // Jika memang soal DDL, cek apakah tabel berhasil dibuat
                 $expectedTable = $expected->expected_table ?? null;
                 if ($expectedTable) {
-                    $tables = DB::connection('mysql_testing')->select("SHOW TABLES LIKE '$expectedTable'");
-                    if (!empty($tables)) {
+                    $userTableNorm = [];
+                    $expectedTableNorm = [];
+                    // 1. Hapus tabel sebelum validasi
+                    try {
+                        DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS $expectedTable");
+                    } catch (\Exception $e) {
+                    }
+
+                    // 2. Jalankan query user (CREATE TABLE)
+                    try {
+                        DB::connection('mysql_testing')->statement($userInput);
+                        $userTable = DB::connection('mysql_testing')->select("DESCRIBE $expectedTable");
+                        // 3. Hapus tabel hasil user
+                        DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS $expectedTable");
+                    } catch (\Exception $e) {
+                        $status = 'false';
+                        $validationError = $e->getMessage();
+                        // Pastikan tabel dihapus jika error
+                        try {
+                            DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS $expectedTable");
+                        } catch (\Exception $ex) {
+                        }
+                    }
+
+                    // 4. Jalankan query expected (CREATE TABLE kunci jawaban)
+                    try {
+                        DB::connection('mysql_testing')->statement($expected->expected_query);
+                        $expectedTableStruct = DB::connection('mysql_testing')->select("DESCRIBE $expectedTable");
+                        // 5. Hapus tabel hasil expected
+                        DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS $expectedTable");
+                    } catch (\Exception $e) {
+                        // Handle jika kunci jawaban error
+                    }
+
+                    // 6. Normalisasi struktur
+                    $normalizeTable = function ($table) {
+                        return array_map(function ($col) {
+                            return [
+                                'Field' => strtolower($col->Field),
+                                'Type' => strtolower($col->Type)
+                            ];
+                        }, $table);
+                    };
+                    $userTableNorm = $normalizeTable($userTable ?? []);
+                    $expectedTableNorm = $normalizeTable($expectedTableStruct ?? []);
+
+                    // 7. Bandingkan struktur
+                    if ($userTableNorm === $expectedTableNorm) {
                         $status = 'true';
+                        $validationError = null;
+                        // 8. Jika benar, create ulang tabel user
+                        try {
+                            DB::connection('mysql_testing')->statement($userInput);
+                        } catch (\Exception $e) {
+                            $status = 'false';
+                            $validationError = $e->getMessage();
+                        }
                     } else {
                         $status = 'false';
+                        $validationError = 'Struktur tabel tidak sesuai instruksi soal!';
                     }
                 }
             }
