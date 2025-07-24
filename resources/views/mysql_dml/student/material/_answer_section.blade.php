@@ -107,98 +107,87 @@
                     @endif
                 </div>
 
-                <div style="border: 1px solid #ccc; padding: 20px 10px 20px 30px; border-radius: 10px;">
-                    {{-- Query Data Section --}}
-                    <form id="run-query-form" method="POST" action="{{ route('runUserSelectQuery') }}">
-                        @csrf
-                        <input type="hidden" name="mysqlid" value="{{ $mysqlid }}">
-                        <label for="userSelectQuery" class="mb-2 fw-semibold">Try Query Data (SELECT only):</label>
-                        <div class="d-flex align-items-start mb-2">
-                            <textarea name="userSelectQuery" id="userSelectQuery" class="form-control me-3" rows="4" placeholder="e.g. SELECT * FROM mk" style="resize: vertical;"></textarea>
-                            <button type="submit" class="btn btn-success fw-semibold" style="height: 40px; white-space: nowrap;" @if($isReset) disabled @endif>Run Query</button>
+                @if($isSequential)
+                    <div style="border: 1px solid #ccc; padding: 20px 10px 20px 30px; border-radius: 10px;">
+                        {{-- Query Data Section --}}
+                        <form id="run-query-form" method="POST" action="{{ route('runUserSelectQuery') }}">
+                            @csrf
+                            <input type="hidden" name="mysqlid" value="{{ $mysqlid }}">
+                            <label for="userSelectQuery" class="mb-2 fw-semibold">Try Query Data (SELECT only):</label>
+                            <div class="d-flex align-items-start mb-2">
+                                <textarea name="userSelectQuery" id="userSelectQuery" class="form-control me-3" rows="4" placeholder="e.g. SELECT * FROM mk" style="resize: vertical;"></textarea>
+                                <button type="submit" class="btn btn-success fw-semibold" style="height: 40px; white-space: nowrap;" @if($isReset) disabled @endif>Run Query</button>
+                            </div>
+                        </form>
+                        <div id="query-result" class="mt-3">
+                            @if(session('query_result'))
+                                {!! session('query_result') !!}
+                            @endif
                         </div>
-                    </form>
-                    <div id="query-result" class="mt-3">
-                        @if(session('query_result'))
-                            {!! session('query_result') !!}
-                        @endif
                     </div>
+                @endif
 
-                    {{-- Pagination --}}
-                    <div class="d-flex justify-content-between mt-5">
-                        <button type="button"
-                            class="btn btn-outline-secondary answer-pagination"
-                            data-page="{{ $page - 1 }}"
-                            {{ $page == 1 ? 'disabled' : '' }}>
-                            Previous
-                        </button>
-                        <span class="fw-semibold">Answer {{ $page }} of {{ $totalAnswer }}</span>
-                        @if($page == $totalAnswer)
-                            @php
-                                // Cari subtopik berikutnya
-                                $nextDetail = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
-                                    ->where('id', '>', $detail->id)
-                                    ->orderBy('id')
-                                    ->first();
-                                // Cek semua jawaban benar
-                                $allCorrect = \DB::table('mysql_student_submissions')
-                                    ->where('user_id', Auth::user()->id)
-                                    ->where('topic_detail_id', $detail->id)
-                                    ->where('status', 'true')
-                                    ->count() >= $detail->total_question;
-                            @endphp
-                            @if($nextDetail)
-                                {{-- @if($allCorrect)
-                                    <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
-                                       id="import-next-btn"
-                                       class="btn btn-primary fw-semibold">
-                                        Next Sub-Topics &rarr;
-                                    </a>
-                                @else
-                                    <button class="btn btn-primary fw-semibold" disabled>
-                                        Next Sub-Topics &rarr;
-                                    </button>
-                                @endif --}}
-                                <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
-                                    id="import-next-btn"
-                                    class="btn btn-primary fw-semibold">
-                                     Next Sub-Topics &rarr;
-                                 </a>
-                            @else
-                                @if($page == $totalAnswer && !$nextDetail)
-                                    @if($allSubtopicsCompleted)
-                                        @if($isReset)
-                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
-                                                Submit All Answer
-                                            </button>
-                                        @else
-                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
-                                                Submit All Answer
-                                            </button>
-                                        @endif
+                {{-- Pagination Section (selalu tampil, di luar blok SELECT) --}}
+                <div class="d-flex justify-content-between mt-5">
+                    <button type="button"
+                        class="btn btn-outline-secondary answer-pagination"
+                        data-page="{{ $page - 1 }}"
+                        {{ $page == 1 ? 'disabled' : '' }}>
+                        Previous
+                    </button>
+                    <span class="fw-semibold">Answer {{ $page }} of {{ $totalAnswer }}</span>
+                    @if($page == $totalAnswer)
+                        @php
+                            // Cari subtopik berikutnya
+                            $nextDetail = \App\Models\MySQL\MySqlTopicDetails::where('topic_id', $mysqlid)
+                                ->where('id', '>', $detail->id)
+                                ->orderBy('id')
+                                ->first();
+                            // Cek semua jawaban benar
+                            $allCorrect = \DB::table('mysql_student_submissions')
+                                ->where('user_id', Auth::user()->id)
+                                ->where('topic_detail_id', $detail->id)
+                                ->where('status', 'true')
+                                ->count() >= $detail->total_question;
+                        @endphp
+                        @if($nextDetail)
+                            <a href="{{ route('showTopicDetail', ['mysqlid' => $mysqlid, 'start' => $nextDetail->id]) }}"
+                                id="import-next-btn"
+                                class="btn btn-primary fw-semibold">
+                                Next Sub-Topics &rarr;
+                            </a>
+                        @else
+                            @if($page == $totalAnswer && !$nextDetail)
+                                @if($allSubtopicsCompleted)
+                                    @if($isReset)
+                                        <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
+                                            Submit All Answer
+                                        </button>
                                     @else
-                                        @if($isReset)
-                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
-                                                Submit All Answer
-                                            </button>
-                                        @else
-                                            <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
-                                                Submit All Answer
-                                            </button>
-                                        @endif
+                                        <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
+                                            Submit All Answer
+                                        </button>
+                                    @endif
+                                @else
+                                    @if($isReset)
+                                        <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" disabled>
+                                            Submit All Answer
+                                        </button>
+                                    @else
+                                        <button id="reset-testing-db-btn" class="btn btn-primary fw-semibold" data-mysqlid="{{ $mysqlid }}">
+                                            Submit All Answer
+                                        </button>
                                     @endif
                                 @endif
                             @endif
-                        @else
-                            <button type="button"
-                                class="btn btn-outline-secondary answer-pagination"
-                                data-page="{{ $page + 1 }}">
-                                Next
-                            </button>
                         @endif
-                    </div>
-                    
-                    {{-- Next Sub-Topics Button --}}
+                    @else
+                        <button type="button"
+                            class="btn btn-outline-secondary answer-pagination"
+                            data-page="{{ $page + 1 }}">
+                            Next
+                        </button>
+                    @endif
                 </div>
             </div>
         {{-- </div> --}}

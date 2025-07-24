@@ -31,7 +31,8 @@ class MysqlStudentController extends Controller
         });
         $topicsNavbar = MySqlTopics::findOrFail($mysqlid);
         $countdownSeconds = $topicsNavbar->countdown_seconds ?? 3600;
-        $isSequential = $topicsNavbar->is_sequential ?? 0;
+        $topic = MySqlTopics::find($request->input('mysqlid'));
+        $isSequential = $topic && $topic->is_sequential ? true : false;
 
         // Ambil semua subtopik pada topik ini, urutkan
         $subtopics = MySqlTopicDetails::where('topic_id', $mysqlid)->orderBy('id')->get();
@@ -207,7 +208,8 @@ class MysqlStudentController extends Controller
                 'totalAnswer',
                 'page',
                 'enrollId',
-                'canAnswer'
+                'canAnswer',
+                'isSequential'
             ));
         }
 
@@ -368,6 +370,10 @@ class MysqlStudentController extends Controller
         $topicDetailId = $request->input('topic_detail_id');
         $userId = Auth::user()->id;
         $answerNumber = $request->input('answer_number', 1);
+
+        // Tambahkan ini:
+        $topic = MySqlTopics::find($request->input('mysqlid'));
+        $isSequential = $topic && $topic->is_sequential ? true : false;
 
         // Panggil setup database user sebelum transaksi
         $this->setupStudentTestingDatabase($userId);
@@ -531,13 +537,43 @@ class MysqlStudentController extends Controller
                     $studentResultNorm = normalizeResult($studentResult);
                     $expectedResultNorm = normalizeResult($expectedResult);
 
+                    // --- Tambahan validasi logika query (misal: wajib WHERE pada soal DML) ---
+                    $expectedQuery = strtolower($expected->expected_query ?? '');
+                    $userQuery = strtolower($userInput);
+
+                    // Jika expected query mengandung 'delete' atau 'update' dan ada 'where', user juga harus pakai WHERE
+                    if (
+                        (strpos($expectedQuery, 'delete') !== false || strpos($expectedQuery, 'update') !== false)
+                        && strpos($expectedQuery, 'where') !== false
+                    ) {
+                        if (strpos($userQuery, 'where') === false) {
+                            $status = 'false';
+                            $validationError = 'Query Anda harus menggunakan WHERE sesuai instruksi soal!';
+                        }
+                    }
+
+                    // Jika expected query adalah DELETE tanpa WHERE, user juga tidak boleh pakai WHERE
+                    if (
+                        strpos($expectedQuery, 'delete') !== false &&
+                        strpos($expectedQuery, 'where') === false
+                    ) {
+                        if (strpos($userQuery, 'where') !== false) {
+                            $status = 'false';
+                            $validationError = 'Query Anda tidak boleh menggunakan WHERE sesuai instruksi soal!';
+                        }
+                    }
+
                     // --- 4. Bandingkan hasil ---
-                    if ($studentResultNorm == $expectedResultNorm) {
-                        // --- 5. Jalankan query user sekali lagi (commit) agar data benar-benar masuk ---
+                    if ($status === 'true' && $studentResultNorm == $expectedResultNorm) {
+                        // --- 5. Jalankan query user sekali lagi (commit/rollback sesuai sequential) ---
                         DB::connection('mysql_testing')->beginTransaction();
                         try {
                             DB::connection('mysql_testing')->statement($userInput);
-                            DB::connection('mysql_testing')->commit();
+                            if ($isSequential) {
+                                DB::connection('mysql_testing')->commit(); // Sequential: commit perubahan
+                            } else {
+                                DB::connection('mysql_testing')->rollBack(); // Non-sequential: rollback, jangan commit
+                            }
                             $status = 'true';
                             $validationError = null;
                         } catch (\Exception $e) {
@@ -545,9 +581,9 @@ class MysqlStudentController extends Controller
                             $status = 'false';
                             $validationError = $e->getMessage(); // Simpan pesan error MySQL
                         }
-                    } else {
+                    } else if ($status === 'true') {
                         $status = 'false';
-                        $validationError = null;
+                        $validationError = 'Hasil query Anda tidak sesuai dengan kunci jawaban.';
                     }
                 } catch (\Exception $e) {
                     DB::connection('mysql_testing')->rollBack();
