@@ -81,8 +81,8 @@
                                 <div class="fw-semibold" style="color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
                             @endif
                             @if($feedback && $feedback->validation_error)
-                                <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem; white-space: pre-line; line-height: 1.4;">
-                                    {{ $feedback->validation_error }}
+                                <div class="fw-semibold" style="color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem;">
+                                    {!! $feedback->validation_error !!}
                                 </div>
                             @endif
                         </div>
