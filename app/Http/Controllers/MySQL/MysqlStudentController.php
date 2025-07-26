@@ -692,7 +692,7 @@ class MysqlStudentController extends Controller
                         }
                     } else if ($status === 'true') {
                         $status = 'false';
-                        $validationError = 'Your query result does not match. Please check again!';
+                        $validationError = 'Your query does not match. Please check again!';
                     }
                 } catch (\Exception $e) {
                     DB::connection('mysql_testing')->rollBack();
@@ -1043,7 +1043,7 @@ class MysqlStudentController extends Controller
 
     private function addDefaultErrorMessage($validationError)
     {
-        $defaultMessage = "Your query result does not match. Please check again!";
+        $defaultMessage = "Your query does not match. Please check again!";
 
         // Jika pesan error kosong, return pesan default saja
         if (empty($validationError)) {
@@ -1056,6 +1056,6 @@ class MysqlStudentController extends Controller
         }
 
         // Tambahkan pesan default di bawah pesan error yang ada dengan 1 baris kosong
-        return $validationError . "<br><br>" . $defaultMessage;
+        return $validationError . "<br>" . $defaultMessage;
     }
 }
