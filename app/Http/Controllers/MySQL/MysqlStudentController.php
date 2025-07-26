@@ -498,7 +498,7 @@ class MysqlStudentController extends Controller
                         DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$userTableName`");
                     } catch (\Exception $e) {
                         $status = 'false';
-                        $validationError = $e->getMessage();
+                        $validationError = $this->addDefaultErrorMessage($e->getMessage());
                         // Pastikan tabel dihapus jika error
                         if ($userTableName) {
                             try {
@@ -532,12 +532,12 @@ class MysqlStudentController extends Controller
                         }
                     }
 
-                    // 6. Bandingkan nama tabel
+                    // 7. Bandingkan nama tabel
                     if (strtolower($userTableName) !== strtolower($expectedTableName)) {
                         $status = 'false';
-                        $validationError = 'The created table is incorrect or does not match the expected answer';
+                        $validationError = $this->addDefaultErrorMessage('The created table is incorrect or does not match the expected answer');
                     } else {
-                        // 7. Normalisasi dan bandingkan struktur tabel
+                        // 8. Normalisasi dan bandingkan struktur tabel
                         $normalizeTable = function ($table) {
                             return array_map(function ($col) {
                                 return [
@@ -557,16 +557,16 @@ class MysqlStudentController extends Controller
                         // Bandingkan struktur tabel
                         if ($userTableNorm !== $expectedTableNorm) {
                             $status = 'false';
-                            $validationError = 'The created table is incorrect or does not match the expected answer';
+                            $validationError = $this->addDefaultErrorMessage('The created table is incorrect or does not match the expected answer');
                         } else {
-                            // 8. Jika nama dan struktur sama, create ulang tabel user
+                            // 9. Jika nama dan struktur sama, create ulang tabel user
                             try {
                                 DB::connection('mysql_testing')->statement($userInput);
                                 $status = 'true';
                                 $validationError = null;
                             } catch (\Exception $e) {
                                 $status = 'false';
-                                $validationError = $e->getMessage();
+                                $validationError = $this->addDefaultErrorMessage($e->getMessage());
                             }
                         }
                     }
@@ -574,7 +574,7 @@ class MysqlStudentController extends Controller
             } else {
                 // Jika kunci jawaban bukan CREATE TABLE, tidak izinkan CREATE TABLE
                 $status = 'false';
-                $validationError = 'CREATE TABLE queries are not allowed for this question!';
+                $validationError = $this->addDefaultErrorMessage('CREATE TABLE queries are not allowed for this question!');
             }
         }
         // Jika bukan CREATE TABLE, lanjutkan ke validasi hasil query biasa
@@ -596,7 +596,7 @@ class MysqlStudentController extends Controller
                     } catch (\Exception $e) {
                         DB::connection('mysql_testing')->rollBack();
                         $status = 'false';
-                        $validationError = $e->getMessage(); // Simpan pesan error MySQL di sini!
+                        $validationError = $this->addDefaultErrorMessage($e->getMessage());
                     }
 
                     // Jika terjadi error pada eksekusi query user, langsung simpan feedback dan return
@@ -657,7 +657,7 @@ class MysqlStudentController extends Controller
                     ) {
                         if (strpos($userQuery, 'where') === false) {
                             $status = 'false';
-                            $validationError = 'Your query must use WHERE clause according to the question instructions!';
+                            $validationError = $this->addDefaultErrorMessage('Your query must use WHERE clause according to the question instructions!');
                         }
                     }
 
@@ -668,7 +668,7 @@ class MysqlStudentController extends Controller
                     ) {
                         if (strpos($userQuery, 'where') !== false) {
                             $status = 'false';
-                            $validationError = 'Your query should not use WHERE clause according to the question instructions!';
+                            $validationError = $this->addDefaultErrorMessage('Your query should not use WHERE clause according to the question instructions!');
                         }
                     }
 
@@ -688,17 +688,16 @@ class MysqlStudentController extends Controller
                         } catch (\Exception $e) {
                             DB::connection('mysql_testing')->rollBack();
                             $status = 'false';
-                            $validationError = $e->getMessage(); // Simpan pesan error MySQL
+                            $validationError = $this->addDefaultErrorMessage($e->getMessage());
                         }
                     } else if ($status === 'true') {
                         $status = 'false';
-                        // Simpan pesan error jika hasil tidak sesuai
                         $validationError = 'Your query result does not match. Please check again!';
                     }
                 } catch (\Exception $e) {
                     DB::connection('mysql_testing')->rollBack();
                     $status = 'false';
-                    $validationError = $e->getMessage(); // Simpan pesan error MySQL
+                    $validationError = $this->addDefaultErrorMessage($e->getMessage());
                 }
             }
         }
@@ -1040,5 +1039,23 @@ class MysqlStudentController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Database testing berhasil dihapus!']);
+    }
+
+    private function addDefaultErrorMessage($validationError)
+    {
+        $defaultMessage = "Your query result does not match. Please check again!";
+
+        // Jika pesan error kosong, return pesan default saja
+        if (empty($validationError)) {
+            return $defaultMessage;
+        }
+
+        // Jika pesan sudah mengandung pesan default, jangan tambahkan lagi
+        if (stripos($validationError, $defaultMessage) !== false) {
+            return $validationError;
+        }
+
+        // Tambahkan pesan default di bawah pesan error yang ada dengan 1 baris kosong
+        return $validationError . "<br><br>" . $defaultMessage;
     }
 }
