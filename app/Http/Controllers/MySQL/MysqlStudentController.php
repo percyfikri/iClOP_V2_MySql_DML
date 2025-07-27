@@ -546,15 +546,15 @@ class MysqlStudentController extends Controller
                         }
 
                         // 7. Bandingkan nama tabel
-                        if (strtolower($userTableName) !== strtolower($expectedTableName)) {
+                        if ($userTableName !== $expectedTableName) { // <-- case-sensitive
                             $status = 'false';
-                            $validationError = $this->addDefaultMessage('The created table is incorrect or does not match the expected answer', false);
+                            $validationError = $this->addDefaultMessage('The created table name must match exactly (case-sensitive) with the expected answer.', false);
                         } else {
                             // 8. Normalisasi dan bandingkan struktur tabel
                             $normalizeTable = function ($table) {
                                 return array_map(function ($col) {
                                     return [
-                                        'Field' => strtolower($col->Field),
+                                        'Field' => $col->Field,
                                         'Type' => strtolower($col->Type),
                                         'Null' => strtolower($col->Null),
                                         'Key' => strtolower($col->Key ?? ''),
@@ -567,10 +567,16 @@ class MysqlStudentController extends Controller
                             $userTableNorm = $normalizeTable($userTable ?? []);
                             $expectedTableNorm = $normalizeTable($expectedTableStruct ?? []);
 
-                            // Bandingkan struktur tabel
-                            if ($userTableNorm !== $expectedTableNorm) {
+                            // Bandingkan nama kolom secara case-sensitive dan urutan
+                            $userFields = array_map(fn($col) => $col['Field'], $userTableNorm);
+                            $expectedFields = array_map(fn($col) => $col['Field'], $expectedTableNorm);
+
+                            if ($userFields !== $expectedFields) {
                                 $status = 'false';
-                                $validationError = $this->addDefaultMessage('The created table is incorrect or does not match the expected answer', false);
+                                $validationError = $this->addDefaultMessage('Column names and order must match exactly (case-sensitive) with the expected answer.', false);
+                            } elseif ($userTableNorm !== $expectedTableNorm) {
+                                $status = 'false';
+                                $validationError = $this->addDefaultMessage('The created table structure does not match the expected answer.', false);
                             } else {
                                 // 9. Jika nama dan struktur sama, create ulang tabel user
                                 try {
@@ -600,9 +606,51 @@ class MysqlStudentController extends Controller
             $validationError = $this->addDefaultMessage('', false);
         } else if ($status === 'true') {
             // ✅ Untuk soal NON-CREATE TABLE, langsung ke validasi normal
-            // TIDAK ADA pesan generic di sini
             if ($expected) {
                 try {
+                    // **TAMBAHKAN VALIDASI SINTAKS CASE-SENSITIVE DI SINI**
+                    // Untuk query INSERT, UPDATE, DELETE - validasi nama kolom case-sensitive
+                    if (
+                        stripos($userInput, 'INSERT') !== false ||
+                        stripos($userInput, 'UPDATE') !== false ||
+                        stripos($userInput, 'DELETE') !== false
+                    ) {
+
+                        // Ekstrak nama kolom dari kedua query
+                        $userColumns = $this->extractColumnNames($userInput);
+                        $expectedColumns = $this->extractColumnNames($expected->expected_query);
+
+                        // Bandingkan case-sensitive
+                        if ($userColumns !== $expectedColumns) {
+                            $status = 'false';
+                            $validationError = $this->addDefaultMessage('Column names must match exactly (case-sensitive). Please check the spelling and capitalization.', false);
+
+                            // Update feedback dan simpan submission
+                            DB::table('mysql_feedbacks')->where('id', $feedbackId)->update([
+                                'validation_error' => $validationError,
+                                'updated_at' => now(),
+                            ]);
+
+                            DB::table('mysql_student_submissions')->insert([
+                                'user_id' => $userId,
+                                'enroll_id' => $enrollId,
+                                'topic_detail_id' => $topicDetailId,
+                                'query_id' => $queryId,
+                                'feedback_id' => $feedbackId,
+                                'status' => $status,
+                                'answer_number' => $answerNumber,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+
+                            return redirect()->route('showTopicDetail', [
+                                'mysqlid' => $request->input('mysqlid'),
+                                'start' => $request->input('start'),
+                                'page' => $request->input('answer_number', 1)
+                            ])->with('answer_status', $shortFeedback);
+                        }
+                    }
+
                     // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
                     DB::connection('mysql_testing')->beginTransaction();
                     try {
@@ -652,11 +700,17 @@ class MysqlStudentController extends Controller
                     // --- 3. Normalisasi hasil ---
                     function normalizeResult($result)
                     {
+                        if (empty($result)) return [];
+
                         $arr = array_map(function ($row) {
                             return (array) $row;
                         }, $result);
+
+                        // Gunakan strcasecmp() untuk case-insensitive comparison pada DATA
                         usort($arr, function ($a, $b) {
-                            return strcmp($a['kode_mk'], $b['kode_mk']);
+                            // Ambil kolom pertama sebagai basis sorting
+                            $firstColumn = array_keys($a)[0];
+                            return strcasecmp($a[$firstColumn], $b[$firstColumn]);
                         });
                         return $arr;
                     }
@@ -690,7 +744,7 @@ class MysqlStudentController extends Controller
                     }
 
                     // --- 4. Bandingkan hasil ---
-                    if ($status === 'true' && $studentResultNorm == $expectedResultNorm) {
+                    if ($status === 'true' && $this->compareResultCaseInsensitive($studentResultNorm, $expectedResultNorm)) {
                         // --- 5. Jalankan query user sekali lagi (commit/rollback sesuai sequential) ---
                         DB::connection('mysql_testing')->beginTransaction();
                         try {
@@ -1078,5 +1132,59 @@ class MysqlStudentController extends Controller
 
         // Tambahkan pesan default di bawah pesan error yang ada dengan 1 baris kosong
         return $validationError . "<br>" . $defaultMessage;
+    }
+
+    /**
+     * Ekstrak nama kolom dari query INSERT/UPDATE/DELETE
+     */
+    private function extractColumnNames($query)
+    {
+        $columns = [];
+
+        // Untuk INSERT INTO table (col1, col2, ...)
+        if (stripos($query, 'INSERT') !== false) {
+            if (preg_match('/INSERT\s+INTO\s+\w+\s*\(([^)]+)\)/i', $query, $matches)) {
+                $columnString = $matches[1];
+                $columns = array_map('trim', explode(',', $columnString));
+                // Remove backticks if any
+                $columns = array_map(function ($col) {
+                    return trim($col, '`');
+                }, $columns);
+            }
+        }
+
+        // Untuk UPDATE table SET col1=val1, col2=val2, ...
+        elseif (stripos($query, 'UPDATE') !== false) {
+            if (preg_match('/SET\s+(.+?)(?:\s+WHERE|$)/i', $query, $matches)) {
+                $setClause = $matches[1];
+                $assignments = explode(',', $setClause);
+                foreach ($assignments as $assignment) {
+                    if (preg_match('/^\s*([^=]+)\s*=/', $assignment, $colMatch)) {
+                        $columns[] = trim($colMatch[1], '` ');
+                    }
+                }
+            }
+        }
+
+        // Untuk DELETE, biasanya tidak ada nama kolom yang perlu dibandingkan
+        // kecuali di WHERE clause, tapi itu lebih kompleks
+
+        return $columns;
+    }
+
+    private function compareResultCaseInsensitive($a, $b)
+    {
+        if (count($a) !== count($b)) return false;
+        foreach ($a as $i => $rowA) {
+            $rowB = $b[$i] ?? [];
+            if (count($rowA) !== count($rowB)) return false;
+            foreach ($rowA as $key => $valA) {
+                $valB = $rowB[$key] ?? null;
+                if (strcasecmp((string)$valA, (string)$valB) !== 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
