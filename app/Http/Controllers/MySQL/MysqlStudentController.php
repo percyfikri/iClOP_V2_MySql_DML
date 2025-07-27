@@ -151,11 +151,13 @@ class MysqlStudentController extends Controller
         $progressPercent = $this->getStudentProgressByEnroll($userId, $mysqlid, $enrollId);
 
         $submission = DB::table('mysql_student_submissions')
+            ->select('id', 'query_id', 'status', 'feedback_id') // Select hanya kolom yang diperlukan
             ->where('user_id', $userId)
             ->where('topic_detail_id', $start)
             ->where('answer_number', $page)
             ->where('enroll_id', $enrollId)
             ->orderByDesc('id')
+            ->limit(1) // Tambahkan limit
             ->first();
 
         $lastAnswer = '';
@@ -466,124 +468,139 @@ class MysqlStudentController extends Controller
             $status = 'true';
         }
 
-        // Validasi CREATE TABLE - letakkan di sini, sebelum validasi hasil query
-        if (stripos($userInput, 'CREATE TABLE') !== false) {
-            $expected = DB::table('mysql_expected_queries')
-                ->where('topic_detail_id', $topicDetailId)
-                ->where('answer_number', $answerNumber)
-                ->first();
+        // Ambil expected query dulu
+        $expected = DB::table('mysql_expected_queries')
+            ->where('topic_detail_id', $topicDetailId)
+            ->where('answer_number', $answerNumber)
+            ->first();
 
-            // Cek apakah kunci jawaban juga menggunakan CREATE TABLE
-            if (isset($expected) && stripos($expected->expected_query, 'CREATE TABLE') !== false) {
-                $expectedTable = $expected->expected_table ?? null;
-                if ($expectedTable) {
-                    $userTableNorm = [];
-                    $expectedTableNorm = [];
-                    $userTableName = '';
-                    $expectedTableName = '';
+        $userIsCreateTable = stripos($userInput, 'CREATE TABLE') !== false;
+        $expectedIsCreateTable = $expected && stripos($expected->expected_query, 'CREATE TABLE') !== false;
 
-                    // 1. Jalankan query user (CREATE TABLE)
-                    try {
-                        DB::connection('mysql_testing')->statement($userInput);
+        // Hanya untuk CREATE TABLE yang diberi validasi khusus
+        if ($userIsCreateTable && $expectedIsCreateTable) {
+            // Validasi CREATE TABLE dengan pesan generic jika salah
+            if (stripos($userInput, 'CREATE TABLE') !== false) {
+                $expected = DB::table('mysql_expected_queries')
+                    ->where('topic_detail_id', $topicDetailId)
+                    ->where('answer_number', $answerNumber)
+                    ->first();
 
-                        // 2. Ambil nama tabel dari query user
-                        if (preg_match('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([a-zA-Z_][a-zA-Z0-9_]*)`?/i', $userInput, $matches)) {
-                            $userTableName = $matches[1];
-                        }
+                // Cek apakah kunci jawaban juga menggunakan CREATE TABLE
+                if (isset($expected) && stripos($expected->expected_query, 'CREATE TABLE') !== false) {
+                    $expectedTable = $expected->expected_table ?? null;
+                    if ($expectedTable) {
+                        $userTableNorm = [];
+                        $expectedTableNorm = [];
+                        $userTableName = '';
+                        $expectedTableName = '';
 
-                        // Ambil struktur tabel buatan user
-                        $userTable = DB::connection('mysql_testing')->select("DESCRIBE `$userTableName`");
+                        // 1. Jalankan query user (CREATE TABLE)
+                        try {
+                            DB::connection('mysql_testing')->statement($userInput);
 
-                        // 3. Drop tabel buatan user
-                        DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$userTableName`");
-                    } catch (\Exception $e) {
-                        $status = 'false';
-                        $validationError = $this->addDefaultMessage($e->getMessage(), false);
-                        // Pastikan tabel dihapus jika error
-                        if ($userTableName) {
-                            try {
-                                DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$userTableName`");
-                            } catch (\Exception $ex) {
+                            // 2. Ambil nama tabel dari query user
+                            if (preg_match('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([a-zA-Z_][a-zA-Z0-9_]*)`?/i', $userInput, $matches)) {
+                                $userTableName = $matches[1];
+                            }
+
+                            // Ambil struktur tabel buatan user
+                            $userTable = DB::connection('mysql_testing')->select("DESCRIBE `$userTableName`");
+
+                            // 3. Drop tabel buatan user
+                            DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$userTableName`");
+                        } catch (\Exception $e) {
+                            $status = 'false';
+                            $validationError = $this->addDefaultMessage($e->getMessage(), false);
+                            // Pastikan tabel dihapus jika error
+                            if ($userTableName) {
+                                try {
+                                    DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$userTableName`");
+                                } catch (\Exception $ex) {
+                                }
                             }
                         }
-                    }
 
-                    // 4. Jalankan query dari kunci jawaban (CREATE TABLE)
-                    try {
-                        DB::connection('mysql_testing')->statement($expected->expected_query);
+                        // 4. Jalankan query dari kunci jawaban (CREATE TABLE)
+                        try {
+                            DB::connection('mysql_testing')->statement($expected->expected_query);
 
-                        // Ambil nama tabel dari query kunci jawaban
-                        if (preg_match('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([a-zA-Z_][a-zA-Z0-9_]*)`?/i', $expected->expected_query, $matches)) {
-                            $expectedTableName = $matches[1];
-                        }
+                            // Ambil nama tabel dari query kunci jawaban
+                            if (preg_match('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([a-zA-Z_][a-zA-Z0-9_]*)`?/i', $expected->expected_query, $matches)) {
+                                $expectedTableName = $matches[1];
+                            }
 
-                        // 5. Ambil struktur tabel dari kunci jawaban
-                        $expectedTableStruct = DB::connection('mysql_testing')->select("DESCRIBE `$expectedTableName`");
+                            // 5. Ambil struktur tabel dari kunci jawaban
+                            $expectedTableStruct = DB::connection('mysql_testing')->select("DESCRIBE `$expectedTableName`");
 
-                        // 6. Drop tabel dari kunci jawaban
-                        DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$expectedTableName`");
-                    } catch (\Exception $e) {
-                        // Handle jika kunci jawaban error
-                        if ($expectedTableName) {
-                            try {
-                                DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$expectedTableName`");
-                            } catch (\Exception $ex) {
+                            // 6. Drop tabel dari kunci jawaban
+                            DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$expectedTableName`");
+                        } catch (\Exception $e) {
+                            // Handle jika kunci jawaban error
+                            if ($expectedTableName) {
+                                try {
+                                    DB::connection('mysql_testing')->statement("DROP TABLE IF EXISTS `$expectedTableName`");
+                                } catch (\Exception $ex) {
+                                }
                             }
                         }
-                    }
 
-                    // 7. Bandingkan nama tabel
-                    if (strtolower($userTableName) !== strtolower($expectedTableName)) {
-                        $status = 'false';
-                        $validationError = $this->addDefaultMessage('The created table is incorrect or does not match the expected answer', false);
-                    } else {
-                        // 8. Normalisasi dan bandingkan struktur tabel
-                        $normalizeTable = function ($table) {
-                            return array_map(function ($col) {
-                                return [
-                                    'Field' => strtolower($col->Field),
-                                    'Type' => strtolower($col->Type),
-                                    'Null' => strtolower($col->Null),
-                                    'Key' => strtolower($col->Key ?? ''),
-                                    'Default' => $col->Default,
-                                    'Extra' => strtolower($col->Extra ?? '')
-                                ];
-                            }, $table);
-                        };
-
-                        $userTableNorm = $normalizeTable($userTable ?? []);
-                        $expectedTableNorm = $normalizeTable($expectedTableStruct ?? []);
-
-                        // Bandingkan struktur tabel
-                        if ($userTableNorm !== $expectedTableNorm) {
+                        // 7. Bandingkan nama tabel
+                        if (strtolower($userTableName) !== strtolower($expectedTableName)) {
                             $status = 'false';
                             $validationError = $this->addDefaultMessage('The created table is incorrect or does not match the expected answer', false);
                         } else {
-                            // 9. Jika nama dan struktur sama, create ulang tabel user
-                            try {
-                                DB::connection('mysql_testing')->statement($userInput);
-                                $status = 'true';
-                                $validationError = $this->addDefaultMessage('', true);
-                            } catch (\Exception $e) {
+                            // 8. Normalisasi dan bandingkan struktur tabel
+                            $normalizeTable = function ($table) {
+                                return array_map(function ($col) {
+                                    return [
+                                        'Field' => strtolower($col->Field),
+                                        'Type' => strtolower($col->Type),
+                                        'Null' => strtolower($col->Null),
+                                        'Key' => strtolower($col->Key ?? ''),
+                                        'Default' => $col->Default,
+                                        'Extra' => strtolower($col->Extra ?? '')
+                                    ];
+                                }, $table);
+                            };
+
+                            $userTableNorm = $normalizeTable($userTable ?? []);
+                            $expectedTableNorm = $normalizeTable($expectedTableStruct ?? []);
+
+                            // Bandingkan struktur tabel
+                            if ($userTableNorm !== $expectedTableNorm) {
                                 $status = 'false';
-                                $validationError = $this->addDefaultMessage($e->getMessage(), false);
+                                $validationError = $this->addDefaultMessage('The created table is incorrect or does not match the expected answer', false);
+                            } else {
+                                // 9. Jika nama dan struktur sama, create ulang tabel user
+                                try {
+                                    DB::connection('mysql_testing')->statement($userInput);
+                                    $status = 'true';
+                                    $validationError = $this->addDefaultMessage('', true);
+                                } catch (\Exception $e) {
+                                    $status = 'false';
+                                    $validationError = $this->addDefaultMessage($e->getMessage(), false);
+                                }
                             }
                         }
                     }
+                } else {
+                    // Jika kunci jawaban bukan CREATE TABLE, tidak izinkan CREATE TABLE
+                    $status = 'false';
+                    $validationError = $this->addDefaultMessage('CREATE TABLE queries are not allowed for this question!', false);
                 }
-            } else {
-                // Jika kunci jawaban bukan CREATE TABLE, tidak izinkan CREATE TABLE
-                $status = 'false';
-                $validationError = $this->addDefaultMessage('CREATE TABLE queries are not allowed for this question!', false);
             }
-        }
-        // Jika bukan CREATE TABLE, lanjutkan ke validasi hasil query biasa
-        else if ($status === 'true') {
-            $expected = DB::table('mysql_expected_queries')
-                ->where('topic_detail_id', $topicDetailId)
-                ->where('answer_number', $answerNumber)
-                ->first();
-
+        } else if ($userIsCreateTable && !$expectedIsCreateTable) {
+            // User pakai CREATE TABLE tapi expected bukan CREATE TABLE
+            $status = 'false';
+            $validationError = $this->addDefaultMessage('', false);
+        } else if (!$userIsCreateTable && $expectedIsCreateTable) {
+            // Expected CREATE TABLE tapi user tidak pakai CREATE TABLE
+            $status = 'false';
+            $validationError = $this->addDefaultMessage('', false);
+        } else if ($status === 'true') {
+            // ✅ Untuk soal NON-CREATE TABLE, langsung ke validasi normal
+            // TIDAK ADA pesan generic di sini
             if ($expected) {
                 try {
                     // --- 1. Jalankan query user dalam transaksi, ambil hasil, rollback ---
