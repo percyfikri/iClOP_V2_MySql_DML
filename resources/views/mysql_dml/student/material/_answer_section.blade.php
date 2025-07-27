@@ -21,6 +21,35 @@
         ->value('is_reset');
 @endphp
 
+<style>
+.feedback-message {
+    animation: fadeIn 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.fade-out {
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+#submit-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+#submit-btn:disabled {
+    opacity: 0.7;
+}
+</style>
+
 {{-- Submit Query from user input --}}
     <div id="answer-section">
         {{-- <div style="border: 1px solid #ccc; padding: 20px 20px; border-radius: 10px; margin-bottom: 40px;"> --}}
@@ -67,7 +96,7 @@
                     @endphp
 
                     @if($lastStatus == 'true')
-                        <div class="mb-4">
+                        <div class="mb-4 feedback-message" id="success-feedback">
                             <div class="fw-bold mb-2" style="background-color: #25923e; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
                                 <div class="text-white">
                                     Your Query Is Correct!
@@ -87,23 +116,25 @@
                             @endif
                         </div>
                     @elseif($lastStatus == 'false')
-                        <div class="fw-bold mb-2" style="background-color: #ff0000; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
-                            <div class="text-white">
-                                Your Query Is Wrong!
+                        <div class="mb-4 feedback-message" id="error-feedback">
+                            <div class="fw-bold mb-2" style="background-color: #ff0000; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem 0.5rem">
+                                <div class="text-white">
+                                    Your Query Is Wrong!
+                                </div>
                             </div>
+                            @if($feedback)
+                                @php
+                                    $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
+                                    $feedbackText = implode('<br>', array_map('trim', $lines));
+                                @endphp
+                                <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
+                            @endif
+                            @if($feedback && $feedback->validation_error)
+                                <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem;">
+                                    {!! $feedback->validation_error !!}
+                                </div>
+                            @endif
                         </div>
-                        @if($feedback)
-                            @php
-                                $lines = preg_split('/\r\n|\r|\n/', $feedback->feedback);
-                                $feedbackText = implode('<br>', array_map('trim', $lines));
-                            @endphp
-                            <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem">{!! $feedbackText !!}</div>
-                        @endif
-                        @if($feedback && $feedback->validation_error)
-                            <div class="fw-semibold" style="color: red; border-radius: 0.5rem; max-width: fit-content; padding: 0.25rem;">
-                                {!! $feedback->validation_error !!}
-                            </div>
-                        @endif
                     @endif
                 </div>
 
@@ -194,8 +225,41 @@
     </div>
 
 <script>
+// Gunakan form submit event, bukan button click
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action*="submitUserInput"]');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Jangan prevent default - biarkan form submit normal
+            
+            // Fade out existing feedback messages
+            const existingFeedback = document.querySelector('.feedback-message');
+            if (existingFeedback) {
+                existingFeedback.classList.add('fade-out');
+            }
+            
+            // Show loading state
+            const submitText = document.getElementById('submit-btn-text');
+            const submitSpinner = document.getElementById('submit-spinner');
+            
+            if (submitBtn && submitText && submitSpinner) {
+                submitBtn.disabled = true;
+                submitText.style.display = 'none';
+                submitSpinner.style.display = 'inline-block';
+            }
+        });
+    }
+    
+    // Animasi fade in untuk pesan yang baru muncul setelah page load
+    const feedbackMessage = document.querySelector('.feedback-message');
+    if (feedbackMessage) {
+        feedbackMessage.style.opacity = '1';
+    }
+});
 
-
+// Script untuk reset
 document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'reset-testing-db-btn' && !e.target.disabled) {
         e.preventDefault();
