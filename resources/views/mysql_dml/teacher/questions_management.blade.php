@@ -4,20 +4,25 @@
         <h4 class="mb-5 fw-bold">Questions Management</h4>
     </div>
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex gap-3 align-items-center">
-            <div class="d-flex align-items-center">
+        <div class="d-flex gap-3 align-items-end">
+            <div class="d-flex flex-column align-items-start" style="min-width: 180px;">
+                <h5 class="fw-semibold">Topic :</h5>
                 <button id="filterTopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterTopicModal" type="button">
                     <span class="filter-label" id="filterTopicLabel">Filter by Topic</span>
                 </button>
             </div>
-            <div class="d-flex align-items-center">
+            <div class="d-flex flex-column align-items-start" style="min-width: 180px;">
+                <h5 class="fw-semibold">Sub-Topic :</h5>
                 <button id="filterSubtopicBtn" class="btn btn-outline-primary filter-btn" data-bs-toggle="modal" data-bs-target="#filterSubtopicModal" type="button">
                     <span class="filter-label" id="filterSubtopicLabel">Filter by Subtopic</span>
                 </button>
             </div>
-            <button id="resetFilterBtn" class="btn btn-outline-secondary" style="border-radius: 18px; font-weight: 500;">
-                Reset Filter
-            </button>
+            <div class="d-flex flex-column justify-content-end" style="min-width: 140px; height: 100%;">
+                <span style="flex:1"></span>
+                <button id="resetFilterBtn" class="btn btn-outline-secondary mt-2" style="border-radius: 18px; font-weight: 500;">
+                    Reset Filter
+                </button>
+            </div>
         </div>
         <div>
             <button class="btn btn-primary fw-bold" id="addQuestionBtn" style="border-radius: 0.5rem;">
