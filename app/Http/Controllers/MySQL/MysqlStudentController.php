@@ -377,6 +377,50 @@ class MysqlStudentController extends Controller
         $topic = MySqlTopics::find($request->input('mysqlid'));
         $isSequential = $topic && $topic->is_sequential ? true : false;
 
+        // Cek jika query SELECT, langsung salah
+        if (preg_match('/^\s*select\s+/i', $userInput)) {
+            $shortFeedback = $this->addDefaultMessage('', false);
+            // Simpan query ke mysql_queries
+            $queryId = DB::table('mysql_queries')->insertGetId([
+                'query' => $userInput,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            // Simpan feedback ke mysql_feedbacks
+            $feedbackId = DB::table('mysql_feedbacks')->insertGetId([
+                'query_id' => $queryId,
+                'feedback' => $shortFeedback,
+                'validation_error' => $shortFeedback,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            // Ambil enroll aktif
+            $enroll = DB::table('mysql_student_topic_times')
+                ->where('user_id', $userId)
+                ->where('topic_id', $request->input('mysqlid'))
+                ->where('is_finished', 0)
+                ->orderByDesc('id')
+                ->first();
+            $enrollId = $enroll ? $enroll->id : null;
+            // Simpan ke mysql_student_submissions
+            DB::table('mysql_student_submissions')->insert([
+                'user_id' => $userId,
+                'enroll_id' => $enrollId,
+                'topic_detail_id' => $topicDetailId,
+                'query_id' => $queryId,
+                'feedback_id' => $feedbackId,
+                'status' => 'false',
+                'answer_number' => $answerNumber,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            return redirect()->route('showTopicDetail', [
+                'mysqlid' => $request->input('mysqlid'),
+                'start' => $request->input('start'),
+                'page' => $request->input('answer_number', 1)
+            ])->with('answer_status', $shortFeedback);
+        }
+
         // Panggil setup database user sebelum transaksi
         $this->setupStudentTestingDatabase($userId);
 
