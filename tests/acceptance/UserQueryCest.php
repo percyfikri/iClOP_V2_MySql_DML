@@ -5,20 +5,10 @@ class UserQueryCest
     public function testUserQuery(\Tests\Support\AcceptanceTester $I, \Codeception\Module\Db $db)
     {
         $userId = trim(getenv('USER_ID'));
-        $queryFile = codecept_root_dir() . "query_user_{$userId}.sql";
+        $query = getenv('USER_QUERY');
 
-        // Cek apakah file query_user.sql ada
-        if (!file_exists($queryFile)) {
-            // Jika tidak ada, maka failed test
-            $I->fail('File query_user.sql tidak ditemukan: ' . $queryFile);
-        }
-
-        // Baca isi file query_user.sql
-        $query = file_get_contents($queryFile);
-
-        // Jika isi file query_user.sql kosong, maka failed test
         if (!$query) {
-            $I->comment('Query user kosong');
+            $I->fail('User query is empty');
         }
 
         // Validasi WHERE pada DELETE/UPDATE agar harus ada operator setelah kolom
@@ -51,6 +41,10 @@ class UserQueryCest
         }
 
         // Jalankan query jika lolos validasi
-        // $db->_getDbh()->exec($query);
+        // try {
+        //     $db->_getDbh()->exec($query);
+        // } catch (\PDOException $e) {
+        //     $I->fail($e->getMessage());
+        // }
     }
 }

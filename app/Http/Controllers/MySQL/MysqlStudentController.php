@@ -433,10 +433,6 @@ class MysqlStudentController extends Controller
             ->first();
         $enrollId = $enroll ? $enroll->id : null;
 
-        // Simpan query ke file
-        $queryFile = base_path("tests/query_user_{$userId}.sql");
-        file_put_contents($queryFile, $userInput);
-
         // 1. Simpan query ke mysql_queries
         $queryId = DB::table('mysql_queries')->insertGetId([
             'query' => $userInput,
@@ -476,7 +472,7 @@ class MysqlStudentController extends Controller
         file_put_contents(base_path("tests/acceptance_user_{$userId}.suite.yml"), $acceptanceConfig);
 
         $projectPath = base_path();
-        $command = "cd /d \"{$projectPath}\\tests\" && set USER_ID={$userId} && set QUERY_ID={$queryId} && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
+        $command = "cd /d \"{$projectPath}\\tests\" && set USER_ID={$userId} && set QUERY_ID={$queryId} && set USER_QUERY=" . escapeshellarg($userInput) . " && \"{$projectPath}\\vendor\\bin\\codecept.bat\" run acceptance_user_{$userId} acceptance/UserQueryCest:testUserQuery -c acceptance_user_{$userId}.suite.yml --env testing 2>&1";
 
         Log::info("Codeception command: " . $command);
         $testResult = shell_exec($command);
@@ -1085,12 +1081,8 @@ class MysqlStudentController extends Controller
 
         // 2. Hapus file acceptance_user dan query_user milik user
         $suiteFile = base_path("tests/acceptance_user_{$userId}.suite.yml");
-        $queryFile = base_path("tests/query_user_{$userId}.sql");
         if (file_exists($suiteFile)) {
             @unlink($suiteFile);
-        }
-        if (file_exists($queryFile)) {
-            @unlink($queryFile);
         }
 
         // 3. Simpan status reset
