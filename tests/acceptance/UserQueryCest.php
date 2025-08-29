@@ -11,6 +11,11 @@ class UserQueryCest
             $I->fail('User query is empty');
         }
 
+        // Validasi minimal: query harus diawali dengan kata kunci SQL yang diizinkan
+        if (!preg_match('/^\s*(INSERT|UPDATE|DELETE|SELECT)\b/i', $query)) {
+            throw new \Exception('The query must start with a valid SQL command (INSERT, UPDATE, DELETE, SELECT)');
+        }
+
         // Validasi WHERE pada DELETE/UPDATE agar harus ada operator setelah kolom
         if (preg_match('/\b(DELETE|UPDATE)\b.+\bWHERE\b\s+([a-zA-Z0-9_]+)\s*;?$/i', $query)) {
             throw new \Exception('The WHERE condition must have a clear comparison operator or condition (e.g. =, IS NOT NULL, LIKE, etc.)');
